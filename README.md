@@ -1,6 +1,6 @@
 # inverse-piml-schrodinger
 
-## Repo Structure
+## Planned Repo Structure
 
 ```
 inverse-piml-schrodinger/
@@ -20,7 +20,14 @@ inverse-piml-schrodinger/
     └── demo_visuals/                          
 ```
 
+---
+This project extends the `lf-pinn-harmonic-oscillator` framework to an inverse quantum problem.
+While project 1 investigated the robustness  of physics-informed neural networks (PINNs) under low fidelity discretization for a *known Hamiltonian*, this project is concerned with the information about an *unknown potential* that can be recovered from partial, noisy observations of quantum states.
 
+Using the time-independent Schrodinger equation (TISE) as a hard physics constraint, we treat tahe potential $V(x)$ as a learnable function while wavefunctions act as auxiliary fields constrained by the PDE. The model is trained using noisy spectral data and probability densities, mimicking low-fidelity experimental measurements.
+
+As with project 1, the goal is not high-precision reconstruction, but interpretability and identifability. 
+> Specifcially, the aim of this repository is to understand which operator features are robustly recoverable under strong physics priors and limited data.
 
 ---
 Below is the complete code for your baseline inverse-Schrödinger PINN repo, reorganized under the structure we discussed and illustrating the five Python “good habits.”  
