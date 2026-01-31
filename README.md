@@ -15,8 +15,11 @@ inverse-piml-schrodinger/
 ├── notebooks/
 │   └── demo.ipynb        # visual + narrative
 ├── references/
-│   ├── README.md        # a blank README.md idk what for though. chat gpt told me to include to when i decided to make the references folder
-│   └── references.bib      # sources (not necessarily used explicity by the github repo code, but that's mainly because i have no idea how to do that. if there is a standard way of implementing bib files easily like in overleaf im open to something like that... just no relearning entire languages and new software related bullshit (pardon my French)
+│   ├── README.md         # a blank README.md idk what for though. chat gpt told me to include to when i decided to make the references folder
+│   └── references.bib    # sources (❓🙋🏻‍♀️ not necessarily used explicity by the github repo code, but that's mainly because i have no idea how to do that. if there is a standard way of implementing bib files easily like in overleaf im open to something like that... just no relearning entire languages and new software related bullshit (pardon my French)
+├── assets/
+│   ├── images/
+│   │   └── interpretability_axis.png    # ⚠️ check spelling
 └── artifacts/
     ├── notes.md                        # conceptual notes and reflection
     ├── figures.md                      # structure-based analysis of demo visuals
