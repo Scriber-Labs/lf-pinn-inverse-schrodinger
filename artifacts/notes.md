@@ -63,7 +63,4 @@ Project 1 questions that said i'd address in this project(at least conceptually 
  - [ ] Duals of covectors (contrast with cross vs. wedge products)
  - [ ] Convince myself that J = [0 1; -1 0] is the matrix representation of the canonical symplectic form.
  - [ ] Bivector contractions and Poisson brackets.
---
-
-can i also get some hestenes references if you can't find any, is there anything out there similar to his work you can point me to?
- 
+-- 
