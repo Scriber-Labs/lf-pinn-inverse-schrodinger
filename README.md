@@ -8,10 +8,12 @@ inverse-piml-schrodinger/
 ├── requirements.txt
 ├── pyproject.toml
 ├── src/
-│   ├── model.py          # neural network ansatz
-│   ├── physics.py        # SHO + variational loss
+│   ├── model.py          # neural network ansatz for V(x)
+│   ├── physics.py        # TISE residual + BCs
+│   ├── inverse.py        # inverse-specific losses
+│   ├── pod.py            # POD decomposition + reconstruction
 │   ├── train.py          # training loop and CLI
-│   └── utils.py          # helper functions (e.g., seeding)
+│   └── utils.py          # helper functions (e.g., seeding and grids)
 ├── notebooks/
 │   └── demo.ipynb        # visual + narrative
 ├── references/
@@ -21,8 +23,8 @@ inverse-piml-schrodinger/
 │   ├── images/
 │   │   └── interpretability_axis.png    # ⚠️ check spelling
 └── artifacts/
-    ├── notes.md                        # conceptual notes and reflection
-    ├── figures.md                      # structure-based analysis of demo visuals
+    ├── notes.md                         # conceptual notes and reflection
+    ├── figures.md                       # structure-based analysis of demo visuals
     └── demo_visuals/                          
 ```
 
