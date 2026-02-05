@@ -38,17 +38,7 @@ As with project 1, the goal is not high-precision reconstruction, but interpreta
 > Specifcially, the aim of this repository is to understand which operator features are robustly recoverable under strong physics priors and limited data.
 
 ---
-Below is the complete code for your baseline inverse-Schrödinger PINN repo, reorganized under the structure we discussed and illustrating the five Python “good habits.”  
-
-Directory structure (relevant files only):  
-```
-inverse-piml-schrodinger/
-└── src/
-    ├── model.py
-    ├── physics.py
-    ├── utils.py
-    └── train.py
-```
+Below is the complete code for your baseline inverse-Schrödinger PINN repo, reorganized under the structure we discussed and illustrating the five Python “good habits.”
 
 1) src/model.py  
 ```python

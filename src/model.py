@@ -16,6 +16,8 @@ class PotentialNet(nn.Module):
     """
     A minimal 2-hidden-layer tanh MLP: x -> V(x)
 
+    This network represents the unknown potential V(x) in the inverse time-independent Schrödinger equation.
+
     Parameters
     ----------
     hidden : int, default = 64
@@ -49,47 +51,66 @@ class PotentialNet(nn.Module):
 
         self._initialize_weights()
 
-        # ------------------------------------------------------------------------------
-        # 2️⃣ Public API
-        # ------------------------------------------------------------------------------
-        def forward(self, x: Tensor) -> Tensor:  # noqa: D401, N802
-            """Forward pass.
+    # ------------------------------------------------------------------------------
+    # 2️⃣ Public API
+    # ------------------------------------------------------------------------------
 
-            Parameters
-            ----------
-            x : torch.Tensor
-                Input tensor of shape ``(N_x, 1)``.
+    def forward(self, x: Tensor) -> Tensor:
+        """
+        Forward pass of the network.
 
-            Returns
-            -------
-            V: torch.Tensor
-                Output tensor of shape ``(N_x, 1)``.
-            """
-            return self.net(x)
+        Parameters
+        ----------
+        x: Tensor of shape (N_x, 1)
 
-        # ------------------------------------------------------------------------------
-        # 3️⃣ Private helpers
-        # ------------------------------------------------------------------------------
-        def _initialize_weights(self) -> None:
-            """Initialize all linear layers with Kaiming normal initialization (❓)."""
-            for module in self.modules():
-                if isinstance(module, nn.Linear):
-                    nn.init.kaiming_normal_(module.weight, nonlinearity="tanh")
-                    if module.bias is not None:  # pragma: no branch
-                        nn.init.zeros_(module.bias)
+        Returns
+        -------
+        Tensor of shape (N_x, 1) representing the potential V(x)
+        """
+        return self.net(x)
 
     # ------------------------------------------------------------------------------
-    # 4️⃣ Example usage/ test case
+    # 3️⃣ Private helpers
     # ------------------------------------------------------------------------------
-    def _smoke_test() -> None:
-        """PotentialNet sanity check."""
-        set_global_seed(42)
 
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        model = PotentialNet()
-        x = torch.linspace(-1, 1, 5).unsqueeze(1)
-        V = model(x)
-        print("✔️ PotentialNet forward OK; output shape: ", V.shape)
+    def _initialize_weights(self) -> None:
+        """
+        Initialize linear layers with Xavier initialization (appropriate for tanh activations).
+        """
+        for module in self.modules():
+            if isinstance(module, nn.Linear):
+                nn.init.xavier_normal_(module.weight)
+                if module.bias is not None:
+                    nn.init.zeros_(module.bias)
+
+
+# ------------------------------------------------------------------------------
+# 4️⃣ Smoke test helpers
+# ------------------------------------------------------------------------------
+
+def run_smoke_test() -> None:
+    """Sanity check or PotentialNet forward pass."""
+    set_global_seed(42)
+
+    device: torch.device = torch.device(
+        "cuda" if torch.cuda.is_available() else "cpu"
+    )
+
+    model: PotentialNet = PotentialNet(device=device).to(device)
+
+    x: Tensor = torch.linspace(-1.0, 1.0, 5, device=device).unsqueeze(1)
+    V: Tensor = model(x)
+
+    print("✔️ PotentialNet forward OK")
+    print(f"Input shape : {x.shape}")
+    print(f"Output shape: {V.shape}")
+
+# ------------------------------------------------------------------------------
+# 5️⃣ Entry point
+# ------------------------------------------------------------------------------
+def main() -> None:
+    """Run local tests when executed as a script."""
+    run_smoke_test()
 
 if __name__ == "__main__":
-    _smoke_test()
+    main()
