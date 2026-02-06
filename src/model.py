@@ -22,7 +22,7 @@ class PotentialNet(nn.Module):
     ----------
     hidden : int, default = 64
         Number of hidden units per hidden layer.
-    device : torch.device or st r, optional
+    device : torch.device or str, optional
         Device on which the parameters will be allocated. If omitted, they will be kept on the current default device.
     dtype : torch.dtype, optional
         Floating-point precision of the parameters.
