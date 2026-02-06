@@ -49,6 +49,8 @@ As with project 1, the goal is not high-precision reconstruction, but interpreta
 - noisy or unnormalized densities
 - partial observation windows
 - unknown normalization constants
+- orthogonality constraints between $\psi_n(x)$ 
+- add energy ordering regularization
 
 ### TISE Residual
 $$\mathcal{L}_\text{TISE}=\Bigg<\bigg(-\frac{\hbar^2}{2m}\psi_n''(x)+V(x)\psi_n(x)-E_n\psi_n(x)\bigg)^2\Bigg>$$
