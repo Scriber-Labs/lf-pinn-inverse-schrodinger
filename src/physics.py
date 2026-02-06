@@ -98,6 +98,50 @@ def tise_residual_loss(
     else:
         raise TypeError(f"`reduction` must be 'mean' or 'sum' or 'none', got {reduction}.")
 
+def density_mismatch_loss(
+    psi_model: SupportsForward,
+    x: Tensor,
+    rho_obs: Tensor,
+    *,
+    reduction: str = "mean",
+) -> Tensor:
+    """
+    Probability density mismatch loss.
+
+    Penalize deviation between predicted |psi(x)^2|^2 and observed probability density rho_obs(x).
+
+        || |psi(x)|^2 - rho_obs(x) ||^2
+
+    Parameters
+    ----------
+    psi_model :
+        Callable mapping ``x -> psi(x)``.
+    x :
+        Coordinates of density observations.
+    rho_obs :
+        Observed probability density values.
+    reduction :
+        "mean", "sum", or "none".
+
+    Returns
+    -------
+    Tensor
+        Density mismatch loss.
+    """
+    psi: Tensor = psi_model(x)
+    rho_pred: Tensor = psi.pow(2)
+
+    pointwise_loss: Tensor = (rho_pred - rho_obs).pow(2)
+
+    if reduction == "mean":
+        return pointwise_loss.mean()
+    elif reduction == "sum":
+        return pointwise_loss.sum()
+    elif reduction == "none":
+        return pointwise_loss
+    else:
+        raise TypeError(f"`reduction` must be 'mean', 'sum', or `none`, got {reduction}.")
+
 def potential_smoothness_loss(
     V_model: SupportsForward,
     x: Tensor,
@@ -148,49 +192,6 @@ def potential_smoothness_loss(
     else:
         raise TypeError(f"`reduction` must be 'mean', 'sum', or 'none', got {reduction}.")
 
-def density_mismatch_loss(
-    psi_model: SupportsForward,
-    x: Tensor,
-    rho_obs: Tensor,
-    *,
-    reduction: str = "mean",
-) -> Tensor:
-    """
-    Probability density mismatch loss.
-
-    Penalize deviation between predicted |psi(x)^2|^2 and observed probability density rho_obs(x).
-
-        || |psi(x)|^2 - rho_obs(x) ||^2
-
-    Parameters
-    ----------
-    psi_model :
-        Callable mapping ``x -> psi(x)``.
-    x :
-        Coordinates of density observations.
-    rho_obs :
-        Observed probability density values.
-    reduction :
-        "mean", "sum", or "none".
-
-    Returns
-    -------
-    Tensor
-        Density mismatch loss.
-    """
-    psi: Tensor = psi_model(x)
-    rho_pred: Tensor = psi.pow(2)
-
-    pointwise_loss: Tensor = (rho_pred - rho_obs).pow(2)
-
-    if reduction == "mean":
-        return pointwise_loss.mean()
-    elif reduction == "sum":
-        return pointwise_loss.sum()
-    elif reduction == "none":
-        return pointwise_loss
-    else:
-        raise TypeError(f"`reduction` must be 'mean', 'sum', or `none`, got {reduction}.")
 # ------------------------------------------------------------------------------
 # 2️⃣ Private Helpers
 # ------------------------------------------------------------------------------

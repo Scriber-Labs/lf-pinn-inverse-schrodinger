@@ -33,7 +33,7 @@ def inverse_schrodinger_loss(
 
     # --- weights ---
     lambda_phys: float = 1.0,
-    lambda_data: float = 1.0,
+    lambda_energy: float = 1.0,
     lambda_density: float = 1.0,
     lambda_smooth: float = 1e-4,
 ) -> Tensor:
@@ -42,7 +42,7 @@ def inverse_schrodinger_loss(
 
     Combines:
       - physics-informed TISE residual
-      - optional data mismatch loss on psi(x)
+      - optional data mismatch losses on spectral energies and probability densities
       - smoothness regularization on V(x)
 
     Parameters
@@ -57,18 +57,18 @@ def inverse_schrodinger_loss(
         Energy eigenvalue E.
 
     energy_obs :
-         Observed energy.
+         Observed energy eigenvalue (from spectral data).
     x_density :
-        Coordinates where density observed.
+        Coordinates where probability density is observed.
     rho_obs  :
-        Observed density.
+        Observed probability density |psi(x)|^2.
 
     lambda_phys :
         Weight for the TISE residual loss.
-    lambda_data :
-        Weight for the data mismatch loss.
+    lambda_energy :
+        Weight for the energy mismatch loss (from spectral data).
     lambda_density :
-        Weight for the density mismatch loss.
+        Weight for the |psi|^2 mismatch loss (from density data).
     lambda_smooth :
         Weight for the potential smoothness regularizer.
 
@@ -92,13 +92,23 @@ def inverse_schrodinger_loss(
     total_loss = total_loss + lambda_phys * L_phys
 
     # ------------------------------------------------------------------
-    # Data loss (optional)
+    # Spectral data: energy mismatch
     # ------------------------------------------------------------------
-    if x_data is not None and psi_data is not None:
-        psi_pred: Tensor = psi_model(x_data)
-        L_data: Tensor = (psi_pred - psi_data).pow(2).mean()
-        total_loss = total_loss  + lambda_data * L_data
+    if energy_obs is not None:
+        L_energy = (energy - energy_obs).pow(2)
+        total_loss = total_loss + lambda_energy * L_energy
 
+    # ------------------------------------------------------------------
+    # Density data: |psi|^2 mismatch
+    # ------------------------------------------------------------------
+    if x_density is not None and rho_obs is not None:
+        L_density = density_mismatch_loss(
+            psi_model,
+            x_density,
+            rho_obs,
+            reduction="mean",
+        )
+        total_loss = total_loss + lambda_density * L_density
     # ------------------------------------------------------------------
     # Smoothness regularization
     # ------------------------------------------------------------------

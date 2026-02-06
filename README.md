@@ -40,7 +40,15 @@ As with project 1, the goal is not high-precision reconstruction, but interpreta
 ---
 
 ## Loss Function
-📝 For this repo, we will assume atomic units and normalized parameters (thus, $\hbar=1$ and $m=1$ electron rest mass).
+📝 For this repo, we will assume:
+- atomic units and normalized parameters (thus, $\hbar=1$ and $m=1$ electron rest mass)
+- $\psi_n$ normalization is handled either implicitly or by the PDE
+- probability density observations are on an absolute scale
+
+🔮 Later, can include:
+- noisy or unnormalized densities
+- partial observation windows
+- unknown normalization constants
 
 ### TISE Residual
 $$\mathcal{L}_\text{TISE}=\Bigg<\bigg(-\frac{\hbar^2}{2m}\psi_n''(x)+V(x)\psi_n(x)-E_n\psi_n(x)\bigg)^2\Bigg>$$
