@@ -9,7 +9,7 @@ inverse-piml-schrodinger/
 ├── pyproject.toml
 ├── src/
 │   ├── model.py          # neural network ansatz for V(x)
-│   ├── physics.py        # TISE residual + BCs
+│   ├── physics.py        # TISE residual, scale-aware smoothness, + BCs(❓)
 │   ├── inverse.py        # inverse-specific losses
 │   ├── pod.py            # POD decomposition + reconstruction
 │   ├── train.py          # training loop and CLI
@@ -32,104 +32,29 @@ inverse-piml-schrodinger/
 This project extends the `lf-pinn-harmonic-oscillator` framework to an inverse quantum problem.
 While project 1 investigated the robustness  of physics-informed neural networks (PINNs) under low fidelity discretization for a *known Hamiltonian*, this project is concerned with the information about an *unknown potential* that can be recovered from partial, noisy observations of quantum states.
 
-Using the time-independent Schrodinger equation (TISE) as a hard physics constraint, we treat tahe potential $V(x)$ as a learnable function while wavefunctions act as auxiliary fields constrained by the PDE. The model is trained using noisy spectral data and probability densities, mimicking low-fidelity experimental measurements.
+Using the time-independent Schrodinger equation (TISE) as a hard physics constraint, we treat the potential $V(x)$ as a learnable function while wavefunctions act as auxiliary fields constrained by the PDE. The model is trained using noisy spectral data and probability densities, mimicking low-fidelity experimental measurements.
 
 As with project 1, the goal is not high-precision reconstruction, but interpretability and identifability. 
-> Specifcially, the aim of this repository is to understand which operator features are robustly recoverable under strong physics priors and limited data.
+> Specifically, the aim of this repository is to understand which operator features are robustly recoverable under strong physics priors and limited data.
 
 ---
-Below is the complete code for your baseline inverse-Schrödinger PINN repo, reorganized under the structure we discussed and illustrating the five Python “good habits.”
 
-1) src/model.py  
-```python
-from __future__ import annotations
-from typing import Any
-import torch
-from torch import nn, Tensor
+## Loss Function
+📝 For this repo, we will assume atomic units and normalized parameters (thus, $\hbar=1$ and $m=1$ electron rest mass).
 
-class PotentialNet(nn.Module):
-    """2‐hidden‐layer tanh MLP: x → V(x)"""
-    def __init__(self, width: int = 64) -> None:
-        super().__init__()
-        self.net: nn.Sequential = nn.Sequential(
-            nn.Linear(1, width),
-            nn.Tanh(),
-            nn.Linear(width, width),
-            nn.Tanh(),
-            nn.Linear(width, 1),
-        )
+### TISE Residual
+$$\mathcal{L}_\text{TISE}=\Bigg<\bigg(-\frac{\hbar^2}{2m}\psi_n''(x)+V(x)\psi_n(x)-E_n\psi_n(x)\bigg)^2\Bigg>$$
 
-    def forward(self, x: Tensor) -> Tensor:
-        """
-        Args:
-            x: Tensor of shape (N_x,1)
-        Returns:
-            V: Tensor of shape (N_x,1)
-        """
-        return self.net(x)
+### Scale-Aware Smoothness
+$$\mathcal{L}_\text{smooth}=\Bigg<\frac{|V''(x)|^2}{\epsilon + |V(x)|^2}\Bigg>$$
 
-def _smoke_test() -> None:
-    """Quick sanity check for PotentialNet."""
-    model = PotentialNet()
-    x = torch.linspace(-1, 1, 5).unsqueeze(1)
-    V = model(x)
-    print("✔️  PotentialNet forward OK; output shape:", V.shape)
+### Data Mismatch (Noisy Observations)
+$$\mathcal{L}_{data} = \sum _n {\Big|\Big| E_n - E_n^\text{obs} \Big|\Big|^2 + \Big|\Big| \Big( |\psi_n |^2 - \rho_n^\text{obs} \Big)}\Big|\Big|^2 $$
 
-if __name__ == "__main__":
-    _smoke_test()
-```
+### Total Loss
+$$\mathcal{L}_\text{total}=\lambda_\text{data}\mathcal{L}_\text{data}+\lambda_\text{phys}\mathcal{L}_\text{TISE}+\lambda_\text{smooth}\mathcal{L}_\text{smooth}$$
 
-2) src/physics.py  
-```python
-from __future__ import annotations
-import math
-from typing import Any
-import torch
-from torch import Tensor, autograd
-
-def se_residual_loss(
-    psi: Tensor,
-    x: Tensor,
-    V: Tensor,
-    E: Tensor,
-    hbar: float = 1.0,
-    m: float = 1.0,
-) -> Tensor:
-    """
-    MSE of Schrödinger residual:
-      -(ℏ²/2m) ψ'' + V ψ - E ψ = 0
-    """
-    d1: Tensor = autograd.grad(psi, x, torch.ones_like(psi), create_graph=True)[0]
-    d2: Tensor = autograd.grad(d1, x, torch.ones_like(d1), create_graph=True)[0]
-    resid: Tensor = - (hbar**2 / (2*m)) * d2 + V * psi - E * psi
-    return (resid.pow(2)).mean()
-
-def smoothness_loss(
-    V: Tensor,
-    x: Tensor,
-) -> Tensor:
-    """
-    Penalize high curvature of V(x): mean |V''(x)|².
-    """
-    d1: Tensor = autograd.grad(V, x, torch.ones_like(V), create_graph=True)[0]
-    d2: Tensor = autograd.grad(d1, x, torch.ones_like(d1), create_graph=True)[0]
-    return d2.pow(2).mean()
-
-def _smoke_test() -> None:
-    """Quick check of loss functions on dummy data."""
-    import torch
-    x = torch.linspace(-1,1,10, requires_grad=True).unsqueeze(1)
-    psi = torch.sin(math.pi * x)
-    V = torch.zeros_like(x)
-    E = torch.tensor([math.pi**2/2], dtype=torch.double)
-    Lr = se_residual_loss(psi, x, V, E)
-    Ls = smoothness_loss(V, x)
-    print(f"✔️  SE loss={Lr.item():.3e}, smoothness loss={Ls.item():.3e}")
-
-if __name__ == "__main__":
-    _smoke_test()
-```
-
+---
 3) src/utils.py  
 ```python
 from __future__ import annotations
