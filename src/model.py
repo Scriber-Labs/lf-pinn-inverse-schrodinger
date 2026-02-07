@@ -115,7 +115,7 @@ class InverseSchrodingerModel(nn.Module):
         *,
         device: torch.device | str | None = None,
         dtype: torch.dtype | None = None,
-    ): -> None:
+    ) -> None:
         super().__init__()
 
         self.n_states = n_states
@@ -146,4 +146,71 @@ class InverseSchrodingerModel(nn.Module):
         # Energy parameters -> learnable scalars (no need for bias term)
         self.energies = nn.Parameter(torch.randn(n_states, dtype=dtype or torch.float32))
 
-    
+    # ------------------------------------------------------------------
+    # 2️⃣ Helper methods – expose the learned fields with the desired names
+    # ------------------------------------------------------------------
+
+    def V_theta(self, x: torch.Tensor) -> torch.Tensor:
+        """Return the learned potential ``V_theta(x)``."""
+        return self.potential_net(x)
+
+    def psi_theta(self, x: torch.Tensor) -> List[torch.Tensor]:
+        """
+        Return a list of wavefunctions ``[psi_theta_0(x), ..., psi_theta_{n-1}(x)]''.
+        """
+        return [net(x) for net in self.psi_nets]
+
+    def E_theta(self) -> torch.Tensor:
+        """
+        Return the learned energy vector ``E_theta`` (shape ``(n_states,)``).
+        """
+        return self.energies
+
+    # ------------------------------------------------------------------
+    # 3️⃣ Convenience wrappers
+    # ------------------------------------------------------------------
+    def potential(self, x: torch.Tensor) -> torch.Tensor:
+        """Legacy alais for :meth:`V_theta`."""
+        return self.V_theta(x)
+
+    def psi(self, x: torch.Tensor) -> List[torch.Tensor]:
+        """Legacy alias for :meth:`psi_theta`."""
+        return self.psi_theta(x)
+
+# ----------------------------------------------------------------------
+# 4️⃣ Smoke‑test helpers
+# ----------------------------------------------------------------------
+
+def _run_smoke_test() -> None:
+    """Basic sanity check -> forward pass through all components."""
+    set_global_seed(27)
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # Instantiate a model with three eigenstates and a modest hidden size.
+    model = InverseSchrodingerModel(n_states=3, hidden_dims=[64, 64], device=device)
+
+    # Sample a spatial grid
+    x = torch.linspace(-1.0, 1.0, 100, device=device).unsqueeze(1)
+
+    # Forward pass
+    V = model.V_theta(x)
+    psi_list = model.psi_theta(x)
+    E = model.E_theta()
+
+    # Quick sanity prints
+    print("✔️ InverseSchrodingerModel forward OK")
+    print(f"Input shape             : {x.shape}")
+    print(f"Potential shape         : {V.shape}")
+    print(f"Number of eigenmodes    : {len(psi_list)} (each {psi_list[0].shape})")
+    print(f"Energies shape          : {E.shape}")
+
+# ----------------------------------------------------------------------
+# 5️⃣ Entry point
+# ----------------------------------------------------------------------
+def main() -> None:
+    """Run the smoke test when the module is executed as a script."""
+    _run_smoke_test()
+
+if __name__ == "__main__":
+    main()
