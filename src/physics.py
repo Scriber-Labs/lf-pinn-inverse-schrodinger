@@ -1,51 +1,34 @@
+# src/physics.py
+
 from __future__ import annotations
 
-from typing import Protocol
+from typing import List
 
 import torch
-from torch import Tensor, autograd
 
-from utils import set_global_seed
+from utils import set_global_seed, second_derivative
 
 __all__: list[str] = [
-    "tise_residual_loss",
+    "tise_residual",
+    "tise_loss",
     "potential_smoothness_loss",
 ]
-
-
-# ------------------------------------------------------------------------------
-# 0️⃣ Typing helpers
-# ------------------------------------------------------------------------------
-class SupportsForward(Protocol):
-    """
-    Protocol for any callable mapping, coordinates -> variables.
-
-    Compatible with:
-    - torch.nn.Module
-    - lambda functions
-    - functional wrappers
-    """
-
-    def __call__(self, x: Tensor) -> Tensor:
-        ...
-
 
 # ------------------------------------------------------------------------------
 # 1️⃣ Public API
 # ------------------------------------------------------------------------------
 
-def tise_residual_loss(
-    psi_model: SupportsForward,
-    V_model: SupportsForward,
-    x: Tensor,
+def tise_residual(
+    psi_model: torch.Tensor,
+    V_model: torch.Tensor,
+    E_model: torch.Tensor,
+    dx: float,
     *,
-    energy: float | Tensor,
-    hbar: float | Tensor = 1.0,
-    mass: float | Tensor = 1.0,
-    reduction: str = "mean",
-) -> Tensor:
+    hbar: float | torch.Tensor = 1.0,
+    mass: float | torch.Tensor = 1.0,
+) -> torch.Tensor:
     """
-    Physics-informed residual loss for the 1D TISE.
+    Physics-informed residual loss for one eigenstate.
 
     Enforces:
         -(hbar^2/(2m))*psi''(x) + V(x)*psi(x) = E*psi(x)
@@ -53,102 +36,64 @@ def tise_residual_loss(
     Parameters
     ----------
     psi_model :
-        Callable mapping ``x -> psi(x)``.
+        Eigenstate inferred from the model.
     V_model :
-        Callable mapping ``x -> V(x)``.
-    x :
-        Input tensor of shape ``(N_x, 1)``
-    energy :
-        Energy eigenvalue E.
+        Potential energy function inferred from the model.
+    dx :
+        spatial grid step size
+    E_model :
+        Learned energy eigenvalue corresponding to ``psi_model(x)``.
     hbar :
         Reduced Planck constant (atomic units by default).
     mass :
         Particle mass m.
-    reduction :
-        "mean", "sum", or "none".
 
     Returns
     -------
     Tensor
-        Scalar loss or pointwise residuals.
+        TISE residual for one eigenstate.
     """
-    if not torch.is_tensor(x):
-        raise TypeError(f"`x` must be a torch.Tensor, got {type(x)}.")
+    psi_xx = second_derivative(psi_model, dx)
+    return -0.5 * (hbar**2 / mass)  * psi_xx + V_model * E_model * psi_model
 
-    x = x.detach().requires_grad_(True)
-
-    psi: Tensor = psi_model(x)
-    V: Tensor = V_model(x)
-
-    dpsi_dx: Tensor = _grad(psi, x)
-    d2psi_dx2: Tensor = _grad(dpsi_dx, x)
-
-    residual: Tensor = (
-        -(hbar ** 2) / (2.0 * mass) * d2psi_dx2 + V * psi - energy * psi
-    )
-
-    pointwise_loss: Tensor = residual.pow(2)
-
-    if reduction == "mean":
-        return pointwise_loss.mean()
-    elif reduction == "sum":
-        return pointwise_loss.sum()
-    elif reduction == "none":
-        return pointwise_loss
-    else:
-        raise TypeError(f"`reduction` must be 'mean' or 'sum' or 'none', got {reduction}.")
-
-def density_mismatch_loss(
-    psi_model: SupportsForward,
-    x: Tensor,
-    rho_obs: Tensor,
-    *,
-    reduction: str = "mean",
-) -> Tensor:
+def tise_loss(
+    multi_psi_model: List[torch.Tensor],
+    V_model: torch.Tensor,
+    energies: torch.Tensor,
+    dx: float,
+) -> torch.Tensor:
     """
-    Probability density mismatch loss.
-
-    Penalize deviation between predicted |psi(x)^2|^2 and observed probability density rho_obs(x).
-
-        || |psi(x)|^2 - rho_obs(x) ||^2
+    Physics-informed loss for all eigenstates.
 
     Parameters
     ----------
-    psi_model :
-        Callable mapping ``x -> psi(x)``.
-    x :
-        Coordinates of density observations.
-    rho_obs :
-        Observed probability density values.
-    reduction :
-        "mean", "sum", or "none".
+    multi_psi_model :
+        List of eigenstates.
+    V_model :
+    energies :
+        List of energy eigenvalues (learned? 📝 I'm officially a little lost here ❓)
+    dx :
+        Spatial grid step size.
 
     Returns
     -------
-    Tensor
-        Density mismatch loss.
+    torch.Tensor
+        Physics loss term from all eigenstates.
     """
-    psi: Tensor = psi_model(x)
-    rho_pred: Tensor = psi.pow(2)
-
-    pointwise_loss: Tensor = (rho_pred - rho_obs).pow(2)
-
-    if reduction == "mean":
-        return pointwise_loss.mean()
-    elif reduction == "sum":
-        return pointwise_loss.sum()
-    elif reduction == "none":
-        return pointwise_loss
-    else:
-        raise TypeError(f"`reduction` must be 'mean', 'sum', or `none`, got {reduction}.")
+    residuals = [
+        tise_residual(psi_model, V_model, energies[i], dx)
+        for i, psi_model in enumerate(multi_psi_model)
+    ]
+    return torch.mean(
+        torch.stack([torch.mean(r**2) for r in residuals])
+    )
 
 def potential_smoothness_loss(
-    V_model: SupportsForward,
-    x: Tensor,
+    V_model: torch.Tensor,
+    dx: float,
     *,
     eps: float = 1e-6,
-    reduction: str = "mean",
-) -> Tensor:
+) -> torch.Tensor:
     """
     Scale-aware smoothness regularization for the inferred potential V(x).
 
@@ -159,98 +104,28 @@ def potential_smoothness_loss(
     Parameters
     ----------
     V_model :
-        Callable mapping ``x -> V(x)``.
-    x :
-        Tensor of shape ``(N_x, 1)``.
+        Callable mapping ``x -> V(x)``. (❓ is this correct? is it a stronger description than the other ones for V_model?)
+    dx :
+        Spatial grid step size.
     eps :
         Small constant for numerical stability.
-    reduction :
-        "mean", "sum", or "none".
 
     Returns
     -------
     Tensor
         Smoothness penalty.
     """
-    if not torch.is_tensor(x):
-        raise TypeError(f"`x` must be a torch.Tensor, got {type(x)}.")
+    V_xx = second_derivative(V_model, dx)
+    return torch.mean((V_xx**2) / (eps + V_model**2))
 
-    x = x.detach().requires_grad_(True)
-
-    V: Tensor = V_model(x)
-    dV_dx: Tensor = _grad(V, x)
-    d2V_dx2: Tensor = _grad(dV_dx, x)
-
-    pointwise_loss: Tensor = d2V_dx2.pow(2) / (V.pow(2) + eps)
-
-    if reduction == "mean":
-        return pointwise_loss.mean()
-    elif reduction == "sum":
-        return pointwise_loss.sum()
-    elif reduction == "none":
-        return pointwise_loss
-    else:
-        raise TypeError(f"`reduction` must be 'mean', 'sum', or 'none', got {reduction}.")
 
 # ------------------------------------------------------------------------------
-# 2️⃣ Private Helpers
-# ------------------------------------------------------------------------------
-
-def _grad(y: Tensor, x: Tensor) -> Tensor:
-    """
-    Compute dy/dx using torch.autograd while preserving the graph.
-    """
-    (dy_dx,) = autograd.grad(
-        outputs=y,
-        inputs=x,
-        grad_outputs=torch.ones_like(y),
-        create_graph=True,
-        allow_unused=True,
-    )
-    if dy_dx is None:
-        return torch.zeros_like(x)
-
-    return dy_dx
-
-# ------------------------------------------------------------------------------
-# 3️⃣ Smoke test helpers
-# ------------------------------------------------------------------------------
-
-def run_smoke_test() -> None:
-    """Sanity check for Schrödinger residual and smoothness losses."""
-    set_global_seed(42)
-
-    psi_model = lambda x: torch.sin(torch.pi * x)     # smooth test function (PIB eigenmode)
-    # psi_model = lambda x: torch.exp(-0.5 * x**2)    # HO ground-state shape (unnormalized)
-    V_model = lambda x: 0.1 * x**2                    # pure quadratic (harmonic) potential
-
-    x: Tensor = torch.linspace(0.0, 1.0, 50).unsqueeze(1)
-    energy: float = (torch.pi ** 2) / 2.0
-
-    L_res: Tensor = tise_residual_loss(
-        psi_model,
-        V_model,
-        x,
-        energy=energy,
-    )
-
-    L_smooth: Tensor = potential_smoothness_loss(
-        V_model,
-        x,
-    )
-
-    print("✔️ Physics losses computed successfully.")
-    print(f"TISE residual loss    : {L_res.item():.3e}")
-    print(f"Potential smoothness  : {L_smooth.item():.3e}")
-
-# ------------------------------------------------------------------------------
-# 4️⃣ Entry point
+# 2️⃣ Entry point
 # ------------------------------------------------------------------------------
 
 def main() -> None:
-    """Run local tests when executed as a script."""
-    run_smoke_test()
-
+    """❓‼️Need help with this part. would like to use the _run_smoke_test() method.‼️❓"""
+    print("physics.py loaded")
 
 if __name__ == "__main__":
     main()

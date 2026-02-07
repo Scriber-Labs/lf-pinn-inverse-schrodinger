@@ -1,10 +1,10 @@
+# src/train.py
+
 from __future__ import annotations
 
 import torch
-from torch import Tensor, nn, optim
-
-from inverse import inverse_multi_state_loss
-from utils import set_global_seed
+from model import InverseSchrodingerModel
+# 🔮🔮🔮🔮 CONTINUE HERE! 🔮🔮🔮🔮🔮🔮🔮🔮🔮🔮
 
 def train_inverse(
     *,
