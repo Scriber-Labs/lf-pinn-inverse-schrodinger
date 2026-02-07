@@ -1,18 +1,19 @@
+# src/model.py
+
 from __future__ import annotations
 
-from typing import Final
+from typing import List
 
 import torch
-from torch import Tensor, nn
+import torch.nn as nn
 
 from utils import set_global_seed
-
 
 # ------------------------------------------------------------------------------
 # 1️⃣ Neural network model
 # ------------------------------------------------------------------------------
 
-class PotentialNet(nn.Module):
+class MLP(nn.Module):
     """
     A minimal 2-hidden-layer tanh MLP: x -> V(x)
 
@@ -20,97 +21,105 @@ class PotentialNet(nn.Module):
 
     Parameters
     ----------
-    hidden : int, default = 64
+    input_dim : int
+        Input dimension.
+    output_dim : int
+        Output dimension.
+    hidden_dims : List[int], default = ❓
         Number of hidden units per hidden layer.
-    device : torch.device or str, optional
+    device : torch.device or str, optional, default = None
         Device on which the parameters will be allocated. If omitted, they will be kept on the current default device.
-    dtype : torch.dtype, optional
+    dtype : torch.dtype, optional, default = None
         Floating-point precision of the parameters.
     """
 
-    INPUT_DIM: Final[int] = 1
-    OUTPUT_DIM: Final[int] = 1
-
     def __init__(
-            self,
-            hidden: int = 64,
-            *,
-            device: torch.device | str | None = None,
-            dtype: torch.dtype | None = None,
+        self,
+        input_dim: int,
+        output_dim: int,
+        hidden_dims: List[int],
+        *,
+        device: torch.device | str | None = None,
+        dtype: torch.dtype | None = None,
     ) -> None:
         super().__init__()
 
-        # Build the network
-        self.net: nn.Sequential = nn.Sequential(
-            nn.Linear(self.INPUT_DIM, hidden, device=device, dtype=dtype),
-            nn.Tanh(),
-            nn.Linear(hidden, hidden, device=device, dtype=dtype),
-            nn.Tanh(),
-            nn.Linear(hidden, self.OUTPUT_DIM, device=device, dtype=dtype),
-        )
+        layers: List[nn.Module] = []
+        dims = [input_dim] + hidden_dims + [output_dim]
 
-        self._initialize_weights()
+        for i in range(len(dims) - 1):
+            layers.append(nn.Linear(dims[i], dims[i + 1]))
+            if i < len(dims) - 2:
+                layers.append(nn.Tanh())
 
-    # ------------------------------------------------------------------------------
-    # 2️⃣ Public API
-    # ------------------------------------------------------------------------------
+        self.net = nn.Sequential(*layers)
 
-    def forward(self, x: Tensor) -> Tensor:
-        """
-        Forward pass of the network.
-
-        Parameters
-        ----------
-        x: Tensor of shape (N_x, 1)
-
-        Returns
-        -------
-        Tensor of shape (N_x, 1) representing the potential V(x)
-        """
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.net(x)
 
-    # ------------------------------------------------------------------------------
-    # 3️⃣ Private helpers
-    # ------------------------------------------------------------------------------
+class InverseSchrodingerModel(nn.Module):
+    """
+    Joint model for:
+    - Inferred (❓) Potential V_theta(x)
+    - Learned (❓) Wavefunctions psi_n(x)
+    - Learned (❓) Energies E_n
+    """
 
-    def _initialize_weights(self) -> None:
-        """
-        Initialize linear layers with Xavier initialization (appropriate for tanh activations).
-        """
-        for module in self.modules():
-            if isinstance(module, nn.Linear):
-                nn.init.xavier_normal_(module.weight)
-                if module.bias is not None:
-                    nn.init.zeros_(module.bias)
+    def __init__(
+        self,
+        n_states: int,
+        hidden_dims: List[int],
+    ) -> None:
+        super().__init__()
+
+        self.n_states = n_states
+
+        self.potential_net = MLP(1, 1, hidden_dims)
+
+        self.psi_nets = nn.ModuleList(
+            [MLP(1, 1, hidden_dims) for _ in range(n_states)]
+        )
+
+        self.energies = nn.Parameter(
+            torch.randn(n_states)
+        )
+
+    def potential(self, x: torch.Tensor) -> torch.Tensor:
+        return self.potential_net(x)
+
+    def psi(self, x: torch.Tensor) -> List[torch.Tensor]:
+        return [net(x) for net in self.psi_nets]
 
 
 # ------------------------------------------------------------------------------
-# 4️⃣ Smoke test helpers
+# 2️⃣ Smoke test helpers
 # ------------------------------------------------------------------------------
 
-def run_smoke_test() -> None:
-    """Sanity check or PotentialNet forward pass."""
+def _run_smoke_test() -> None:
+    """Sanity check or MLP forward pass."""
     set_global_seed(42)
 
     device: torch.device = torch.device(
         "cuda" if torch.cuda.is_available() else "cpu"
     )
 
-    model: PotentialNet = PotentialNet(device=device).to(device)
+    model: InverseSchrodingerModel = InverseSchrodingerModel(n_states=3, hidden_dims=[64, 64])
 
-    x: Tensor = torch.linspace(-1.0, 1.0, 5, device=device).unsqueeze(1)
-    V: Tensor = model(x)
+    x: torch.Tensor = torch.linspace(-1.0, 1.0, 100, device=device).unsqueeze(1)
+    V: torch.Tensor = model.potential(x)
+    psi: List[torch.Tensor] = model.psi(x)
 
-    print("✔️ PotentialNet forward OK")
+    print("✔️ MLP forward OK")
     print(f"Input shape : {x.shape}")
     print(f"Output shape: {V.shape}")
+    print(f"Wavefunction shape: {len(psi)}")
 
 # ------------------------------------------------------------------------------
 # 5️⃣ Entry point
 # ------------------------------------------------------------------------------
 def main() -> None:
     """Run local tests when executed as a script."""
-    run_smoke_test()
+    _run_smoke_test()
 
 if __name__ == "__main__":
     main()

@@ -1,3 +1,5 @@
+# src/utils.py
+
 from __future__ import annotations
 import random
 from typing import Optional
@@ -46,8 +48,8 @@ def make_grid(
         Maximum x value.
     n_points : int
         Number of grid points.
-    device : torch.device, optional
-        Device to use for computation.
+    device : torch.device or str, optional
+        Device on which the parameters will be allocated. If omitted, they will be kept on the current default device.
 
     Returns
     -------
