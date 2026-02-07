@@ -50,3 +50,30 @@ class MLP(nn.Module):
     - The activation is applied **after** each linear layer except for the final one.
     - ``tanh`` is chosen because it is bounded and differentiable. This implements nicely with the physics-informed loss term.
     """
+
+    def __init__(
+            self,
+            input_dim: int,
+            output_dim: int,
+            hidden_dims: List[int],
+            *,
+            device: torch.device | str | None = None,
+            dtype: torch.dtype | None = None,
+    ) -> None:
+        super().__init__()
+
+        # Build the sequential stack: Linear -> Tanh -> Linear -> ... -> Linear
+        layers: List[nn.Module] = []
+        dims = [input_dim] + hidden_dims + [output_dim]
+
+        for i in range(len(dims) - 1):
+            layers.append(nn.Linear(dims[i], dims[i + 1], device=device, dtype=dtype))
+            # Insert activation after every hidden layer (not after the output)
+            if i < len(dims) -2:
+                layers.append(nn.Tanh())
+
+        self.net = nn.Sequential(*layers)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass -> forwards ``x`` through the stacked MLP."""
+        return self.net(x)
