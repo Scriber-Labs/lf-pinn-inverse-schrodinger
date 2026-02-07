@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import torch
 from model import InverseSchrodingerModel
-# 🔮🔮🔮🔮 CONTINUE HERE! 🔮🔮🔮🔮🔮🔮🔮🔮🔮🔮
+from physics import tise_loss, potential_smoothness_loss
+from inverse import
 
 def train_inverse(
     *,

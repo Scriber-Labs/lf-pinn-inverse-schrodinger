@@ -72,7 +72,7 @@ $$\mathcal{L}_\text{TISE}=\Bigg<\bigg(-\frac{\hbar^2}{2m}\psi_n''(x)+V(x)\psi_n(
 $$\mathcal{L}_\text{smooth}=\Bigg<\frac{|V''(x)|^2}{\epsilon + |V(x)|^2}\Bigg>$$
 
 ### Data Mismatch (Noisy Observations)
-$$\mathcal{L}_{data} = \sum _n {\Big|\Big| E_n - E_n^\text{obs} \Big|\Big|^2 + \Big|\Big| \Big( |\psi_n |^2 - \rho_n^\text{obs} \Big)}\Big|\Big|^2 $$
+$$\mathcal{L}_\text{data} = \sum _n {\Big|\Big| E_n - E_n^\text{obs} \Big|\Big|^2 + \Big|\Big| \Big( |{\psi_\theta}_n |^2 - \rho_n^\text{obs} \Big)}\Big|\Big|^2 $$
 
 ### Total Loss
 $$\mathcal{L}_\text{total}=\lambda_\text{data}\mathcal{L}_\text{data}+\lambda_\text{phys}\mathcal{L}_\text{TISE}+\lambda_\text{smooth}\mathcal{L}_\text{smooth}$$
