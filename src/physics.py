@@ -125,7 +125,7 @@ def potential_smoothness_loss(
 
 def main() -> None:
     """❓‼️Need help with this part. would like to use the _run_smoke_test() method.‼️❓"""
-    print("physics.py loaded")
+    print("✔️ physics.py loaded")
 
 if __name__ == "__main__":
     main()
