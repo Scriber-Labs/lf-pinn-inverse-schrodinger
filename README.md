@@ -39,31 +39,23 @@ As with project 1, the goal is not high-precision reconstruction, but interpreta
 
 ## 🌍 Global Design Choices
 Assumptions:
-- Atomic units: $\hbar = m = 1$
+- Atomic units: $\hbar = 1$
+- Normalized parameters: $m = 1$ electron rest mass
+- $\psi_n(\theta, x)$ normalization is handled either implicitly or by the PDE
+- probability density observations are on an absolute scale
 
 What is being learned:
-- $V_\theta(x)$ via the MLP.
-- ${\psi_\theta}_n(x)$ via the MLP. (‼️Get feedback about the notation we use to write the learned wave function; usually we just assume $\psi_n(x) \equiv {\psi_\theta}_n(x)$, but the ambiguity bothers me; I just don't know what to do about the indices or whether there are already best practice  guidelines for these sorts of things).
-- ${E_\theta}_n$ as learnable scalars. (‼️ same feedback is needed as requested for the learned wave function).
+- $V(\theta, x)$ via the MLP.
+- Eigenmodes $\psi_n(\theta,x)$ via the MLP. 
+- Associated energy eigenvalues $E_n(\theta)$ as learnable scalars. 
 
 Orthogonality
 - For our low fidelity design, we are not _enforcing_ orthogonality directly.
 - However, our POD function (`src/pod.py`) allows us to _diagnose_ orthogonality.
 
 ---
-
 ## Loss Function
-📝 For this repo, we will assume:
-- atomic units and normalized parameters (thus, $\hbar=1$ and $m=1$ electron rest mass)
-- $\psi_n$ normalization is handled either implicitly or by the PDE
-- probability density observations are on an absolute scale
-
-🔮 Later, can include:
-- noisy or unnormalized densities
-- partial observation windows
-- unknown normalization constants
-- orthogonality constraints between $\psi_n(x)$ 
-- add energy ordering regularization
+- [ ] Condense this section into a table.
 
 ### TISE Residual
 $$\mathcal{L}_\text{TISE}=\Bigg<\bigg(-\frac{\hbar^2}{2m}\psi_n''(x)+V(x)\psi_n(x)-E_n\psi_n(x)\bigg)^2\Bigg>$$
@@ -79,21 +71,30 @@ $$\mathcal{L}_\text{total}=\lambda_\text{data}\mathcal{L}_\text{data}+\lambda_\t
 
 ---
 ## Proper Orthogonal Decomposition (POD)
-> POD does not enforce physics. It reveals structure.
+> ✨ POD does not enforce physics. It reveals structure.
 
 ### Specific Questions POD Answers
 
-| Question                             | Why it matters                  |
-| ------------------------------------ | ------------------------------- |
-| Are ψₙ distinct or collapsing?       | Detects mode collapse           |
-| How many effective modes exist?      | Identifiability                 |
-| Are learned states redundant?        | Overparameterization            |
-| Do modes align with energy ordering? | Model consistency               |
-| Is orthogonality emerging naturally? | Strength of physics constraints |
+| 🧙🏻‍♂️ Question                                          | ✨ Relvance                     |
+| -----------------------------------------------------| ------------------------------- |
+| Are $\psi_n(\theta,x)$ distinct or collapsing?       | Detects mode collapse           |
+| How many effective modes exist?                      | Identifiability                 |
+| Are learned states (❓is this just the same thing as saying 'learned eigenmodes') redundant?                     | Overparameterization            |
+| Do modes align with energy ordering?                 | Model consistency               |
+| Is orthogonality emerging naturally?                 | Strength of physics constraints |
 
-### Important Notes
+### 🏡 Take-Home Messages:
 - POD allows us to make statements about whether the learned eigenfunctions exhibit partial orthogonality, even in the absence of explicit orthogonality constraints.
-- POD tells us whether mode collapse occurs without additional structure (❓).
+- POD tells us whether mode collapse occurs without additional structure (❓ what 'additional s tructure' specicially refer to?❓).
+
+---
+## 🔮 Future possible implementations
+- noisy or unnormalized densities
+- partial observation windows
+- unknown normalization constants
+- orthogonality constraints between $\psi_n(\theta,x)$ 
+- add energy ordering regularization
+- add symplectic loss
 
 ---
 ## ✅ To Do
