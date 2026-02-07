@@ -77,3 +77,73 @@ class MLP(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass -> forwards ``x`` through the stacked MLP."""
         return self.net(x)
+
+class InverseSchrodingerModel(nn.Module):
+    """
+    Joint model that bundles together:
+    - ``V_theta``           a learned potential,
+    - ``psi_theta_n``       the *n*-th learned eigenmode,
+    - ``E_theta_n``         the *n*-th learned energy eigenvalue,
+
+    All three families share the **same hidden-layer architecture** (``hidden_dimes``). However, they are separately initiated so they can learn independent parameters.
+
+    Parameters
+    ----------
+    n_states : int
+        Number of eigenstates to learn.
+    hidden_dims : List[int]
+        Hidden layer sizes for the underlying MLP.
+    device : torch.device or ``str``, optional
+        Device on which to place all sub-modules. If ``None`` the model inherits the default device of the surrounding context.
+    dtype : torch.dtype, optional
+        Precision for the parameters (defaults to ``torch.float32``).
+
+    Attributes
+    ----------
+    potential_net : MLP
+        Represents ``V_theta(x)``.
+    psi_nets : nn.ModuleList(MLP)
+        One MLP per eigenstate, representing ``psi_theta_n(x)``.
+    energies : nn.Parameter
+        Tensor of shape ``(n_states,)`` holding ``E_theta_n`.
+    """
+
+    def __init__(
+        self,
+        n_states: int,
+        hidden_dims: List[int],
+        *,
+        device: torch.device | str | None = None,
+        dtype: torch.dtype | None = None,
+    ): -> None:
+        super().__init__()
+
+        self.n_states = n_states
+
+        # Potential network -> single scalar field
+        self.potential_net = MLP(
+            input_dim=1,
+            output_dim=1,
+            hidden_dims=hidden_dims,
+            device=device,
+            dtype=dtype,
+        )
+
+        # One wavefunction network per eigenstate
+        self.psi_nets = nn.ModuleList(
+            [
+                MLP(
+                    input_dim=1,
+                    output_dim=1,
+                    hidden_dims=hidden_dims,
+                    device=device,
+                    dtype=dtype,
+                )
+                for _ in range(n_states)
+            ]
+        )
+
+        # Energy parameters -> learnable scalars (no need for bias term)
+        self.energies = nn.Parameter(torch.randn(n_states, dtype=dtype or torch.float32))
+
+    
