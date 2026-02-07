@@ -1,6 +1,6 @@
 # inverse-piml-schrodinger
 
-## Planned Repo Structure
+## Repo Structure
 
 ```
 inverse-piml-schrodinger/
@@ -36,6 +36,19 @@ Using the time-independent Schrodinger equation (TISE) as a hard physics constra
 
 As with project 1, the goal is not high-precision reconstruction, but interpretability and identifability. 
 > Specifically, the aim of this repository is to understand which operator features are robustly recoverable under strong physics priors and limited data.
+
+## 🌍 Global Design Choices
+Assumptions:
+- Atomic units: $\hbar = m = 1$
+
+What is being learned:
+- $V_\theta(x)$ via the MLP.
+- ${\psi_\theta}_n(x)$ via the MLP. (‼️Get feedback about the notation we use to write the learned wave function; usually we just assume $\psi_n(x) \equiv {\psi_\theta}_n(x)$, but the ambiguity bothers me; I just don't know what to do about the indices or whether there are already best practice  guidelines for these sorts of things).
+- ${E_\theta}_n$ as learnable scalars. (‼️ same feedback is needed as requested for the learned wave function).
+
+Orthogonality
+- For our low fidelity design, we are not _enforcing_ orthogonality directly.
+- However, our POD function (`src/pod.py`) allows us to _diagnose_ orthogonality.
 
 ---
 
