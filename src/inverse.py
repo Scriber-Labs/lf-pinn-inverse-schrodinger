@@ -44,7 +44,7 @@ def data_mismatch_loss(
     energy_loss = torch.mean((energies - E_obs)**2)
 
     density_losses = [
-        torch.mean((psi_model**2 - rho_obs[i])**2)
+        torch.mean((psi**2 - rho_obs[i])**2)
         for i, psi in enumerate(multi_psi_model)
     ]
 

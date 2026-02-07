@@ -60,7 +60,7 @@ class MLP(nn.Module):
 class InverseSchrodingerModel(nn.Module):
     """
     Joint model for:
-    - Inferred (❓) Potential V_theta(x)
+    - Inferred (❓) Potential V_model(x)
     - Learned (❓) Wavefunctions psi_n(x)
     - Learned (❓) Energies E_n
     """
