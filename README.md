@@ -51,7 +51,7 @@ Assumptions:
 
 What is being learned:
 - The potential function $V_\theta(x) := V(\theta, x)$ via the MLP.
-- Eigenmodes $\psi_\theta^n(x) := \psi_n(\theta,x)$ via the MLP. 
+- Eigenmodes $\psi_n^\theta(x) := \psi_n(\theta,x)$ via the MLP. 
 - Associated energy eigenvalues $E_n^\theta := E_n(\theta)$ as learnable scalars. 
 
 Orthogonality
