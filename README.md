@@ -46,13 +46,13 @@ inverse-piml-schrodinger/
 Assumptions:
 - Atomic units: $\hbar = 1$
 - Normalized parameters: $m = 1$ electron rest mass
-- $\psi_n(\theta, x)$ normalization is handled either implicitly or by the PDE
+- Wavefunction/eigenmode normalization is handled either implicitly or by the PDE
 - probability density observations are on an absolute scale
 
 What is being learned:
-- $V(\theta, x)$ via the MLP.
-- Eigenmodes $\psi_n(\theta,x)$ via the MLP. 
-- Associated energy eigenvalues $E_n(\theta)$ as learnable scalars. 
+- The potential function $V_\theta(x) := V(\theta, x)$ via the MLP.
+- Eigenmodes $\psi_\theta^n(x) := \psi_n(\theta,x)$ via the MLP. 
+- Associated energy eigenvalues $E_n^\theta := E_n(\theta)$ as learnable scalars. 
 
 Orthogonality
 - For our low fidelity design, we are not _enforcing_ orthogonality directly.
@@ -90,7 +90,7 @@ $$\mathcal{L}_\text{total}=\lambda_\text{data}\mathcal{L}_\text{data}+\lambda_\t
 
 ### 🏡 Take-Home Messages:
 - POD allows us to make statements about whether the learned eigenfunctions exhibit partial orthogonality, even in the absence of explicit orthogonality constraints.
-- POD tells us whether mode collapse occurs without additional structure (❓ what 'additional s tructure' specicially refer to?❓).
+- POD tells us whether mode collapse occurs without additional structure (❓ what 'additional structure' specicially refer to?❓).
 
 ---
 ## 🔮 Future possible implementations
@@ -100,6 +100,8 @@ $$\mathcal{L}_\text{total}=\lambda_\text{data}\mathcal{L}_\text{data}+\lambda_\t
 - orthogonality constraints between $\psi_n(\theta,x)$ 
 - add energy ordering regularization
 - add symplectic loss
+- use PySR architecture instead of 'pure' neural network (Crammer, 2023)
+  - ✨ adds to interpretability discussion in `lf-pinn-inversse-schrodinger`
 
 ---
 ## ✅ To Do
