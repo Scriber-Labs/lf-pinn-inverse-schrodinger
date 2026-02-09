@@ -1,4 +1,16 @@
 # src/physics.py
+"""
+Physics-informed loss utilities for the inverse TISE problem.
+
+All functions operate on *already-evaluated* tensors (i.e., the outputs of the neural networks defined by ``model.InverseSchrodingerModel``.
+
+Learned functions:
+- A potential function: ``V_theta(x)``
+- A wavefunction for state *n*: ``psi_theta_n(x)``
+- Energy eigenvalues for state *n*: ``E_theta_n``
+
+These helpers are deliberately coded to be thin wrappers (❓) around the generic utilities in ``utils.py`` (e.g., ``second_derivative``) so that the physics stays explict and can be easily audited.
+"""
 
 from __future__ import annotations
 
@@ -6,7 +18,7 @@ from typing import List
 
 import torch
 
-from utils import set_global_seed, second_derivative
+from utils import second_derivative
 
 __all__: list[str] = [
     "tise_residual",
@@ -14,118 +26,102 @@ __all__: list[str] = [
     "potential_smoothness_loss",
 ]
 
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------
 # 1️⃣ Public API
-# ------------------------------------------------------------------------------
+# ----------------------------------------------------------------------
 
 def tise_residual(
-    psi_model: torch.Tensor,
-    V_model: torch.Tensor,
-    E_model: torch.Tensor,
+    psi_theta: torch.Tensor,
+    V_theta: torch.Tensor,
+    E_theta: torch.Tensor,
     dx: float,
     *,
-    hbar: float | torch.Tensor = 1.0,
-    mass: float | torch.Tensor = 1.0,
+    hbar: float | torch.Tensor = 1.0,   # atomic units
+    mass: float | torch.Tensor = 1.0,   # non-dimensionalization
 ) -> torch.Tensor:
     """
-    Physics-informed residual loss for one eigenstate.
-
-    Enforces:
-        -(hbar^2/(2m))*psi''(x) + V(x)*psi(x) = E*psi(x)
+    Residual of the time-independent Schrödinger equation for a *single* eigenstate.
 
     Parameters
     ----------
-    psi_model :
-        Eigenstate inferred from the model.
-    V_model :
-        Potential energy function inferred from the model.
-    dx :
-        spatial grid step size
-    E_model :
-        Learned energy eigenvalue corresponding to ``psi_model(x)``.
-    hbar :
-        Reduced Planck constant (atomic units by default).
-    mass :
-        Particle mass m.
+    psi_theta : torch.Tensor, shape ``(N, 1)``
+        Tensor ``psi(x)`` for one eigenstate.
+    V_theta : torch.Tensor, shape ``(N, 1)``
+        Tensor ``V(x)`` for a potential function.
+    E_theta : torch.Tensor
+        Scalar energy eigenvalue for this eigenstate. Either a zero dimensional tensor or a Python float.
+    dx : float
+        Uniform grid spacing.
+    hbar, mass: float, default: 1.0
+        Physical constants (default to atomic units) and mass (default to nondimensional value).
 
     Returns
     -------
-    Tensor
-        TISE residual for one eigenstate.
+    torch.Tensor, shape ``(N, 1)``
+        The pointwise residual ``R(x)``. Note that a perfect solution gives ``R = 0`` everywhere.
     """
-    psi_xx = second_derivative(psi_model, dx)
-    return -0.5 * (hbar**2 / mass)  * psi_xx + V_model * E_model * psi_model
+    # Second derivative of psi using the central-difference helper from utils.
+    psi_xx = second_derivative(psi_theta, dx)
+
+    # Assemble the residual term-by-term.
+    kinetic = -0.5 * (hbar**2 / mass) * psi_xx
+    potential =V_theta * psi_theta
+    rhs = E_theta * psi_theta
+
+    return kinetic + potential - rhs
 
 def tise_loss(
-    multi_psi_model: List[torch.Tensor],
-    V_model: torch.Tensor,
-    energies: torch.Tensor,
+    multi_psi_theta: List[torch.Tensor],
+    V_theta: torch.Tensor,
+    energies_theta: torch.Tensor,
     dx: float,
 ) -> torch.Tensor:
     """
-    Physics-informed loss for all eigenstates.
+    Aggregate physics loss over *all* learned eigenstates.
 
     Parameters
     ----------
-    multi_psi_model :
-        List of eigenstates.
-    V_model :
-    energies :
-        List of energy eigenvalues (learned? 📝 I'm officially a little lost here ❓)
-    dx :
-        Spatial grid step size.
+    multi_psi_theta : List[torch.Tensor]
+        List of the wavefunction tnesors ``[psi_theta_0, psi_theta_1, ... ]``.
+    V_theta : torch.Tensor
+        Potential function tensor (shared across learned eigenstates).
+    energies_theta : torch.Tensor
+        Tensor of learned energy eigenvalues ``[E_theta_0, E_theta_1, ... ]``.
+    dx : float
+        Grid spacing.
 
     Returns
     -------
-    torch.Tensor
-        Physics loss term from all eigenstates.
+    torch.Tensor (scalar)
+        Mean-squared TISE residual across all eigenstates.
     """
+    # Compute a residual for each eigenstate.
     residuals = [
-        tise_residual(psi_model, V_model, energies[i], dx)
-        for i, psi_model in enumerate(multi_psi_model)
+        tise_residual(psi, V_theta, energies_theta[i], dx) for i, psi in enumerate(multi_psi_theta)
     ]
-    return torch.mean(
-        torch.stack([torch.mean(r**2) for r in residuals])
-    )
+
+    # Square, average per-state, then average across all states.
+    per_state_mse = [torch.mean(r**2) for r in residuals]
+
+    return torch.mean(torch.stack(per_state_mse))
 
 def potential_smoothness_loss(
-    V_model: torch.Tensor,
+    V_theta: torch.Tensor,
     dx: float,
     *,
     eps: float = 1e-6,
 ) -> torch.Tensor:
     """
-    Scale-aware smoothness regularization for the inferred potential V(x).
+    Scale-aware smoothness regularization for the learned potential.
 
-    Penalizes relative curvature with respect to the local magnitude of V(x).
-
-        |V''(x)|^2 / (|V(x)|^2 + eps)
-
+    Large curvature relative to the local magnitude of the potential is penalized.
     Parameters
     ----------
-    V_model :
-        Callable mapping ``x -> V(x)``. (❓ is this correct? is it a stronger description than the other ones for V_model?)
-    dx :
-        Spatial grid step size.
-    eps :
-        Small constant for numerical stability.
+    V_theta
+    dx
+    eps
 
     Returns
     -------
-    Tensor
-        Smoothness penalty.
+
     """
-    V_xx = second_derivative(V_model, dx)
-    return torch.mean((V_xx**2) / (eps + V_model**2))
-
-
-# ------------------------------------------------------------------------------
-# 2️⃣ Entry point
-# ------------------------------------------------------------------------------
-
-def main() -> None:
-    """❓‼️Need help with this part. would like to use the _run_smoke_test() method.‼️❓"""
-    print("✔️ physics.py loaded")
-
-if __name__ == "__main__":
-    main()
