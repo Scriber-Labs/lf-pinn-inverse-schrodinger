@@ -82,7 +82,7 @@ def tise_loss(
     Parameters
     ----------
     multi_psi_theta : List[torch.Tensor]
-        List of the wavefunction tnesors ``[psi_theta_0, psi_theta_1, ... ]``.
+        List of the wavefunction tensors ``[psi_theta_0, psi_theta_1, ... ]``.
     V_theta : torch.Tensor
         Potential function tensor (shared across learned eigenstates).
     energies_theta : torch.Tensor
@@ -117,11 +117,61 @@ def potential_smoothness_loss(
     Large curvature relative to the local magnitude of the potential is penalized.
     Parameters
     ----------
-    V_theta
-    dx
-    eps
+    V_theta : torch.Tensor, shape ``(N, 1)``
+        Potential function tensor ``V(x)``
+    dx : float
+        Grid spacing.
+    eps : float, default: 1e-6
+        Small constant to avoid dividing by zero.
 
     Returns
     -------
-
+    torch.Tensor (scalar)
+        Smoothness penalty.
     """
+    V_xx = second_derivative(V_theta, dx)
+    return torch.mean((V_xx**2) / (eps + V_theta**2))
+
+# ----------------------------------------------------------------------
+# 2️⃣ Smoke‑test entry point
+# ----------------------------------------------------------------------
+
+def _run_physics_smoke_test() -> None:
+    """
+    Minimal sanity check that the loss functions accept realistic shapes.
+
+    Builds a dummy spatial grid, feeds random tensors through the loss utilities, and prints the resulting scalars.  Since this is purely a shape-check, no gradients are taken into account.
+    """
+    from utils import make_grid, set_global_seed
+
+    set_global_seed(27)
+
+    # Dummy grid (100 points from -1 to 1)
+    x = make_grid(-1.0, 1.0, 100)
+    dx = float(x[1] - x[0])
+
+    # Random but well-shaped tensors
+    V = torch.sin(x)                    # potential
+    psi0 = torch.cos(x)                 # ground-state guess
+    psi1 = torch.sin(2 * x)             # first excited state guess
+    energies = torch.tensor([0.5, 1.5]) # arbitrary energies
+
+    # Run each loss
+    res0 = tise_residual(psi0, V, energies[0], dx)
+    loss_tise = tise_loss([psi0, psi1], V, energies, dx)
+    loss_smooth = potential_smoothness_loss(V, dx)
+
+    print("✔️ physics.py smoke test:")
+    print(f"  residual shape    : {res0.shape}")
+    print(f"  tise loss         : {loss_tise.item():.6f}")
+    print(f"  smoothness loss   : {loss_smooth.item():.6f}")
+
+def main() -> None:
+    """
+    Entry-point used when the module is executed directly.
+    Calls the minimal smoke-test for verification that the file loads correctly.
+    """
+    _run_physics_smoke_test()
+
+if __name__ == "__main__":
+    main()
