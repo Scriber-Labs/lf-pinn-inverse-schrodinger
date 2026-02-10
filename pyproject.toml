@@ -1,0 +1,58 @@
+# pyproject.toml
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "inverse_schrodinger"
+version = "0.1.0"
+description = "Inverse Schrödinger solver with POD and physics‑informed losses"
+authors = [{name = "Renzo", email = "you@example.com"}]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "torch>=2.0",
+    # add any other runtime deps here (e.g. numpy, tqdm, etc.)
+]
+
+# ----------------------------------------------------------------------
+# Tell setuptools that the source code lives in the `src/` folder
+# ----------------------------------------------------------------------
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["*"]
+
+# ----------------------------------------------------------------------
+# Optional: Poetry‑style section if you ever switch to Poetry
+# ----------------------------------------------------------------------
+[tool.poetry]
+name = "inverse_schrodinger"
+version = "0.1.0"
+description = "Inverse Schrödinger solver with POD and physics‑informed losses"
+authors = ["Renzo <you@example.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+torch = "^2.0"
+
+# ----------------------------------------------------------------------
+# Development extras (testing, linting, notebooks)
+# ----------------------------------------------------------------------
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "black",
+    "ruff",
+    "ipykernel",   # for Jupyter notebooks
+]
+
+# ----------------------------------------------------------------------
+# Make `src/` the default import location for notebooks
+# ----------------------------------------------------------------------
+[tool.ipython]
+# When you start a notebook from the repository root, IPython will add the
+# project’s root to sys.path automatically.  If you use VS Code’s Jupyter
+# extension, the same behavior applies.

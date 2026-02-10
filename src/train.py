@@ -108,7 +108,7 @@ def _run_train_smoke_test() -> None:
     loss.backward()
     optimizer.step()
 
-    print("✔️ train.py smoke test - loss after one step:", float(loss))
+    print("✔️ train.py smoke test - loss after one step:", float(loss.detach()))
 
 def main() -> None:
     """Entry point for ``python -m src.train`` -> runs the smoke test."""
