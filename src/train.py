@@ -42,12 +42,77 @@ def train_step(
     x: torch.Tensor, shape ``(N, 1)``
         Collocation points on which the PDE is enforced.
     dx : float
-        Uniform
-    rho_obs
-    E_obs
-    lambdas
+        Uniform grid spacing.
+    rho_obs : List[torch.Tensor], each shape ``(❓, ❓)``
+        List of observed probability density tensors, one per eigenstate.
+    E_obs : torch.Tensor, shape ``(n_states,)``
+        Tensor of observed energies.
+    lambdas : dict[str, float]
+        Dictionary mapping loss identifies to scalar weights, e.g.
+        ``{'data': 1.0, 'physics': 1.0, 'smooth': 1e-2}``.
 
     Returns
     -------
-
+    torch.Tensor
+        The total weighted loss (scalar) -> ready for ``backward()``.
     """
+    # ----- Forward pass -------------------------------------------------
+    V_theta = model.V_theta(x)      # potential V(theta, x)
+    psi_list = model.psi_theta(x)   # list[psi_n(theta, x)]
+
+    # ----- Individual loss terms ----------------------------------------
+    L_physics = tise_loss(psi_list, V_theta, model.E_theta(), dx)
+    L_smooth = potential_smoothness_loss(V_theta, dx)
+    L_data = data_mismatch_loss(psi_list, model.E_theta(), rho_obs, E_obs)
+
+    # ----- Weighted sum --------------------------------------------------
+    total = (
+        lambdas["data"] * L_data
+        + lambdas["physics"] * L_physics
+        + lambdas["smooth"] * L_smooth
+    )
+
+    return total
+
+# ----------------------------------------------------------------------
+# 2️⃣ Smoke‑test entry point
+# ----------------------------------------------------------------------
+def _run_train_smoke_test() -> None:
+    """
+    Runs a *single* optimization step on synthetic data.
+    Useful for CI pipelines or quick sanity checks inside a notebook.
+    """
+    set_global_seed(27)
+
+    device = torch.device("cpu")
+    model = InverseSchrodingerModel(
+        n_states=3,
+        hidden_dims=[64, 64],
+        device=device,
+    ).to(device)
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+
+    # Spatial grid
+    x = make_grid(-5.0, 5.0, 128, device)
+    dx = float(x[1] - x[0])
+
+    # Synthetic observations
+    rho_obs = [torch.exp(-x**2).squeeze() for _ in range(3)]
+    E_obs = torch.tensor([0.5, 1.5, 2.5], device=device)
+
+    lambdas = {"data": 1.0, "physics": 1.0, "smooth": 1e-2}
+
+    optimizer.zero_grad()
+    loss = train_step(model, x, dx, rho_obs, E_obs, lambdas)
+    loss.backward()
+    optimizer.step()
+
+    print("✔️ train.py smoke test - loss after one step:", float(loss))
+
+def main() -> None:
+    """Entry point for ``python -m src.train`` -> runs the smoke test."""
+    _run_train_smoke_test()
+
+if __name__ == "__main__":
+    main()
