@@ -24,6 +24,7 @@ __all__: list[str] = [
     "tise_residual",
     "tise_loss",
     "potential_smoothness_loss",
+    "wavefunction_normalization_loss",
 ]
 
 # ----------------------------------------------------------------------
@@ -65,7 +66,7 @@ def tise_residual(
 
     # Assemble the residual term-by-term.
     kinetic = -0.5 * (hbar**2 / mass) * psi_xx
-    potential =V_theta * psi_theta
+    potential = V_theta * psi_theta
     rhs = E_theta * psi_theta
 
     return kinetic + potential - rhs
@@ -118,7 +119,7 @@ def potential_smoothness_loss(
     Parameters
     ----------
     V_theta : torch.Tensor, shape ``(N, 1)``
-        Potential function tensor ``V(x)``
+        Potential function tensor ``V(x)``.
     dx : float
         Grid spacing.
     eps : float, default: 1e-6
@@ -131,6 +132,31 @@ def potential_smoothness_loss(
     """
     V_xx = second_derivative(V_theta, dx)
     return torch.mean((V_xx**2) / (eps + V_theta**2))
+
+def wavefunction_normalization_loss(
+    multi_psi_theta: List[torch.Tensor],
+    dx: float,
+) -> torch.Tensor:
+    """
+    Enforces quantum mechanical normalization for each learned eigenstate.
+
+    Parameters
+    ----------
+    multi_psi_theta : List[torch.Tensor], each has shape ``(N,1)``
+        List of  wavefunction tensors ``[psi_theta_0, psi_theta_1, ... ]``.
+    dx :float
+        Grid spacing.
+
+    Returns
+    -------
+    torch.Tensor (scalar)
+        Normalization penalty
+    """
+    norms = [
+        torch.sum(psi**2) * dx
+        for psi in multi_psi_theta
+    ]
+    return torch.mean((torch.stack(norms) - 1.0) ** 2)
 
 # ----------------------------------------------------------------------
 # 2️⃣ Smoke‑test entry point
@@ -160,11 +186,13 @@ def _run_physics_smoke_test() -> None:
     res0 = tise_residual(psi0, V, energies[0], dx)
     loss_tise = tise_loss([psi0, psi1], V, energies, dx)
     loss_smooth = potential_smoothness_loss(V, dx)
+    loss_norm = wavefunction_normalization_loss([psi0, psi1], dx)
 
     print("✔️ physics.py smoke test:")
-    print(f"  residual shape    : {res0.shape}")
-    print(f"  tise loss         : {loss_tise.item():.6f}")
-    print(f"  smoothness loss   : {loss_smooth.item():.6f}")
+    print(f"  residual shape     : {res0.shape}")
+    print(f"  tise loss          : {loss_tise.item():.6f}")
+    print(f"  smoothness loss    : {loss_smooth.item():.6f}")
+    print(f"  normalization loss : {loss_norm.item():.6f}")
 
 def main() -> None:
     """
