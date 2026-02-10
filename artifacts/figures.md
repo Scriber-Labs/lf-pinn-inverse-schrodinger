@@ -43,9 +43,11 @@
 ---
 
 ## Figure 3 - Learned Wavefunctions $\psi_n^\theta(x)$ vs. Ground Truth Wavefunctions $\psi_n(x)$ (Harmonic Oscillator)
-
+![Learned Wavefunctions](demo_visuals/learned_wavefunctions.png)
 
 ### 🏡 Take-Home Messages
-- **Phase ambiguity**
-- **Shape consistency**
-- **Node structure**
+- **Phase ambiguity:** overall sign may flip 
+- **Shape consistency:** learned curves retain the same envelope
+- **Node structure:** zeros line up with the true wavefunctions.
+
+---
