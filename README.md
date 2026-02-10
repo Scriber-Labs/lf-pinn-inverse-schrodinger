@@ -59,20 +59,15 @@ Orthogonality
 - However, our POD function (`src/pod.py`) allows us to _diagnose_ orthogonality.
 
 ---
-## Loss Function
-- [ ] Condense this section into a table.
+## 📉 Loss Function
 
-### TISE Residual
-$$\mathcal{L}_\text{TISE}=\Bigg<\bigg(-\frac{\hbar^2}{2m}\psi_n''(x)+V(x)\psi_n(x)-E_n\psi_n(x)\bigg)^2\Bigg>$$
-
-### Scale-Aware Smoothness
-$$\mathcal{L}_\text{smooth}=\Bigg<\frac{|V''(x)|^2}{\epsilon + |V(x)|^2}\Bigg>$$
-
-### Data Mismatch (Noisy Observations)
-$$\mathcal{L}_\text{data} = \sum _n {\Big|\Big| E_n - E_n^\text{obs} \Big|\Big|^2 + \Big|\Big| \Big( |{\psi_\theta}_n |^2 - \rho_n^\text{obs} \Big)}\Big|\Big|^2 $$
-
-### Total Loss
-$$\mathcal{L}_\text{total}=\lambda_\text{data}\mathcal{L}_\text{data}+\lambda_\text{phys}\mathcal{L}_\text{TISE}+\lambda_\text{smooth}\mathcal{L}_\text{smooth}$$
+| **Loss Term** | **Formulation**                                                                                                                                                                | **Soft vs. Hard**                            | **Type**                     | **Comments** |
+| ------------- |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|------------------------------| ------------ |
+| **Schrodinger residual (physics loss)** | $$\mathcal{L}_\text{TISE} = \sum_n{\Big\| -\frac{\hbar^2}{2m}\frac{\partial^2}{\partial x^2}\psi_n^\theta + V_\theta(x)\psi_n^\theta(x)-E_n^\theta\psi_n^\theta(x) \Big\|^2}$$ | soft                                         | Consistency condition        | Enforces the TISE. |
+| **Wavefunction normalization loss** | $$ \mathcal{L}_\text{norm} = \frac{1}{N}\sum_{n=1}^N{\bigg(\int{\|\psi^\theta_n(x)\|^2dx} - 1\bigg)^2}$$                                                                       | ❓                                            | ❓                            | ❓ 
+| **Scale-aware smoothness** | $$ \mathcal{L}_\text{smooth} = \Big< \frac{\| V_\theta''(x)\| ^2}{\epsilon + \|V_\theta(x)\|^2}\Big> $$                                                                        | soft | Regularizer | Penalize steep curvature in $V_\theta(x)$. Encourages physically plausible potentials and controls the ill-posedness of the inverse problem. |
+| **Data mismatch (obervables)** | $$ \mathcal{L}_\text{data} = \sum_n{\|E_n^\theta-E_n^\text{obs}\|^2 +  \|\|\psi_n^\theta(x)\|^2 - \rho_n^\text{obs}(x)\|^2} $$ | soft (in the sense of measurement noise)  | Consistency condition | Ensures the learned eigenstates match noisy observations. |
+| **Total Loss** | $$ \mathcal{L}_\text{total} = \lambda_\text{TISE}\mathcal{L}_\text{TISE} + \lambda_\text{norm}\mathcal{L}_\text{norm} + \lambda_\text{smooth}\mathcal{L}_\text{smooth} + \lambda_\text{data}\mathcal{L}_\text{data} $$ | ❓ | ❓ | ❓ |
 
 ---
 ## Proper Orthogonal Decomposition (POD)
