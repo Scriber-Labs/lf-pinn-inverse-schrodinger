@@ -6,7 +6,7 @@
 This project extends the `lf-pinn-harmonic-oscillator` framework to an inverse quantum problem.
 While project 1 investigated the robustness  of physics-informed neural networks (PINNs) under low fidelity discretization for a *known Hamiltonian*, this project is concerned with the information about an *unknown potential* that can be recovered from partial, noisy observations of quantum states.
 
-Using the time-independent Schrodinger equation (TISE) as a hard physics constraint, we treat the potential $V(x)$ as a learnable function while wavefunctions act as auxiliary fields constrained by the PDE. The model is trained using noisy spectral data and probability densities, mimicking low-fidelity experimental measurements.
+Using the time-independent Schrodinger equation (TISE) as a physics constraint, we treat the potential $V(x)$ as a learnable function while wavefunctions act as auxiliary fields constrained by the PDE. The model is trained using noisy spectral data and probability densities, mimicking low-fidelity experimental measurements.
 
 As with project 1, the goal is not high-precision reconstruction, but interpretability and identifability.
 
@@ -20,7 +20,7 @@ inverse-piml-schrodinger/
 ├── requirements.txt
 ├── pyproject.toml
 ├── src/
-│   ├── model.py          # neural network ansatz for V(x)
+│   ├── model.py          # neural network ansatz for V_theta(x)
 │   ├── physics.py        # TISE residual, data mismatch, scale-aware smoothness
 │   ├── inverse.py        # inverse-specific losses
 │   ├── pod.py            # POD decomposition + reconstruction
