@@ -379,8 +379,8 @@ def plot_energy_spectrum(
     _apply_style()
 
     # Softer color pairs for better balance: warm reds to cool purples, greens to warm yellows
-    true_col_1, true_col_2 = "#D9534F", "#9B59B6"
-    learn_col_1, learn_col_2 = "#F653A6", "#3EB489"
+    true_col_1, true_col_2 =  "#FF0090", "#E52B50"
+    learn_col_1, learn_col_2 = "#03C03C", "#39FF14"
 
     # Ensure we are working with CPU NumPy arrays -> no gradient tracking
     E_true_np = E_true.detach().cpu().numpy()
