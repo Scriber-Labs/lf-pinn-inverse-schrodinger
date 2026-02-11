@@ -17,6 +17,7 @@ import pathlib
 from typing import Dict, List, Sequence, Tuple
 
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import numpy as np
 import torch
 
@@ -343,7 +344,8 @@ def plot_energy_spectrum(
     """
     _apply_style()
 
-    true_col, learn_col = "#E52B50", "#39FF14"
+    true_col_1, learn_col_1 = "#E52B50", "#39FF14"
+    true_col_2, learn_col_2 = "#DA2C43", "#0BDA51"
 
     # Ensure we are working with CPU NumPy arrays -> no gradient tracking
     E_true_np = E_true.detach().cpu().numpy()
@@ -366,20 +368,31 @@ def plot_energy_spectrum(
         zorder=0  # Place grid behind bars
     )
 
-    ax.bar(
-        indices - 0.15,
-        E_true_np,
-        width=0.3,
-        label="True",
-        color=true_col,
-    )
-    ax.bar(
-        indices + 0.15,
-        E_learn_np,
-        width=0.3,
-        label="Learned",
-        color=learn_col,
-    )
+    # Create gradient colormaps: red→purple for true, green→blue for learned
+    true_cmap = mcolors.LinearSegmentedColormap.from_list("true_grad", [true_col_2, true_col_1, ])
+    learn_cmap = mcolors.LinearSegmentedColormap.from_list("learn_grad", [learn_col_2, learn_col_1])
+    
+    # Helper function to draw a bar with gradient fill
+    def plot_gradient_bar(ax, x, height, width, cmap, label=None):
+        n_segments = 50  # Number of thin bars to simulate gradient
+        segment_height = height / n_segments
+        for i in range(n_segments):
+            color = cmap(i / (n_segments - 1)) if n_segments > 1 else cmap(0)
+            ax.bar(x, segment_height, width=width, bottom=i*segment_height, 
+                   color=color, edgecolor='none')
+        # Add label only once for the legend
+        if label:
+            ax.bar(x, height, width=width, color='none', edgecolor='none', label=label)
+    
+    # Plot true energy bars with red→purple gradient
+    for i, idx in enumerate(indices - 0.15):
+        plot_gradient_bar(ax, idx, E_true_np[i], 0.3, true_cmap, 
+                         label="True" if i == 0 else None)
+    
+    # Plot learned energy bars with green→blue gradient
+    for i, idx in enumerate(indices + 0.15):
+        plot_gradient_bar(ax, idx, E_learn_np[i], 0.3, learn_cmap, 
+                         label="Learned" if i == 0 else None)
 
     ax.set_xticks(indices)
     ax.set_xticklabels([rf"$n={i}$" for i in indices])
