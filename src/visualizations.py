@@ -391,6 +391,8 @@ def plot_energy_spectrum(
         out_path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(out_path, dpi=200, bbox_inches="tight")
 
+    return fig
+
 # ----------------------------------------------------------------------
 # 🧪 Smoke test – runs when the module is executed directly
 # ----------------------------------------------------------------------
