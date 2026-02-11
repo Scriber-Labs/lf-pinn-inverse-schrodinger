@@ -313,6 +313,84 @@ def plot_wavefunctions(
 
     return fig
 
+# ──────────────────────────────────────────────────────────────
+# 📊 4️⃣ Energy‑spectrum histogram (ground‑truth vs. learned)
+# ──────────────────────────────────────────────────────────────
+from typing import Mapping
+
+def plot_energy_spectrum(
+    E_true: torch.Tensor,
+    E_learned: torch.Tensor,
+    *,
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """
+    Bar-chart comparison of the first ``n_states`` energy levels.
+
+    Parameters
+    ----------
+    E_true : torch.Tensor
+        Ground-truth energies, shape ``(n_states,)``.
+    E_learned : torch.Tensor
+        Learned energies from ``model.E_theta()``, same shape as ``E_true``.
+    out_path : pathlib.Path | None, optional
+        Optional output path (saved as a PNG).
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        A bar chart comparing the first ``n_states`` energy levels (learned vs. ground truth).
+    """
+    _apply_style()
+
+    true_col, learn_col = "#E52B50", "#39FF14"
+
+    # Ensure we are working with CPU NumPy arrays -> no gradient tracking
+    E_true_np = E_true.detach().cpu().numpy()
+    E_learn_np = E_learned.detach().cpu().numpy()
+
+    # Indices for the spatial grid (assumes tensors are already ordered)
+    indices = np.arange(len(E_true_np))
+
+    fig, ax = plt.subplots()
+
+    # Configure grid settings
+    ax.grid(
+        visible=True,
+        which='major',
+        axis='y',
+        color='grey',
+        linestyle=':',
+        linewidth=1.0,
+        alpha=0.6,
+        zorder=0  # Place grid behind bars
+    )
+
+    ax.bar(
+        indices - 0.15,
+        E_true_np,
+        width=0.3,
+        label="True",
+        color=true_col,
+    )
+    ax.bar(
+        indices + 0.15,
+        E_learn_np,
+        width=0.3,
+        label="Learned",
+        color=learn_col,
+    )
+
+    ax.set_xticks(indices)
+    ax.set_xticklabels([rf"$n={i}$" for i in indices])
+    ax.set_ylabel(rf"Energy ($\hbar \omega_n$ units)")
+    ax.set_title("Exact vs. Learned Energy Eigenvalues")
+    ax.legend()
+
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+
 # ----------------------------------------------------------------------
 # 🧪 Smoke test – runs when the module is executed directly
 # ----------------------------------------------------------------------
@@ -371,7 +449,23 @@ def _smoke_test() -> None:
         psi_learned,
         out_path=out_dir / "wavefunctions.png",
     )
-    print(f"✔️ Smoke test complete. Figures written to {out_dir.resolve()}")
+
+    # Energy-spectrum bar plot
+    # Dummy ground truth energies (linear ladder)
+    E_true = torch.tensor([0.5, 1.5, 2.5])          # hbar*omega_n units
+    # Fake learned energies -> perturb the true values slightly
+    E_learned = E_true + 0.1 * torch.randn_like(E_true)
+
+    energy_path = out_dir / "energy.png"
+    plot_energy_spectrum(
+        E_true=E_true,
+        E_learned=E_learned,
+        out_path=energy_path,
+    )
+
+    print(
+        f"\n✅ Smoke test complete. All {len(list(out_dir.iterdir()))} figures written to {out_dir.resolve()}\n"
+    )
 
 def main() -> None:
     """Entry point for ``python -m src.visualizations`` -> runs the smoke test."""

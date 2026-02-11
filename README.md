@@ -20,12 +20,13 @@ inverse-piml-schrodinger/
 ├── requirements.txt
 ├── pyproject.toml
 ├── src/
-│   ├── model.py          # neural network ansatz for V_theta(x)
-│   ├── physics.py        # TISE residual, data mismatch, scale-aware smoothness
-│   ├── inverse.py        # inverse-specific losses
-│   ├── pod.py            # POD decomposition + reconstruction
-│   ├── train.py          # training loop and CLI
-│   └── utils.py          # helper functions (e.g., seeding and grids)
+│   ├── model.py            # neural network ansatz for V_theta(x)
+│   ├── physics.py          # TISE residual, data mismatch, scale-aware smoothness
+│   ├── inverse.py          # inverse-specific losses
+│   ├── pod.py              # POD decomposition + reconstruction
+│   ├── train.py            # training loop and CLI
+│   ├── visualizations.py   # visualization utilities (e.g., seeding and grids)
+│   └── utils.py            # helper functions (e.g., seeding and grids)
 ├── notebooks/
 │   └── demo.ipynb        # visual + narrative
 ├── references/
