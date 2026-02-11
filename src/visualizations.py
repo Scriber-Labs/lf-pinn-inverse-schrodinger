@@ -1,0 +1,316 @@
+# src/visualization.py
+"""
+🖼️ Visualization utilities for the inverse Schrödinger demo.
+
+All functions accept plain NumPy / PyTorch objects are return the matplotlib Figure they create -> they are easy to unit test and reuse from notebooks or scripts.
+
+✨ Features
+    - type-annotated
+    - emoji section dividers for readability
+    - list-comprehensions wherever relevant
+    - a minimal smoke-test
+"""
+
+from __future__ import annotations
+
+import pathlib
+from typing import Dict, List, Sequence, Tuple
+
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+
+# ----------------------------------------------------------------------
+# 🌍 Global style helper
+# ----------------------------------------------------------------------
+def _apply_style() -> None:
+    """Set the global rcParams used throughout the module."""
+    plt.rcParams.update(
+        {
+            "figure.figsize": (9, 5),
+            "figure.dpi": 120,
+            "font.size": 12,
+            "axes.labelsize": 13,
+            "axes.titlesize": 14,
+            "legend.fontsize": 11,
+            "lines.linewidth": 2,
+        }
+    )
+
+# ----------------------------------------------------------------------
+# 📊 1️⃣ Training Curves
+# ----------------------------------------------------------------------
+def plot_loss_history(
+        epochs: Sequence[int],
+        total: Sequence[float],
+        physics: Sequence[float],
+        norm: Sequence[float],
+        smooth: Sequence[float],
+        data: Sequence[float],
+        lambdas: Dict[str, float],
+        out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """
+    Render a log-scale line plot of all loss components.
+
+    Parameters
+    ----------
+    epochs : Sequence[int]
+        Epoch numbers (usually ``range(1, N+1)``).
+    total, physics, data, smooth, norm : Sequence[float]
+        Per-epoch scalar losses.
+    lambdas : dict[str, float]
+        Mapping ``{'data':..., `physics`:..., `smooth`:..., `norm`:...}``.
+    out_path : Path or None (optional)
+        If provided, the figure is saved to this path location (PNG).
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        A 2x2 figure containing the log-scale training curves for each individual loss term.
+    """
+    _apply_style()
+
+    # 🎨 color / label mapping (list comprehension keeps it tidy)
+    comps: List[Tuple[str, str, Sequence[float]]] = [
+        ("Total", "#8000FF", total),
+        ("Physics", "#007FFF", physics),
+        ("Norm", "#0FFFFF", norm),
+        ("Smoothness", "#39FF14", smooth),
+        ("Data-fit", "#E52B50", data),
+    ]
+
+    fig, ax = plt.subplots()
+    for label, color, series in comps:
+        ax.plot(epochs, series, label=label, color=color)
+
+    ax.set_yscale("log")
+    ax.set_xlabel("Epoch")
+    ax.set_ylabel("Loss")
+    ax.set_title("Training loss components")
+    ax.grid(True, which="both", alpha=0.2)
+    ax.legend()
+
+    # ⚖️ lambda-annotation box (compact, right-bottom)
+    lambda_box = "\n".join(rf"$\lambda_{k} = {v}$" for k, v in lambdas.items())
+    ax.text(
+        0.98,
+        0.02,
+        lambda_box,
+        transform=ax.transAxes,
+        fontsize=10,
+        ha="right",
+        va="bottom",
+        bbox=dict(edgecolor="gray", alpha=0.7),
+    )
+
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+
+    return fig
+
+# ----------------------------------------------------------------------
+# 🌠 2️⃣ Potential plot (true vs. learned)
+# ----------------------------------------------------------------------
+def plot_potential(
+    x: torch.Tensor,
+    V_true: torch.Tensor,
+    V_learned: torch.Tensor,
+    lambdas: Dict[str, float],
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """
+    Plot the analytic potential and the network's prediction.
+
+    All tensors are expected to be a 1-D (shape ``(N,)``) and on CPU
+    """
+    _apply_style()
+
+    # Ensure everything is on the CPU and NumPy for Matplotlib
+    x_np = x.squeeze().cpu().numpy()
+    Vt_np = V_true.squeeze().cpu().numpy()
+    Vl_np = V_learned.squeeze().cpu().numpy()
+
+    fig, ax = plt.subplots()
+    ax.plot(x_np, Vt_np, label=r"True $V(x)$", color="#E52B50", linewidth=4)
+    ax.plot(
+        x_np,
+        Vl_np,
+        label=r"$V_\theta(x)$",
+        color="#39FF14",
+        linewidth=4,
+        ls="--",
+    )
+    # domain shapes
+    for edge in (x_np.min(), x_np.max()):
+        ax.axvline(edge, color="#A9A9A9", lw=3, ls=":", alpha=0.6)
+
+    ax.set_xlabel(r"$x$")
+    ax.set_ylabel(r"$V$")
+    ax.set_title("Learned vs. Ground Truth Potential")
+    ax.grid(True, which="both", alpha=0.2)
+    ax.legend()
+
+    # lambda container (re-use same formatting)
+    lambda_box = "\n".join(rf"$\lambda_{k} = {v}$" for k, v in lambdas.items())
+    ax.text(
+        0.98,
+        0.02,
+        lambda_box,
+        transform=ax.transAxes,
+        fontsize=10,
+        ha="left",
+        va="bottom",
+        bbox=dict(edgecolor="gray", alpha=1.0)
+    )
+
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+
+    return fig
+
+# ----------------------------------------------------------------------
+# 🔱 3️⃣ Wave‑function comparison
+# ----------------------------------------------------------------------
+def plot_wavefunctions(
+    x: torch.Tensor,
+    psi_true: Sequence[torch.Tensor],
+    psi_learned: Sequence[torch.Tensor],
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """
+    Side-by-side plot of each eigenmode (learned vs. ground truth)
+
+    Parameters
+    ----------
+    x : torch.Tensor
+        1-D tensor of spatial coordinates.
+    psi_true, psi_learned : Sequence[torch.Tensor]
+        Iterables of 1-D tensors, length = number of modes.
+    out_path : pathlib.Path | None
+        Optional output path.
+    Returns
+    -------
+    matplotlib.figure.Figure
+        A 1x3 figure whose subplots compare the learned vs. ground truth wavefunctions for the first three eigenmodes.
+    """
+    _apply_style()
+
+    n_modes = len(psi_true)
+    fig, axes = plt.subplots(
+        1,
+        n_modes,
+        figsize=(15, 4),
+        sharey=True,
+        constrained_layout=True,
+    )
+    # If there is only one mode, ``axes`` is not a list -> wrap it.
+    if n_modes == 1:
+        axes = [axes]
+
+    x_np = x.squeeze().cpu().numpy()
+    true_col, learn_col = "#E52B50", "#39FF14"
+
+    for idx, (ax, pt, pl) in enumerate(
+        zip(axes, psi_true, psi_learned)
+    ):
+        ax.plot(
+            x_np,
+            pt.squeeze().cpu().numpy(),
+            label=rf"True $\psi_{idx}(x)$",
+            color=true_col,
+            linewidth=4,
+        )
+        ax.plot(
+            x_np,
+            pl.squeeze().cpu().numpy(),
+            label=rf"Learned $\psi_{idx}^\theta(x)$",
+            color=learn_col,
+            ls="--",
+            linewidth=4,
+        )
+        ax.set_xlabel(r"$x$")
+        ax.set_title(rf"Mode $n={idx}$")
+        ax.grid(True, which="both", alpha=0.2)
+        ax.legend(fontsize=9, loc="upper right")
+
+    axes[0].set_ylabel(r"$\psi(x)$")
+    fig.suptitle(
+        f"Learned vs. Ground Truth Wavefunctions ( {n_modes} modes)",
+        fontsize=16,
+    )
+
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+
+    return fig
+
+# ----------------------------------------------------------------------
+# 🧪 Smoke test – runs when the module is executed directly
+# ----------------------------------------------------------------------
+def _smoke_test() -> None:
+    """Generate dummy data and produce all figures."""
+    torch.manual_seed(27)
+
+    # Dummy grid
+    N = 128
+    x = torch.linspace(-5.0, 5.0, N)
+
+    # Fake potentials
+    V_true = 0.5 * x**2
+    V_learned = V_true + 0.2 * torch.randn_like(V_true)
+
+    # Fake eigenfunctions (sinusoidal basis)
+    psi_true = [torch.sin((i + 1) * x) for i in range(3)]
+    psi_learned = [
+        pt + 0.1 * torch.randn_like(pt) for pt in psi_true
+    ]
+
+    # Dummy loss histories (exponential and decay noise)
+    epochs = list(range(1, 101))
+    total = np.exp(-0.03 * np.arange(100)) + 0.02 * np.random.rand(100)
+    physics = np.exp(-0.025 * np.arange(100)) + 0.015 * np.random.rand(100)
+    norm = np.exp(-0.04 * np.arange(100)) + 0.008 * np.random.rand(100)
+    smooth = np.exp(-0.02 * np.arange(100)) + 0.005 * np.random.rand(100)
+    data = np.exp(-0.035 * np.arange(100)) + 0.01 * np.random.rand(100)
+
+    lambdas = {"data": 1.0, "physics": 1.0, "smooth": 1e-2, "norm": 10}
+
+    # Produce figures in a temporary folder
+    out_dir = pathlib.Path("./_smoke_outputs")
+    out_dir.mkdir(exist_ok=True)
+
+    plot_loss_history(
+        epochs,
+        total,
+        physics,
+        norm,
+        smooth,
+        data,
+        lambdas,
+        out_path=out_dir / "loss_history.png",
+    )
+    plot_potential(
+        x,
+        V_true,
+        V_learned,
+        lambdas,
+        out_path=out_dir / "potential.png",
+    )
+    plot_wavefunctions(
+        x,
+        psi_true,
+        psi_learned,
+        out_path=out_dir / "wavefunctions.png",
+    )
+    print(f"✔️ Smoke test complete. Figures written to {out_dir.resolve()}")
+
+def main() -> None:
+    """Entry point for ``python -m src.visualizations`` -> runs the smoke test."""
+    _smoke_test()
+
+if __name__ == "__main__":
+    main()
