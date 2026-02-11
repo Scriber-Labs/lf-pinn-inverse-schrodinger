@@ -39,6 +39,40 @@ def _apply_style() -> None:
     )
 
 # ----------------------------------------------------------------------
+# ✨ Helper: gradient bar plotting
+# ----------------------------------------------------------------------
+def _plot_gradient_bar(ax, x, height, width, cmap, label=None):
+    """
+    Draw a bar with a smooth gradient fill (lighter at bottom, darker at top).
+    
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes to draw the bar on.
+    x : float
+        The x-position of the bar.
+    height : float
+        The height (value) of the bar.
+    width : float
+        The width of the bar.
+    cmap : matplotlib.colors.Colormap
+        The colormap to use for the gradient.
+    label : str, optional
+        Legend label (only used once per bar group).
+    """
+    n_segments = 50  # Number of thin bars to simulate gradient
+    segment_height = height / n_segments
+    for i in range(n_segments):
+        # Reverse the color index so lighter colors are at bottom (i=0) and darker at top
+        color = cmap(1 - i / (n_segments - 1)) if n_segments > 1 else cmap(1)
+        ax.bar(x, segment_height, width=width, bottom=i*segment_height, 
+               color=color, edgecolor='none')
+    # Add label to legend using a proxy artist (a visible patch)
+    if label:
+        from matplotlib.patches import Patch
+        ax.patches[-1].set_label(label)
+
+# ----------------------------------------------------------------------
 # ✨ Helper: horizontal lambdas‑row (figure‑level)
 # ----------------------------------------------------------------------
 def _add_lambda_row(
@@ -344,8 +378,9 @@ def plot_energy_spectrum(
     """
     _apply_style()
 
-    true_col_1, learn_col_1 = "#E52B50", "#39FF14"
-    true_col_2, learn_col_2 = "#DA2C43", "#0BDA51"
+    # Softer color pairs for better balance: warm reds to cool purples, greens to warm yellows
+    true_col_1, true_col_2 = "#D9534F", "#9B59B6"
+    learn_col_1, learn_col_2 = "#5CB85C", "#F0AD4E"
 
     # Ensure we are working with CPU NumPy arrays -> no gradient tracking
     E_true_np = E_true.detach().cpu().numpy()
@@ -368,37 +403,32 @@ def plot_energy_spectrum(
         zorder=0  # Place grid behind bars
     )
 
-    # Create gradient colormaps: red→purple for true, green→blue for learned
-    true_cmap = mcolors.LinearSegmentedColormap.from_list("true_grad", [true_col_2, true_col_1, ])
-    learn_cmap = mcolors.LinearSegmentedColormap.from_list("learn_grad", [learn_col_2, learn_col_1])
+    # Create gradient colormaps with balanced colors
+    true_cmap = mcolors.LinearSegmentedColormap.from_list("true_grad", [true_col_1, true_col_2])
+    learn_cmap = mcolors.LinearSegmentedColormap.from_list("learn_grad", [learn_col_1, learn_col_2])
     
-    # Helper function to draw a bar with gradient fill
-    def plot_gradient_bar(ax, x, height, width, cmap, label=None):
-        n_segments = 50  # Number of thin bars to simulate gradient
-        segment_height = height / n_segments
-        for i in range(n_segments):
-            color = cmap(i / (n_segments - 1)) if n_segments > 1 else cmap(0)
-            ax.bar(x, segment_height, width=width, bottom=i*segment_height, 
-                   color=color, edgecolor='none')
-        # Add label only once for the legend
-        if label:
-            ax.bar(x, height, width=width, color='none', edgecolor='none', label=label)
-    
-    # Plot true energy bars with red→purple gradient
+    # Plot true energy bars with gradient
     for i, idx in enumerate(indices - 0.15):
-        plot_gradient_bar(ax, idx, E_true_np[i], 0.3, true_cmap, 
-                         label="True" if i == 0 else None)
+        _plot_gradient_bar(ax, idx, E_true_np[i], 0.3, true_cmap, 
+                          label="True" if i == 0 else None)
     
-    # Plot learned energy bars with green→blue gradient
+    # Plot learned energy bars with gradient
     for i, idx in enumerate(indices + 0.15):
-        plot_gradient_bar(ax, idx, E_learn_np[i], 0.3, learn_cmap, 
-                         label="Learned" if i == 0 else None)
+        _plot_gradient_bar(ax, idx, E_learn_np[i], 0.3, learn_cmap, 
+                          label="Learned" if i == 0 else None)
 
     ax.set_xticks(indices)
     ax.set_xticklabels([rf"$n={i}$" for i in indices])
     ax.set_ylabel(rf"Energy ($\hbar \omega_n$ units)")
     ax.set_title("Exact vs. Learned Energy Eigenvalues")
-    ax.legend()
+    
+    # Create custom legend patches
+    from matplotlib.patches import Patch
+    legend_patches = [
+        Patch(facecolor=true_col_1, edgecolor='black', label='True'),
+        Patch(facecolor=learn_col_1, edgecolor='black', label='Learned')
+    ]
+    ax.legend(handles=legend_patches)
 
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
