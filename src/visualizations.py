@@ -159,7 +159,7 @@ def _add_lambda_row(
 
 
 # ----------------------------------------------------------------------
-# 📊 1️⃣ Training Curves
+#🩵 1️⃣ Training Curves
 # ----------------------------------------------------------------------
 def plot_loss_history(
         epochs: Sequence[int],
@@ -348,9 +348,9 @@ def plot_wavefunctions(
 
     return fig
 
-# ──────────────────────────────────────────────────────────────
-# 📊 4️⃣ Energy‑spectrum histogram (ground‑truth vs. learned)
-# ──────────────────────────────────────────────────────────────
+# ----------------------------------------------------------------------
+# 🔷 4️⃣ Energy‑spectrum histogram (ground‑truth vs. learned)
+# ----------------------------------------------------------------------
 from typing import Mapping
 
 def plot_energy_spectrum(
@@ -430,6 +430,115 @@ def plot_energy_spectrum(
     ]
     ax.legend(handles=legend_patches)
 
+    # ------------------------------------------------------------------
+    # 🗃 Save if requested
+    # ------------------------------------------------------------------
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+
+    return fig
+
+# ----------------------------------------------------------------------
+# 🫟 5️⃣ Probability‑density comparison (|ps_theta_n|^2 vs. rho_obs_n)
+# ----------------------------------------------------------------------
+def plot_density_vs_observed(
+    x: torch.Tensor,
+        psi_learned: Sequence[torch.Tensor],
+        rho_obs: Sequence[torch.Tensor],
+        *,
+        lambdas: Dict[str, float] | None = None,
+        out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """
+    Plot the learned probability densities |psi_theta_n(x)|^2 alongside the observed densities rho_obs_n(x) for each mode n.
+
+    Parameters
+    ----------
+    x : torch.Tensor
+        1-D spatial grid, shape ``(n_modes,)``.
+    psi_learned : Sequence[torch.Tensor]
+        Learned wavefunctions psi_theta_n(x). Each tensor must be 1-D of length ``n_modes``.
+    rho_obs : Sequence[torch.Tensor]
+        Corresponding observed probability densities rho_obs_n(x). Same shape as ``psi_learned``.
+    lambdas : Dict[str, float] | None, optional
+        If supplied, the loss-weight row will be added below the title.
+    out_path : pathlib.Path | None, optional
+        Destination path (saved as a PNG). If ``None``, the figure is only returned.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        Probability density comparison (|psi_theta_n(x)|^2 vs. rho_obs_n(x)).
+    """
+    _apply_style()
+
+    # ------------------------------------------------------------------
+    # 🤯 Sanity checks (will raise early if shapes mismatch)
+    # ------------------------------------------------------------------
+    n_modes = len(psi_learned)
+    assert n_modes == len(rho_obs), "❌ Mismatched number of modes."
+    # Convert the grid once -> everything else will be Numpy for Matplotlib
+    x_np = x.squeeze().cpu().numpy()
+
+    # ------------------------------------------------------------------
+    # 🖼️ Create a subplot for each mode (1 × n_modes)
+    # ------------------------------------------------------------------
+    fig, axes = plt.subplots(
+        1,
+        n_modes,
+        figsize=(max(5 * n_modes, 12), 4),    # wider for more modes
+        sharey=True,
+        constrained_layout=True,
+    )
+    if n_modes == 1:
+        axes = [axes]    # make the iterator uniform
+
+    psi_theta_col, rho_obs_col = "#3EB489", "#FF8200"
+
+    for idx, (ax, psi, rho) in enumerate(
+        zip(axes, psi_learned, rho_obs),
+    ):
+        # |psi|^2 -> detach, move to CPU, and square element-wise
+        prob_density = (psi.squeeze().detach().cpu() ** 2).numpy()
+        obs_density  = rho.squeeze().detach().cpu().numpy()
+
+        ax.plot(
+            x_np,
+            obs_density,
+            label=r"Observed $\rho_n^{\text{obs}}(x)$",
+            color=rho_obs_col,
+            linewidth=4,
+        )
+        ax.plot(
+            x_np,
+            prob_density,
+            label=r"$|\psi_n^{\theta}(x)|^2$",
+            color=psi_theta_col,
+            linewidth=4,
+            ls="--",
+        )
+        ax.set_xlabel(r"$x$")
+        ax.set_title(rf"Mode $n={idx}$")
+        ax.grid(True, which="both", alpha=0.2)
+        ax.legend(fontsize=9, loc="upper right")
+
+    axes[0].set_ylabel(r"Probability density")
+
+    fig.suptitle(
+        "Learned vs. Observed Probability Densities",
+        fontsize=16,
+    )
+
+    # ------------------------------------------------------------------
+    # ⚖️Optional row of loss weights
+    # ------------------------------------------------------------------
+    if lambdas is not None:
+        _add_lambda_row(fig, lambdas, ax=axes[0])   # any axis works for reference
+
+    # ------------------------------------------------------------------
+    # 🗃️ Save if requested
+    # ------------------------------------------------------------------
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(out_path, dpi=200, bbox_inches="tight")
@@ -506,6 +615,21 @@ def _smoke_test() -> None:
         E_true=E_true,
         E_learned=E_learned,
         out_path=energy_path,
+    )
+
+    # Probability‑density comparison (dummy data)
+    # Fake observed densities -> noisy version of |psi|^2
+    rho_obs = [
+        (pt.squeeze() ** 2 + 0.02 * torch.rand_like(pt.squeeze())) for pt in psi_true
+    ]
+
+    density_path = out_dir / "density_vs_observed.png"
+    plot_density_vs_observed(
+        x=x,
+        psi_learned=psi_learned,    # from the earlier dummy wavefunctions
+        rho_obs=rho_obs,
+        lambdas=lambdas,            # optional -> omit if you don't want loss terms to render on probability density plot
+        out_path=density_path,
     )
 
     print(
