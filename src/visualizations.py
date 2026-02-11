@@ -38,6 +38,92 @@ def _apply_style() -> None:
     )
 
 # ----------------------------------------------------------------------
+# ✨ Helper: horizontal lambdas‑row (figure‑level)
+# ----------------------------------------------------------------------
+def _add_lambda_row(
+        fig: plt.Figure,
+        lambdas: Dict[str, float],
+        *,
+        ax: plt.Axes | None = None,
+) -> None:
+    """
+    Render the loss-weight dictionary as a single horizontal row.
+    The row is placed **just below the title** (if it exists):
+
+    - If the figure has ``suptitle`` -> below that.
+    - Else if an ``ax`` is supplied (or can be inferred) -> below the Axes title.
+    - Otherwise fall back to safe default near the top of the canvas.
+
+    Parameters
+    ----------
+    fig : matplotlib Figure
+        The figure on which the annotation the loss weights will be rendered.
+    lambdas : dict[str, float]
+        Mapping of loss-weight names -> numeric values.
+    ax : matplotlib.axes.Axes, optional
+        The axes whose title should be used as a reference point.
+        If omitted, the function will try to locate the first Axes in ``fig.axes`.
+    """
+    # Build the formatted string of loss weights (four spaces between entries)
+    lambda_str = "    ".join(
+        rf"$\lambda_{{{k}}} = {v:g}$" for k, v in lambdas.items()
+    )
+
+    # Determine where the suptitle lives (if it exists)
+    # ``fig._suptitle`` is the Text object created by ``fig.suptitle``.
+    # It may be ``None`` if the user never called a ``suptitle``.
+    suptitle = getattr(fig, "_suptitle", None)
+
+    if suptitle is not None:
+        # Get the title's *figure* coordinates (x, y) - y is near 0.98.
+        _, title_y = suptitle.get_position()
+        # Pull the text down by a modest amount (approximately 5% of the figure height).
+        # The factor 0.05 works well for the default 9x5 inch canvas.
+        lambda_y = title_y - 0.05
+    else:
+        # No suptitle -> fall back to an Axes title (most of the plots in this module use ax.set_title)
+        # If the caller supplied an Axes, use it; otherwise grab the first one.
+        if ax is None:
+            if fig.axes:
+                ax = fig.axes[0]        # first Axes in the figure
+            else:
+                # No Axes at all -> use a generic safe default
+                lambda_y = 0.94
+                fig.text(
+                    0.5,
+                    lambda_y,
+                    lambda_str,
+                    ha="center",
+                    va="center",
+                    fontsize=11,
+                    color="black",
+                    bbox=dict(facecolor="white", edgecolor="grey", alpha=0.85, pad=3.0),
+                    transform=fig.transFigure,
+                )
+            return
+
+        # Convert the Axes bounding box to figure coordinates
+        # ``ax.get_position()`` returns a Bbox in *figure* coordinates already.
+        bbox = ax.get_position()
+        # ``box.y1`` is the top edge of the Axes (0-1 in figure space)
+        # Pull the text down by a small fraction for the figure height.
+        lambda_y = bbox.y1 - 0.03   # 3% of figure height works well for 9x5
+
+    # Draw the annotation
+    fig.text(
+        0.5,
+        lambda_y,
+        lambda_str,
+        ha="center",
+        va="center",
+        fontsize=11,
+        color="black",
+        bbox=dict(facecolor="white", edgecolor="gray", alpha=0.85, pad=3.0),
+        transform=fig.transFigure,
+    )
+
+
+# ----------------------------------------------------------------------
 # 📊 1️⃣ Training Curves
 # ----------------------------------------------------------------------
 def plot_loss_history(
@@ -91,18 +177,8 @@ def plot_loss_history(
     ax.grid(True, which="both", alpha=0.2)
     ax.legend()
 
-    # ⚖️ lambda-annotation box (compact, right-bottom)
-    lambda_box = "\n".join(rf"$\lambda_{k} = {v}$" for k, v in lambdas.items())
-    ax.text(
-        0.98,
-        0.02,
-        lambda_box,
-        transform=ax.transAxes,
-        fontsize=10,
-        ha="right",
-        va="bottom",
-        bbox=dict(edgecolor="gray", alpha=0.7),
-    )
+    # ⚖️ Horizontal lambdas row
+    _add_lambda_row(fig, lambdas, ax=ax)
 
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -150,20 +226,9 @@ def plot_potential(
     ax.set_ylabel(r"$V$")
     ax.set_title("Learned vs. Ground Truth Potential")
     ax.grid(True, which="both", alpha=0.2)
-    ax.legend()
+    ax.legend(loc="center")
 
-    # lambda container (re-use same formatting)
-    lambda_box = "\n".join(rf"$\lambda_{k} = {v}$" for k, v in lambdas.items())
-    ax.text(
-        0.98,
-        0.02,
-        lambda_box,
-        transform=ax.transAxes,
-        fontsize=10,
-        ha="left",
-        va="bottom",
-        bbox=dict(edgecolor="gray", alpha=1.0)
-    )
+    _add_lambda_row(fig, lambdas, ax=ax)
 
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
