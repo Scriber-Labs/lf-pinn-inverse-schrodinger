@@ -546,6 +546,49 @@ def plot_density_vs_observed(
     return fig
 
 # ----------------------------------------------------------------------
+# 🗺️6️⃣ Overlap matrix heatmap (POD diagnostic)
+# ----------------------------------------------------------------------
+def plot_overlap_heatmap(
+    psi_theta: Sequence[torch.Tensor],
+    *,
+    dx: float | None = None,
+    lambdas: Dict[str, float] | None = None,
+    cmap: str = "cool",
+    fmt: str = ".2f",
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """
+    Render a heat map of the overlap matrix <psi_theta_m | psi_theta_n>.
+
+    Parameters
+    ----------
+    psi_theta : Sequence[torch.Tensor]
+        Learned wavefunctions, each 1-D with the same length. The function will stack them into a (n_modes, N) matrix.
+    dx : float | None, optional
+        Grid spacing. If ``None`` the function infers it from teh first wavefunction (assumes uniform grid). This hidden assumption is removed if `dx` is provided explicitly.
+    lambdas : Dict[str, float] | None, optional
+        Optional string with loss weights to be displayed on the figure.
+    cmap, fmt, out_path : str
+        Color map, print settings for inputs values, and output path.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        Overlap matrix heatmap -> POD diagnostic.
+    """
+    _apply_style()
+
+    # ------------------------------------------------------------------
+    # 1️⃣ Stack and normalise the wavefunctions
+    # ------------------------------------------------------------------
+    psi_mat = torch.stack([p.squeeze().detach().cpu() for p in psi_theta])  # (n_modes, N)
+
+    # ------------------------------------------------------------------
+    # 2️⃣ Determine dx (explicit argument preferred)
+    # ------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------
 # 🧪 Smoke test – runs when the module is executed directly
 # ----------------------------------------------------------------------
 def _smoke_test() -> None:
