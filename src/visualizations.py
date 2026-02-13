@@ -578,15 +578,57 @@ def plot_overlap_heatmap(
     """
     _apply_style()
 
+    n_modes = len(psi_theta)
     # ------------------------------------------------------------------
     # 1️⃣ Stack and normalise the wavefunctions
     # ------------------------------------------------------------------
-    psi_mat = torch.stack([p.squeeze().detach().cpu() for p in psi_theta])  # (n_modes, N)
+    psi_theta_mat = torch.stack([p.squeeze().detach().cpu() for p in psi_theta])  # (n_modes, N)
+
+    # Normalize each wavefunction (important for a meaningful overlap)
+    norms = torch.norm(psi_theta_mat, dim=1, keepdim=True)
+    psi_theta_normed = psi_theta_mat / norms
+
+    # Overlap = psi_theta_normed @ psi_theta_normed.T (inner product over the spatial dimension)
+    overlap = torch.mm(psi_theta_normed, psi_theta_normed.t()).numpy()
 
     # ------------------------------------------------------------------
-    # 2️⃣ Determine dx (explicit argument preferred)
+    # 2️⃣ Plot the heat map
     # ------------------------------------------------------------------
+    fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5))
 
+    im = ax.imshow(overlap, cmap=cmap, vmin=0.0, vmax=1.0)
+
+    # Axis ticks - label each mode with its index
+    ax.set_xticks(np.arange(n_modes))
+    ax.set_yticks(np.arange(n_modes))
+    ax.set_xticklabels([rf"$n={i}$" for i in range(n_modes)], rotation=45, ha="right")
+    ax.set_yticklabels([rf"$n={i}$" for i in range(n_modes)])
+
+    # Annotate each cell with the numeric value
+    for i in range(n_modes):
+        for j in range(n_modes):
+            txt = f"{overlap[i, j]:{fmt}}"
+            ax.text(j, i, txt,
+                    ha="center", va="center",
+                    color="white" if overlap[i, j] < 0.5 else "black",
+                    fontsize=9)
+    ax.set_title(r"Overlap Matrix $\langle \psi_m^\theta | \psi_n^\theta \rangle$ (POD Diagnostic)", fontsize=16)
+    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="Overlap matrix")
+
+    # ------------------------------------------------------------------
+    # 3️⃣ Loss weights row
+    # ------------------------------------------------------------------
+    if lambdas is not None:
+        _add_lambda_row(fig, lambdas, ax=ax)
+
+    # ------------------------------------------------------------------
+    # 4️⃣ Save if requestec
+    # ------------------------------------------------------------------
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+
+    return fig
 
 # ----------------------------------------------------------------------
 # 🧪 Smoke test – runs when the module is executed directly
@@ -623,6 +665,9 @@ def _smoke_test() -> None:
     out_dir = pathlib.Path("./_smoke_outputs")
     out_dir.mkdir(exist_ok=True)
 
+    # --------------------------------------------------------------
+    # 1️⃣ Plot the training curves for each term and the total loss
+    # --------------------------------------------------------------
     plot_loss_history(
         epochs,
         total,
@@ -633,6 +678,10 @@ def _smoke_test() -> None:
         lambdas,
         out_path=out_dir / "loss_history.png",
     )
+
+    # --------------------------------------------------------------
+    # 2️⃣ Plot the learned potential and the ground truth potential
+    # --------------------------------------------------------------
     plot_potential(
         x,
         V_true,
@@ -640,6 +689,10 @@ def _smoke_test() -> None:
         lambdas,
         out_path=out_dir / "potential.png",
     )
+
+    # --------------------------------------------------------------
+    # 3️⃣ Plot wavefunctions for first `n_modes` eigenmodes
+    # --------------------------------------------------------------
     plot_wavefunctions(
         x,
         psi_true,
@@ -647,7 +700,9 @@ def _smoke_test() -> None:
         out_path=out_dir / "wavefunctions.png",
     )
 
-    # Energy-spectrum bar plot
+    # --------------------------------------------------------------
+    # 4️⃣ Energy-spectrum bar plot
+    # --------------------------------------------------------------
     # Dummy ground truth energies (linear ladder)
     E_true = torch.tensor([0.5, 1.5, 2.5])          # hbar*omega_n units
     # Fake learned energies -> perturb the true values slightly
@@ -660,7 +715,9 @@ def _smoke_test() -> None:
         out_path=energy_path,
     )
 
-    # Probability‑density comparison (dummy data)
+    # --------------------------------------------------------------
+    # 5️⃣ Probability‑density comparison (dummy data)
+    # --------------------------------------------------------------
     # Fake observed densities -> noisy version of |psi|^2
     rho_obs = [
         (pt.squeeze() ** 2 + 0.02 * torch.rand_like(pt.squeeze())) for pt in psi_true
@@ -673,6 +730,16 @@ def _smoke_test() -> None:
         rho_obs=rho_obs,
         lambdas=lambdas,            # optional -> omit if you don't want loss terms to render on probability density plot
         out_path=density_path,
+    )
+
+    # --------------------------------------------------------------
+    # 6️⃣ Overlap‑matrix heatmap (dummy POD diagnostic)
+    # --------------------------------------------------------------
+    overlap_path = out_dir / "overlap_heatmap.png"
+    plot_overlap_heatmap(
+        psi_theta=psi_learned,        # use the same learned wavefunction from the dummy data
+        lambdas=lambdas,              # optional - show loss weights
+        out_path=overlap_path,
     )
 
     print(
