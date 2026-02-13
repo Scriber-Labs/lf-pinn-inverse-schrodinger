@@ -122,6 +122,27 @@ def l2_inner_product(
     # Trapezoidal rule reduces to a simple sum since the grid is uniform.
     return torch.sum(f * g) * dx
 
+def grid_spacing(grid: torch.Tensor) -> float:
+    """
+    Return the uniform spacing of a 1-D grid tensor.
+    The function assumes the grid is sorted and uniformly spaced.
+    Raises a ValueError if the spacing is not constant within tolerance.
+
+    Parameters
+    ----------
+    grid : torch.Tensor
+        Spatial grid tensor.
+
+    Returns
+    -------
+    float
+        Uniform spacing of 1-D grid tensor.
+    """
+    diffs = torch.diff(grid.squeeze())
+    if not torch.allclose(diffs, diffs[0], atol=1e-12, rtol=0):
+        raise ValueError("Grid is not uniformly spaced.")
+    return diffs[0].item()
+
 # ----------------------------------------------------------------------
 # 2️⃣ Smoke test & entry point
 # ----------------------------------------------------------------------
