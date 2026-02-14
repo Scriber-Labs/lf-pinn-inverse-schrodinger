@@ -21,25 +21,6 @@
 - **Over-smoothing** (❓is this the same thing as flattening, or is it more general/ something different?❓)
 - **Boundary artifacts** are more likely to manifest due to the model being less constricted near the boundaries.
 
-### 🔮 Future Projects
-- Dynamic weighting of the loss terms
-  - 📝 For this project, the loss weights are assigned to a static `dict`. 
-  - Ideas
-    - Focus on data first, then enforce physics loss.
-    - Prevent over-smoothing early during training.
-    - **Adaptive balancing:** Compute the magnitude of each loss term every epoch and scale the $\lambda$'s so that all terms contribute roughly the same amount.
-    - **Bayesian/ probabilistic sampling:** Treat each $\lambda$ as a learnable hyperparameter and update it with gradient descent.
-  - Tips
-    - Start with a static `dict` for the first pass. This will provide a baseline to compare against.
-    - Add a **scheduler** only if you see a failure mode symptom.
-    
-      | **Symptom** | **Remedy**                                                       |
-      | ----------- |------------------------------------------------------------------|
-      | Physics residual stalls while the data-fit continues to improve. | Increase $\lambda_\text{physics}$.                               |
-      | Flattening failure mode | Decrease $\lambda_\text{smooth}$ or slow down its schedule.      |
-       | Wildly oscillating loss curves | Use a **smooth ramp** for all $\lambda$'s to stabilize training. | 
-    
-    - Log the effective $\lambda$ values each epoch and plot them alongside the training curves. This will help reveal whether a scheduler helped or hindered learning.
 ---
 
 ## Figure 3 - Learned Wavefunctions $\psi_n^\theta(x)$ vs. Ground Truth Wavefunctions $\psi_n(x)$ (Quantum Harmonic Oscillator)
@@ -52,25 +33,44 @@
 
 ---
 
-## Figure 4 - Learned Energy Eigenvalues $E_n^\theta$ vs. Ground Truth Energy Eigenvalues $E_n$ 
+## Figure 4 - Learned vs. Ground Truth Energy Eigenvalues 
 ![Learned Energies](demo_visuals/learned_energies.png)
-
+> A bar chart of first three learned energy eigenvalues $E_n^\theta$ vs. ground truth energy eigenvalues $E_n$ for the quantum harmonic oscillator.
 
 ---
 
-## Figure 5 - Learned Probability Densities $|\psi_n^\theta(x)|^2$ vs. Observed Probability Densities $\rho_n^\text{obs}(x)$
+## Figure 5 - Learned vs. (Fake) Observed Probability Densities
 ![Probability Densities](demo_visuals/density.png)
+> Inferred probability densities $|\psi_n^\theta(x)|^2$ vs. fake observed probability densities $\rho_n^\text{obs}(x)$ for the first three eigenmodes.
+
+### 🏡 Take-Home Messages
+- **Data anchoring**
+- **Indirect supervision**
+- **Why phase remains unconstrained**
+
 
 ---
 
 ## Figure 6 - Overlap Heatmap
 ![Overlap Heatmap](demo_visuals/overlap_heatmap.png)
 
+### 🏡 Take-Home Messages
+- **Near-orthogonality emerges (or not)**
+- **Coupling** through shared $V(x)$
+
+✨ This is important for interpretability!
+
 ---
 
-## Figure 7 - POD Singular Values and Spatial Modes vs. Learned Wavefunctions vs. Ground Truth Wavefunctions
+## Figure 7 - POD Diagnostics 
 ### Figure 7a - POD Singular Values
 ![POD Singular Values](demo_visuals/pod_singular_values.png)
+> Singular values $\sigma_k$ vs. $k$ (logarithmic scale).
 
 ### Figure 7b - POD Spatial Modes vs. Learned Wavefunctions vs. Ground Truth Wavefunctions
 ![POD Spatial Modes](demo_visuals/pod_modes.png)
+> Compare first three POD spatial modes to $\psi_n^\theta(x)$ and $\psi_n(x)$.
+
+### 🏡 Take-Home Messages
+- Learned basis is not equivalent to ground-truth physical eigenbasis
+- Still explains the data
