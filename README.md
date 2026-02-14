@@ -94,8 +94,8 @@ flowchart TB
         direction TB
         subgraph synthetic_data["1️⃣ Synthetic Data"]
             direction TB
-            B["1️Spatial Grid"]:::stage1
-            obs["1️Noisy Observations"]:::stage1
+            B["Spatial Grid"]:::stage1
+            obs["Noisy Observations"]:::stage1
         end
         
         synthetic_data:::Observed_data
