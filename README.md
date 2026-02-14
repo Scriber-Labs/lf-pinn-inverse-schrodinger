@@ -34,11 +34,19 @@ inverse-piml-schrodinger/
 │   └── references.bib    # sources (❓🙋🏻‍♀️ not necessarily used explicity by the github repo code, but that's mainly because i have no idea how to do that. if there is a standard way of implementing bib files easily like in overleaf im open to something like that... just no relearning entire languages and new software related bullshit (pardon my French)
 ├── assets/
 │   ├── images/
-│   │   └── interpretability_axis.png    # ⚠️ check spelling
+│   │   └── interpratibility_axis.png    
 └── artifacts/
     ├── notes.md                         # conceptual notes and reflection
     ├── figures.md                       # structure-based analysis of demo visuals
-    └── demo_visuals/                          
+    └── demo_visuals/    
+        ├── density.png
+        ├── learned_energies.png
+        ├── learned_potential.png
+        ├── learned_wavefunctions.png
+        ├── overlap_heatmap.png
+        ├── pod_modes.png
+        ├── pod_singular_values.png
+        └── training_curves.png                       
 ```
 
 ---
@@ -101,7 +109,7 @@ Orthogonality
 
 ---
 ## ✅ To Do
-- [ ] `demo.ipynb`
+- [ ] Figure 8 (bifurcation diagram) in `demo.ipynb`
 - [ ] `figures.md`
   - Each figure should have:
     - Title
