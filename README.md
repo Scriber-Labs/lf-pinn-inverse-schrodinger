@@ -89,14 +89,18 @@ flowchart TB
     %%--------------------------------------------------------------
     %%  MAIN PIPELINE SUBGRAPH WITH HEADER
     %%--------------------------------------------------------------
-    obs["0️⃣ Noisy observations"]:::stage0
     subgraph PIML["PIML Framework"]
         direction TB
-        B["1️⃣ Spatial Grid"]:::stage1
+        subgraph synthetic_data["Synthetic Data"]
+            direction TB
+            B["1️⃣ Spatial Grid"]:::stage1
+            obs["1️⃣ Observed Data"]:::stage1
+        end
+            
         C["2️⃣ Neural Ansatz"]:::stage2
         D["3️⃣ Automatic Differentiation"]:::stage3
         F["5️⃣ Optimizer (Adam)"]:::stage5
-        
+        obs["0️⃣ Noisy observations"]:::stage0
         
         subgraph loss["4️⃣ Total Loss"]
             direction TB
@@ -107,9 +111,9 @@ flowchart TB
         end
         
         B --> C
+        obs --> data
         C --> D
         D --> loss:::Total_loss
-        obs --> data
         loss --> F
         F -- training loop --> C
     end
