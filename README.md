@@ -105,9 +105,8 @@ flowchart TB
         
         subgraph loss["4️⃣ Total Loss"]
             direction TB
-            physics["Physics Loss"]:::stage4
-            norm["Wavefunction Normalization Loss"]:::stage4
-            smooth["Smoothness Regularization"]:::stage4
+            physics["Physics Loss + Wavefunction Normalization Loss + Smoothness Regularization"]:::stage4
+
             data["Data mismatch loss"]:::stage4
         end
         
