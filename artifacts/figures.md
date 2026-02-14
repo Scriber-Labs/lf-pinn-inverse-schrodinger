@@ -69,5 +69,8 @@
 ---
 
 ## Figure 7 - POD Singular Values and Spatial Modes vs. Learned Wavefunctions vs. Ground Truth Wavefunctions
-### Figure 7a
-![POD Singular Values][demo/visuals]
+### Figure 7a - POD Singular Values
+![POD Singular Values](demo_visuals/pod_singular_values.png)
+
+### Figure 7b - POD Spatial Modes vs. Learned Wavefunctions vs. Ground Truth Wavefunctions
+![POD Spatial Modes](demo_visuals/pod_modes.png)
