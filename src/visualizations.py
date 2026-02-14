@@ -21,6 +21,9 @@ import matplotlib.colors as mcolors
 import numpy as np
 import torch
 
+from pod import pod_decomposition
+
+
 # ----------------------------------------------------------------------
 # 🌍 Global style helper
 # ----------------------------------------------------------------------
@@ -568,8 +571,10 @@ def plot_overlap_heatmap(
         Grid spacing. If ``None`` the function infers it from teh first wavefunction (assumes uniform grid). This hidden assumption is removed if `dx` is provided explicitly.
     lambdas : Dict[str, float] | None, optional
         Optional string with loss weights to be displayed on the figure.
-    cmap, fmt, out_path : str
+    cmap, fmt : str
         Color map, print settings for inputs values, and output path.
+    out_path : pathlib.Path | None
+        Destination path (saved as a PNG). If ``None``, the figure is only returned.
 
     Returns
     -------
@@ -580,7 +585,7 @@ def plot_overlap_heatmap(
 
     n_modes = len(psi_theta)
     # ------------------------------------------------------------------
-    # 1️⃣ Stack and normalise the wavefunctions
+    # 1️⃣ Stack and normalize the wavefunctions
     # ------------------------------------------------------------------
     psi_theta_mat = torch.stack([p.squeeze().detach().cpu() for p in psi_theta])  # (n_modes, N)
 
@@ -623,6 +628,213 @@ def plot_overlap_heatmap(
 
     # ------------------------------------------------------------------
     # 4️⃣ Save if requestec
+    # ------------------------------------------------------------------
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+
+    return fig
+
+# ----------------------------------------------------------------------
+# 📊7️⃣a) POD singular values (log plot, all values)
+# ----------------------------------------------------------------------
+def plot_pod_singular_values(
+    singular_values: torch.Tensor,
+    *,
+    title: str = "POD singular values",
+    ylabel: str = "Singular value (log scale)",
+    cmap: str = "cool",
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """
+    Plot the singular values obtained from a POD decomposition on a logarithmic y-axis.
+
+    Parameters
+    ----------
+    singular_values : torch.Tensor
+        1-D tensor of singular values (sigma_k) -> typically the output of ``pod_decomposition`` (the `S` component).
+    title : str, optional
+        Figure title. Defaults to a generic POD-SV caption.
+    ylabel : str, optional
+        Y-axis label. Defaults to "Singular value (log scale)".
+    cmap : str, optional
+        Color map. Defaults to "cool". Unused but kep for backward compatibility with the previous signature.
+    out_path : pathlib.Path | None, optional
+        Destination path (saved as a PNG). If ``None``, the figure is only returned.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        The log plot of singular values.
+    """
+    _apply_style()
+
+    # ------------------------------------------------------------------
+    # 1️⃣ Convert to NumPy (detach, CPU) -> no gradients needed
+    # ------------------------------------------------------------------
+    sv = singular_values.detach().cpu().numpy()
+
+    # ------------------------------------------------------------------
+    # 2️⃣ Plot
+    # ------------------------------------------------------------------
+    fig, ax = plt.subplots()
+    ax.semilogy(
+        np.arange(1, len(sv) + 1),
+        sv,
+        marker="o",
+        color="#8000FF",
+        linewidth=2,
+        label="Singular values",
+    )
+
+    ax.set_xlabel(r"Mode index $k$", fontsize=13)
+    ax.set_ylabel(ylabel, fontsize=13)
+    ax.set_title(title, fontsize=16, pad=12)
+    ax.grid(True, which="both", alpha=0.2)
+    ax.legend(loc="upper right", fontsize=10)
+
+    # ------------------------------------------------------------------
+    # 3️⃣ Optional save
+    # ------------------------------------------------------------------
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+
+    return fig
+
+# ----------------------------------------------------------------------
+# 📊7️⃣b) First three spatial POD modes (should resemble the true eigenmodes)
+# ----------------------------------------------------------------------
+def plot_pod_first_three_spatial_modes(
+    x: torch.Tensor,
+    spatial_modes: torch.Tensor,
+    *,
+    ground_truth: Sequence[torch.Tensor] | None = None,
+    psi_learned: Sequence[torch.Tensor] | None = None,
+    lambdas: Dict[str, float] | None = None,
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """
+    Plot the first three columns of the POD spatial-mode matrix ``U``.
+    If a list of ground-truth wavefunctions is supplied, each POD mode is overlaid with the corresponding ground truth wavefunction for visual comaprison.
+
+    Parameters
+    ----------
+    x : torch.Tensor
+        1-D grid on which the modes are evaluated (shape ``(N, 1)`` or ``(N,)``).
+    spatial_modes : torch.Tensor
+        POD spatial modes matrix `U` of shape ``(N, n_modes)``. The function will plot the first three columns (or fewer if ``n_modes < 3``).
+    ground_truth : Sequence[torch.Tensor], optional
+        Ground-truth wavefunctions `psi_0, psi_1, ...`, each of shape ``(N,)``. If provided, the i-th ground truth wavefunction is plotted with POD mode i.
+    psi_learned : Sequence[torch.Tensor], optional
+        Learned wavefunctions `psi_theta_0, psi_theta_1, ...`, each of shape ``(N,)``. If provided, the i-th learned wavefunction is plotted with POD mode i.
+    lambdas : Dict[str, float] | None, optional
+        Optional string with loss weights to be displayed on the figure.
+    out_path : pathlib.Path | None, optional
+        Destination path (saved as a PNG). If ``None``, the figure is only returned.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        A plot of the first `n_modes` spatial POD modes.
+    """
+    _apply_style()
+
+    # ------------------------------------------------------------------
+    # 0️⃣ Minimal sanity checks
+    # ------------------------------------------------------------------
+    if x.dim() not in (1, 2):
+        raise ValueError("`x` must be a 1-D tensor or a column vector.")
+    if spatial_modes.dim() != 3:
+        raise ValueError("`spatial_modes` must be 2-D tensor (N, n_modes, 1).")
+
+    # Ensure we work on CPU and detach from the autograd graph
+    x_np = x.squeeze().detach().cpu().numpy()
+    modes_np = spatial_modes.detach().cpu().numpy()     # shape (N, n_modes)
+
+    # Ground-truth handling
+    if ground_truth is None:
+        gt_np = []
+    else:
+        gt_np = [
+            ground_truth.squeeze().detach().cpu().numpy()
+            for ground_truth in ground_truth[: modes_np.shape[1]]
+        ]
+
+    # Learned wavefunction handling
+    if psi_learned is None:
+        psi_learned_np = []
+    else:
+        psi_learned_np = [
+            psi_learned.squeeze().detach().cpu().numpy()
+            for psi_learned in psi_learned[: modes_np.shape[1]]
+        ]
+
+    n_plot = min(3, modes_np.shape[1])
+
+    # ------------------------------------------------------------------
+    # 1️⃣ Create subplots (1 x n_plot)
+    # ------------------------------------------------------------------
+    fig, axs = plt.subplots(
+        1,
+        n_plot,
+        figsize=(5 * n_plot, 4),
+        constrained_layout=True,
+    )
+    # If there is only one subplot, `axs` is not iterable -> wrap it.
+    if n_plot == 1:
+        axs = [axs]
+
+    pod_mode_color = "#8000FF"
+    true_color = "#E52B50"
+    learned_color = "#39FF14"
+
+    for k in range(n_plot):
+        ax = axs[k]
+
+        # ---- Ground-truth (if provided) ----
+        if k < len(gt_np):
+            ax.plot(x_np,
+                    gt_np[k],
+                    label=rf"True $\psi_{k}$",
+                    color=true_color,
+                    linewidth=3,
+                    )
+
+        # ---- Learned wavefunctions (if provided) ----
+        if k < len(psi_learned_np):
+            ax.plot(x_np,
+                    psi_learned_np[k],
+                    label=rf"$\psi_{k}^\theta$",
+                    color=learned_color,
+                    ls="--",
+                    linewidth=3,
+                    )
+
+        # ---- POD mode ----
+        ax.plot(
+            x_np,
+            modes_np[:, k],
+            label=f"POD mode {k}",
+            color=pod_mode_color,
+            ls=":",
+            linewidth=3,
+        )
+
+        ax.set_xlabel(r"$x$")
+        ax.set_ylabel("Amplitude")
+        ax.set_title(f"POD spatial model {k}")
+        ax.legend(fontsize=9, loc="upper right")
+        ax.grid(True, which="both", alpha=0.2)
+
+    # ------------------------------------------------------------------
+    # 2️⃣ Optional loss weights row
+    # ------------------------------------------------------------------
+    if lambdas is not None:
+        _add_lambda_row(fig, lambdas, ax=axs[0])
+
+    # ------------------------------------------------------------------
+    # 3️⃣ Optional save
     # ------------------------------------------------------------------
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -740,6 +952,34 @@ def _smoke_test() -> None:
         psi_theta=psi_learned,        # use the same learned wavefunction from the dummy data
         lambdas=lambdas,              # optional - show loss weights
         out_path=overlap_path,
+    )
+
+    # --------------------------------------------------------------
+    # 7️⃣a) POD singular-value spectrum (dummy data)
+    # --------------------------------------------------------------
+    # Use the same psi_theta matrix you already built for POD demo
+    psi_matrix = torch.stack(psi_learned, dim=1)    # shape (N, n_modes)
+    _, S, _ = pod_decomposition(psi_matrix)         # S is a 1-D tensor of singular values
+
+    sv_path = out_dir / "pod_singular_values.png"
+    plot_pod_singular_values(
+        singular_values=S,
+        out_path=sv_path,
+    )
+
+    # --------------------------------------------------------------
+    # 7️⃣b) First three POD spatial modes
+    # -------------------------------------------------------------
+    psi_matrix = torch.stack(psi_learned, dim=1)  # shape (N, n_modes)
+    U, _, _ = pod_decomposition(psi_matrix)  # U is a 2-D tensor of spatial modes
+
+    pod_modes_path = out_dir / "pod_modes.png"
+    plot_pod_first_three_spatial_modes(
+        x=x,
+        spatial_modes=U,
+        ground_truth=psi_true,
+        lambdas=lambdas,
+        out_path=pod_modes_path,
     )
 
     print(
