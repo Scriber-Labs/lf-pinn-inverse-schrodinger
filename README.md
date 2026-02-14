@@ -83,6 +83,7 @@ flowchart TB
     classDef stage7 fill:#0f2a3d,stroke:#14b5ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
 
     classDef PIML_framework fill:#161b22,stroke:#14b5ff,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
+    classDef Observed_data stroke:#0f2a3d,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
     classDef Total_loss stroke:#00f5db,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
     classDef POD_diagnostics stroke:#f78166,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
     
@@ -91,16 +92,16 @@ flowchart TB
     %%--------------------------------------------------------------
     subgraph PIML["PIML Framework"]
         direction TB
-        subgraph synthetic_data["Synthetic Data"]
+        subgraph synthetic_data["1️⃣ Synthetic Data"]
             direction TB
-            B["1️⃣ Spatial Grid"]:::stage1
-            obs["1️⃣ Observed Data"]:::stage1
+            B["1️Spatial Grid"]:::stage1
+            obs["1️Noisy Observations"]:::stage1
         end
-            
+        
+        synthetic_data:::Observed_data
         C["2️⃣ Neural Ansatz"]:::stage2
         D["3️⃣ Automatic Differentiation"]:::stage3
         F["5️⃣ Optimizer (Adam)"]:::stage5
-        obs["0️⃣ Noisy observations"]:::stage0
         
         subgraph loss["4️⃣ Total Loss"]
             direction TB
