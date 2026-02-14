@@ -42,7 +42,7 @@
     - Log the effective $\lambda$ values each epoch and plot them alongside the training curves. This will help reveal whether a scheduler helped or hindered learning.
 ---
 
-## Figure 3 - Learned Wavefunctions $\psi_n^\theta(x)$ vs. Ground Truth Wavefunctions $\psi_n(x)$ (Harmonic Oscillator)
+## Figure 3 - Learned Wavefunctions $\psi_n^\theta(x)$ vs. Ground Truth Wavefunctions $\psi_n(x)$ (Quantum Harmonic Oscillator)
 ![Learned Wavefunctions](demo_visuals/learned_wavefunctions.png)
 
 ### 🏡 Take-Home Messages
@@ -51,3 +51,23 @@
 - **Node structure:** zeros line up with the true wavefunctions.
 
 ---
+
+## Figure 4 - Learned Energy Eigenvalues $E_n^\theta$ vs. Ground Truth Energy Eigenvalues $E_n$ 
+![Learned Energies](demo_visuals/learned_energies.png)
+
+
+---
+
+## Figure 5 - Learned Probability Densities $|\psi_n^\theta(x)|^2$ vs. Observed Probability Densities $\rho_n^\text{obs}(x)$
+![Probability Densities](demo_visuals/density.png)
+
+---
+
+## Figure 6 - Overlap Heatmap
+![Overlap Heatmap](demo_visuals/overlap_heatmap.png)
+
+---
+
+## Figure 7 - POD Singular Values and Spatial Modes vs. Learned Wavefunctions vs. Ground Truth Wavefunctions
+### Figure 7a
+![POD Singular Values][demo/visuals]
