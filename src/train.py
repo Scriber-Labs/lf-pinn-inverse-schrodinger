@@ -16,7 +16,7 @@ from typing import List
 
 import torch
 from model import InverseSchrodingerModel
-from physics import tise_loss, potential_smoothness_loss
+from physics import tise_loss, potential_smoothness_loss, wavefunction_normalization_loss
 from inverse import data_mismatch_loss
 from utils import make_grid, set_global_seed
 
@@ -49,7 +49,7 @@ def train_step(
         Tensor of observed energies.
     lambdas : dict[str, float]
         Dictionary mapping loss identifies to scalar weights, e.g.
-        ``{'data': 1.0, 'physics': 1.0, 'smooth': 1e-2}``.
+        ``{'data': 1.0, 'physics': 1.0, 'smooth': 1e-2, 'norm': 10.0}``.
 
     Returns
     -------
@@ -62,6 +62,7 @@ def train_step(
 
     # ----- Individual loss terms ----------------------------------------
     L_physics = tise_loss(psi_list, V_theta, model.E_theta(), dx)
+    L_norm = wavefunction_normalization_loss(psi_list,dx)
     L_smooth = potential_smoothness_loss(V_theta, dx)
     L_data = data_mismatch_loss(psi_list, model.E_theta(), rho_obs, E_obs)
 
@@ -70,6 +71,7 @@ def train_step(
         lambdas["data"] * L_data
         + lambdas["physics"] * L_physics
         + lambdas["smooth"] * L_smooth
+        + lambdas["norm"] * L_norm
     )
 
     return total
@@ -101,7 +103,7 @@ def _run_train_smoke_test() -> None:
     rho_obs = [torch.exp(-x**2).squeeze() for _ in range(3)]
     E_obs = torch.tensor([0.5, 1.5, 2.5], device=device)
 
-    lambdas = {"data": 1.0, "physics": 1.0, "smooth": 1e-2}
+    lambdas = {"data": 1.0, "physics": 1.0, "smooth": 1e-2, "norm": 1e-2}
 
     optimizer.zero_grad()
     loss = train_step(model, x, dx, rho_obs, E_obs, lambdas)
