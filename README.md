@@ -50,7 +50,104 @@ inverse-piml-schrodinger/
 ```
 
 ---
+## 🏗️ PIML Architecture
+```mermaid
+%%====================================================================
+%%  CURVED-CORNER MERMAID WITH SUBGRAPH HEADER
+%%====================================================================
+%%{ init: {
+        "theme": "base",
+        "themeVariables": {
+            "background": "#0d1117",
+            "lineColor": "#14b5ff",
+            "textColor": "#ffffff",
+            "fontFamily": "'Aclonica', sans-serif",
+            "borderRadius": "16"       /* larger radius for more rounded corners */
+        },
+        "handDrawn": true
+    } }%%
+%%====================================================================
 
+flowchart TB
+
+    %%--------------------------------------------------------------
+    %%  COLOR RAMP (pseudo-gradient)
+    %%--------------------------------------------------------------
+    classDef stage0 fill:#0b1c2d,stroke:#14b5ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+    classDef stage1 fill:#0f2a3d,stroke:#14b5ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+    classDef stage2 fill:#103b4f,stroke:#00f5db,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+    classDef stage3 fill:#124f55,stroke:#00f5db,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+    classDef stage4 fill:#1a6b63,stroke:#00f5db,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+    classDef stage5 fill:#1f4e5f,stroke:#f78166,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+    classDef stage6 fill:#3a2f2a,stroke:#f78166,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+    classDef stage7 fill:#0f2a3d,stroke:#14b5ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+
+    classDef PIML_framework fill:#161b22,stroke:#14b5ff,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
+    classDef Total_loss stroke:#00f5db,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
+    classDef POD_diagnostics stroke:#f78166,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
+    
+    %%--------------------------------------------------------------
+    %%  MAIN PIPELINE SUBGRAPH WITH HEADER
+    %%--------------------------------------------------------------
+    subgraph PIML["PIML Framework"]
+        direction TB
+        B["1️⃣ Spatial Grid"]:::stage1
+        C["2️⃣ Neural Ansatz"]:::stage2
+        D["3️⃣ Automatic Differentiation"]:::stage3
+        F["5️⃣ Optimizer (Adam)"]:::stage5
+        
+        subgraph loss["4️⃣ Total Loss"]
+            direction LR
+            physics["Physics Loss"]:::stage4
+            norm["Wavefunction Normalization Loss"]:::stage4
+            smooth["Smoothness Regularization"]:::stage4
+            data["Data mismatch loss"]:::stage4
+        end
+        
+        B --> C
+        C --> D
+        D --> loss:::Total_loss
+        loss --> F
+        F -- training loop --> C
+    end
+    
+    %%--------------------------------------------------------------
+    %%  CONTEXT & DIAGNOSTICS
+    %%--------------------------------------------------------------
+    A["0️⃣ Define TISE Dynamics"]:::stage0
+    obs["0️⃣ Noisy observations"]:::stage0
+    H["6️⃣ Sanity Checks"]:::stage6
+    
+    subgraph POD["POD Diagnostics"]
+        direction TB
+        SVD["7️⃣ SVD"]:::stage6
+        sigma["8️⃣ POD Singular Values"]:::stage6
+        U["9️⃣ POD Eigenmodes"]:::stage6
+        
+        SVD --> sigma
+        SVD --> U
+    end
+    
+    A --> PIML:::PIML_framework
+    obs --> data
+    PIML --> H
+    PIML -- Snapshot Matrix --> POD:::POD_diagnostics
+```
+
+### Pipeline Legend (Mathematical Mapping)
+
+| Step | Component                 | Mathematical Description                                                                                                                                                | Interpretation                                                                                |
+|----|---------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
+| 0️⃣ | Problem setup             |                                                                                                                                                                         | Define the physical system                                                                    |
+| 1️⃣ | Spatial grid              | $x \in [-5, 5]$                                                                                                                                                         | Synthetic “data” for physics enforcement                                                      |
+| 2️⃣ | Neural ansatz             | $\begin{align*} V_\theta(x) &= \text{MLP}_V(x; \theta_V) \\ \psi_n^\theta(x) &= \text{MLP}_\psi(x; \theta_\psi) \\ E_n^\theta &= \text{learnable scalar}  \end{align*}$ | Learned potential and eigenstates                                                             |
+| 3️⃣ | Automatic differentiation | $\frac{\partial}{\partial x}\psi_n^\theta$ and $\frac{\partial^2}{\partial x^2}\psi_n^\theta$                                                                           | Recover first and second partial derivatives of the learned wavefunctions with respect to $x$ |
+| 4️⃣ | Total loss                | $\mathcal{L}_\text{tot}=\mathcal{L}_\text{TISE}+\mathcal{L}_\text{norm}+\mathcal{L}_\text{smooth}+\mathcal{L}_\text{data}$                                              | Low-fidelity PINN objective                                                                   |
+| 5️⃣ | Optimization              | $\theta \leftarrow \theta - \eta\nabla_\theta \mathcal{L}$                                                                                                              | Gradient-based learning                                                                       |
+| 6️⃣ | Sanity Checks             |                                                                                                                                                                         | Sanity checks and structure validation                                                        |
+| 7️⃣ | POD Diagnostics           |                                                                                                                                                                         | Proper Orthogonal Decomposition of the learned eigenfunctions                                 |
+
+---
 ## 🌍 Global Design Choices
 Assumptions:
 - Atomic units: $\hbar = 1$
@@ -70,13 +167,13 @@ Orthogonality
 ---
 ## 📉 Loss Function
 
-| **Loss Term** | **Formulation**                                                                                                                                                                | **Soft vs. Hard**                            | **Type**                     | **Comments** |
-| ------------- |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|------------------------------| ------------ |
-| **Schrodinger residual (physics loss)** | $$\mathcal{L}_\text{TISE} = \sum_n{\Big\| -\frac{\hbar^2}{2m}\frac{\partial^2}{\partial x^2}\psi_n^\theta + V_\theta(x)\psi_n^\theta(x)-E_n^\theta\psi_n^\theta(x) \Big\|^2}$$ | soft                                         | Consistency condition        | Enforces the TISE. |
-| **Wavefunction normalization loss** | $$ \mathcal{L}_\text{norm} = \frac{1}{N}\sum_{n=1}^N{\bigg(\int{\|\psi^\theta_n(x)\|^2dx} - 1\bigg)^2}$$                                                                       | ❓                                            | ❓                            | ❓ 
-| **Scale-aware smoothness** | $$ \mathcal{L}_\text{smooth} = \Big< \frac{\| V_\theta''(x)\| ^2}{\epsilon + \|V_\theta(x)\|^2}\Big> $$                                                                        | soft | Regularizer | Penalize steep curvature in $V_\theta(x)$. Encourages physically plausible potentials and controls the ill-posedness of the inverse problem. |
-| **Data mismatch (obervables)** | $$ \mathcal{L}_\text{data} = \sum_n{\|E_n^\theta-E_n^\text{obs}\|^2 +  \|\|\psi_n^\theta(x)\|^2 - \rho_n^\text{obs}(x)\|^2} $$ | soft (in the sense of measurement noise)  | Consistency condition | Ensures the learned eigenstates match noisy observations. |
-| **Total Loss** | $$ \mathcal{L}_\text{total} = \lambda_\text{TISE}\mathcal{L}_\text{TISE} + \lambda_\text{norm}\mathcal{L}_\text{norm} + \lambda_\text{smooth}\mathcal{L}_\text{smooth} + \lambda_\text{data}\mathcal{L}_\text{data} $$ | ❓ | ❓ | ❓ |
+| **Loss Term** | **Formulation**                                                                                                                                                                | **Soft vs. Hard**                        | **Type**              | **Comments** |
+| ------------- |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------|-----------------------| ------------ |
+| **Schrodinger residual (physics loss)** | $$\mathcal{L}_\text{TISE} = \sum_n{\Big\| -\frac{\hbar^2}{2m}\frac{\partial^2}{\partial x^2}\psi_n^\theta + V_\theta(x)\psi_n^\theta(x)-E_n^\theta\psi_n^\theta(x) \Big\|^2}$$ | soft                                     | Consistency condition | Enforces the TISE. |
+| **Wavefunction normalization loss** | $$ \mathcal{L}_\text{norm} = \frac{1}{N}\sum_{n=1}^N{\bigg(\int{\|\psi^\theta_n(x)\|^2dx} - 1\bigg)^2}$$                                                                       | soft                                     | Regularizer           | Enforces normalization structure 
+| **Scale-aware smoothness** | $$ \mathcal{L}_\text{smooth} = \Big< \frac{\| V_\theta''(x)\| ^2}{\epsilon + \|V_\theta(x)\|^2}\Big> $$                                                                        | soft                                     | Regularizer           | Penalize steep curvature in $V_\theta(x)$. Encourages physically plausible potentials and controls the ill-posedness of the inverse problem. |
+| **Data mismatch (obervables)** | $$ \mathcal{L}_\text{data} = \sum_n{\|E_n^\theta-E_n^\text{obs}\|^2 +  \|\|\psi_n^\theta(x)\|^2 - \rho_n^\text{obs}(x)\|^2} $$ | soft (in the sense of measurement noise) | Consistency condition | Ensures the learned eigenstates match noisy observations. |
+| **Total Loss** | $$ \mathcal{L}_\text{total} = \lambda_\text{TISE}\mathcal{L}_\text{TISE} + \lambda_\text{norm}\mathcal{L}_\text{norm} + \lambda_\text{smooth}\mathcal{L}_\text{smooth} + \lambda_\text{data}\mathcal{L}_\text{data} $$ | ❓                                        | ❓                     | ❓ |
 
 ---
 ## Proper Orthogonal Decomposition (POD)
