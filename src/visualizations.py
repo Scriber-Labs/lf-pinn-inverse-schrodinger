@@ -797,7 +797,7 @@ def plot_pod_first_three_spatial_modes(
                     gt_np[k],
                     label=rf"True $\psi_{k}$",
                     color=true_color,
-                    linewidth=3,
+                    linewidth=4,
                     )
 
         # ---- Learned wavefunctions (if provided) ----
@@ -807,7 +807,7 @@ def plot_pod_first_three_spatial_modes(
                     label=rf"$\psi_{k}^\theta$",
                     color=learned_color,
                     ls="--",
-                    linewidth=3,
+                    linewidth=4,
                     )
 
         # ---- POD mode ----
@@ -817,7 +817,7 @@ def plot_pod_first_three_spatial_modes(
             label=f"POD mode {k}",
             color=pod_mode_color,
             ls=":",
-            linewidth=3,
+            linewidth=4,
         )
 
         ax.set_xlabel(r"$x$")

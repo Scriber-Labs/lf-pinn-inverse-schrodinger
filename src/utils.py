@@ -138,10 +138,10 @@ def grid_spacing(grid: torch.Tensor) -> float:
     float
         Uniform spacing of 1-D grid tensor.
     """
-    diffs = torch.diff(grid.squeeze())
-    if not torch.allclose(diffs, diffs[0], atol=1e-12, rtol=0):
-        raise ValueError("Grid is not uniformly spaced.")
-    return diffs[0].item()
+    g = grid.squeeze()
+    if g.numel() < 2:
+        raise ValueError("Grid must have at least 2 elements.")
+    return ((g[-1] - g[0]) / ( g.numel() - 1)).item()
 
 # ----------------------------------------------------------------------
 # 2️⃣ Smoke test & entry point
