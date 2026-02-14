@@ -681,7 +681,7 @@ def plot_pod_singular_values(
         np.arange(1, len(sv) + 1),
         sv,
         marker="o",
-        color="#8000FF",
+        color="#007FFF",
         linewidth=2,
         label="Singular values",
     )
