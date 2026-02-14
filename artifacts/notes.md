@@ -50,7 +50,7 @@ For the sake of keeping it simple, we start with establishing 1D phase space:
 - geometric product: $$\mathbb{e}_q \mathbb{e}_p = \mathbb{e}_q\cdot\mathbb{e}_p+\mathbb{e}_q\wedge\mathbb{e}_p$$
   - This is a good place to distinguish $dq$ and $dp$ from $\mathbb{e}_q$ and $\mathbb{e}_p$. If there is no real distinction, I need to decide how i want to define my basis for this sort of context from here on out. or at least have a game plan since this will come up a lot. 
 
-## Symplectric Consistency Loss
+## Symplectic Consistency Loss
 Let $$p_\psi(x) := -i\hbar \frac{\psi'(x)}{\psi(x)}$$ be the **quantum momentum field**. Then define $$\mathcal{L}_\text{symp}=\bigg|\bigg| \frac{dp_\psi}{dx} + V'(x) \bigg|\bigg|^2$$
 
 ---
