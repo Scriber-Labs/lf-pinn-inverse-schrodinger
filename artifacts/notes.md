@@ -36,8 +36,9 @@ $$L_\text{SE} = \bigg|\bigg| \bigg(  -\frac{\hbar^2}{2m}\psi'' + V_\theta\psi - 
 ### Justification for extra structure
 Project 1: symplectic structure and Hamiltonian gave a well-posed problem.
 
-Project 2: inverse problem is not well-posed from since the Hamiltonian is not entirely symplectic. (❓I NEED THIS STATEMENT TO BE FIXED AND EXPLAINED)
-- Introducing $$\int(V''(x))^2dx$$ penalizes curvature in the configuration-space projection of phase space (i.e., wild folding of Lagrangian submanicfolds). (❓❓❓❓WHAT DOES THIS MEAN? IT SOUNDS IMPORTANT!)
+Project 2: the inverse Schrodinger problem is ill-posed due to the fact that many possible potential functions can give rise to the same eigenstates. (❓I NEED THIS STATEMENT TO BE FIXED AND EXPLAINED)
+- Regularization introduces geometric bias so that the hypothesis space is constrained.
+  - Introducing $$\int(V''(x))^2dx$$ penalizes curvature in the configuration-space projection of phase space (i.e., wild folding of Lagrangian submanifolds). (❓❓❓❓WHAT DOES THIS MEAN? IT SOUNDS IMPORTANT!)
 
 > 🏡 The smooathness term regularizes the inverse problem by discouraging rapid curvature of the effective Lagrangian submanifold induced by $V(x)$.
 
