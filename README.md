@@ -89,6 +89,7 @@ flowchart TB
     %%--------------------------------------------------------------
     %%  MAIN PIPELINE SUBGRAPH WITH HEADER
     %%--------------------------------------------------------------
+    obs["0️⃣ Noisy observations"]:::stage0
     subgraph PIML["PIML Framework"]
         direction TB
         B["1️⃣ Spatial Grid"]:::stage1
@@ -96,8 +97,9 @@ flowchart TB
         D["3️⃣ Automatic Differentiation"]:::stage3
         F["5️⃣ Optimizer (Adam)"]:::stage5
         
+        
         subgraph loss["4️⃣ Total Loss"]
-            direction LR
+            direction TB
             physics["Physics Loss"]:::stage4
             norm["Wavefunction Normalization Loss"]:::stage4
             smooth["Smoothness Regularization"]:::stage4
@@ -107,6 +109,7 @@ flowchart TB
         B --> C
         C --> D
         D --> loss:::Total_loss
+        obs --> data
         loss --> F
         F -- training loop --> C
     end
@@ -115,7 +118,6 @@ flowchart TB
     %%  CONTEXT & DIAGNOSTICS
     %%--------------------------------------------------------------
     A["0️⃣ Define TISE Dynamics"]:::stage0
-    obs["0️⃣ Noisy observations"]:::stage0
     H["6️⃣ Sanity Checks"]:::stage6
     
     subgraph POD["POD Diagnostics"]
@@ -129,7 +131,6 @@ flowchart TB
     end
     
     A --> PIML:::PIML_framework
-    obs --> data
     PIML --> H
     PIML -- Snapshot Matrix --> POD:::POD_diagnostics
 ```
