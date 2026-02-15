@@ -67,7 +67,15 @@ def mode_overlap_matrix(
     torch.Tensor, shape ``(N_modes, N_modes)``
         Symmetric overlap matrix.
     """
-    return psi_matrix.T @ psi_matrix * dx
+    N = psi_matrix.shape[0]
+
+    weights = torch.ones(N, device=psi_matrix.device)
+    weights[0] = 0.5
+    weights[-1] = 0.5
+
+    weighted = psi_matrix * weights.unsqueeze(1)
+
+    return weighted.T @ psi_matrix * dx
 
 # ----------------------------------------------------------------------
 # 2️⃣ Smoke‑test entry point

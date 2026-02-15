@@ -8,7 +8,7 @@ These functions are deliberately designed to be lightweight. Specifically, they 
 from __future__ import annotations
 
 import random
-from typing import Optional
+from typing import Optional, Literal
 
 import numpy as np
 import torch
@@ -76,9 +76,11 @@ def make_grid(
 def second_derivative(
     y: torch.Tensor,
     dx: float,
+    *,
+    boundary: Literal["nearest", "zero", "periodic"] = "nearest",
 ) -> torch.Tensor:
     """
-    Central finite-difference approximation of the second derivative ``y''``.
+    Central finite-difference approximation of the second derivative ``y''`` with selectable boundary handling.
 
     Parameters
     ----------
@@ -86,6 +88,8 @@ def second_derivative(
         Function values sampled on a uniform grid.
     dx : float
         Grid spacing (``x[i+1] - x[i]``).
+    boundary : Literal["nearest", "zero", "periodic"]
+        Boundary handling. Default is ``"nearest"``.
 
     Returns
     -------
@@ -94,10 +98,20 @@ def second_derivative(
         Boundary points are padded using nearest-neighbor values so that the central finite-difference stencil preserves the original array size.
     """
     # Interior stencil: (y[i=1] - 2*y[i] + y[i+1]) / (dx^2)
-    y_xx = (y[:-2] - 2.0 * y[1:-1] + y[2:]) / dx**2
+    interior = (y[:-2] - 2.0 * y[1:-1] + y[2:]) / dx**2
+
+    if boundary == "nearest":
+        padded = torch.cat([interior[:1], interior, interior[-1:]], dim=0)
+    elif boundary == "zero":
+        padded = torch.cat([torch.zeros_like(interior[:1]), interior, torch.zeros_like(interior[-1:])], dim=0)
+    elif boundary == "periodic":
+        # Wrap around: use last interior value for the first point, first interior for the last
+        padded = torch.cat([interior[-1:], interior, interior[:1]], dim=0)
+    else:
+        raise ValueError(f"Unsupported boundary mode: {boundary}")
 
     # Pad to keep original shape (first & last rows duplicated)
-    return torch.cat([y_xx[:1], y_xx, y_xx[-1:]], dim=0)
+    return padded
 
 def l2_inner_product(
     f: torch.Tensor,
