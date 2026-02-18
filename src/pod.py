@@ -77,6 +77,37 @@ def mode_overlap_matrix(
 
     return weighted.T @ psi_matrix * dx
 
+def cross_overlap_matrix(
+    psi_A: torch.Tensor,
+    psi_B: torch.Tensor,
+    dx: float,
+) -> torch.Tensor:
+    """
+    Compute <psi_A_m | psi_B_n>.
+
+    Parameters
+    ----------
+    psi_A : torch.Tensor, shape ``(N_x, n_modes)``
+        POD eigenmode.
+    psi_B : torch.Tensor, shape ``(N_x, n_modes)``
+        Learned wavefunction.
+    dx : float
+        Spatial grid spacing.
+
+    Returns
+    -------
+    torch.Tensor, shape ``(n_modes, n_modes)``
+        Overlap matrix of <psi_A_m | psi_B_n>.
+    """
+    N = psi_A.shape[0]
+
+    weights = torch.ones(N, device=psi_A.device)
+    weights[0] = 0.5
+    weights[-1] = 0.5
+
+    weighted_A = psi_A * weights.unsqueeze(1)
+    return weighted_A.T @ psi_B * dx
+
 # ----------------------------------------------------------------------
 # 2️⃣ Smoke‑test entry point
 # ----------------------------------------------------------------------

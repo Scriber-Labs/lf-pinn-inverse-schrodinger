@@ -739,14 +739,6 @@ def plot_pod_first_three_spatial_modes(
     """
     _apply_style()
 
-    # ------------------------------------------------------------------
-    # 0️⃣ Minimal sanity checks
-    # ------------------------------------------------------------------
-    if x.dim() not in (1, 2):
-        raise ValueError("`x` must be a 1-D tensor or a column vector.")
-    if spatial_modes.dim() != 3:
-        raise ValueError("`spatial_modes` must be 2-D tensor (N, n_modes, 1).")
-
     # Ensure we work on CPU and detach from the autograd graph
     x_np = x.squeeze().detach().cpu().numpy()
     modes_np = spatial_modes.detach().cpu().numpy()     # shape (N, n_modes)
