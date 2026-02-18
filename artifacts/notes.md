@@ -40,13 +40,13 @@ Project 2: the inverse Schrodinger problem is ill-posed due to the fact that man
 - Regularization introduces geometric bias so that the hypothesis space is constrained.
   - Introducing $$\int(V''(x))^2dx$$ penalizes curvature in the configuration-space projection of phase space (i.e., wild folding of Lagrangian submanifolds). (❓❓❓❓WHAT DOES THIS MEAN? IT SOUNDS IMPORTANT!)
 
-> 🏡 The smooathness term regularizes the inverse problem by discouraging rapid curvature of the effective Lagrangian submanifold induced by $V(x)$.
+> 🏡 The smoothness term regularizes the inverse problem by discouraging rapid curvature of the effective Lagrangian submanifold induced by $V(x)$.
 
 ## Clifford algebra detour
 Importantly, Clifford algebra does not introduce additional parameters or structure. It is the linearlization of symplectic geometry (❓i would really like a source for this that i can look at for myself).
 
 For the sake of keeping it simple, we start with establishing 1D phase space:
-- basis: $\{ \mathbb{e}_q, \mathbb{e}_p \}$
+- basis: $\{ \mathbb{e}_q, \mathbb{e}_p \}$d
 - geometric product: $$\mathbb{e}_q \mathbb{e}_p = \mathbb{e}_q\cdot\mathbb{e}_p+\mathbb{e}_q\wedge\mathbb{e}_p$$
   - This is a good place to distinguish $dq$ and $dp$ from $\mathbb{e}_q$ and $\mathbb{e}_p$. If there is no real distinction, I need to decide how i want to define my basis for this sort of context from here on out. or at least have a game plan since this will come up a lot. 
 

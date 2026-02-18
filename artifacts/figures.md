@@ -11,14 +11,16 @@
 
 ### 🏡 Take-Home Messages
 - **Smoothness prior effect** pulls $V_\theta(x)$ towards a low-curvature shape.
-- **Identifiability limits** (❓) 
+- **Non-uniqueness of $V_\theta$**: The same set of eigenstates (wavefunctions and their associated eigenvalue energies) can be produced by more than one $V(x)$ $\rightarrow$ Thus, the inverse Schrodinger problem is fundamentally ill-posed.
+  - $\mathcal{L}_\text{smooth}$ helps guide the model to a physically plausible solution (e.g., no sharpe curves).
+  - ⚠️ However, $\mathcal{L}_\text{smooth}$ does not guarantee uniqueness!!
+### ✖️ Failure Modes
 - **Bias vs. variance tradeoff:** 
   - If $\lambda_\text{smooth}$ is too strong, flattening (bias) occurs.
-  - If $\lambda_\text{smooth}$ is too weak, noisy wiggles (wiggles) manifest.
-
-### ✖️ Failure Modes
-- **Flattening** (bias) occurs if $\lambda_\text{smooth}$ is too strong.
-- **Over-smoothing** (❓is this the same thing as flattening, or is it more general/ something different?❓)
+    - **Over-smoothing** (bias) occurs if $\lambda_\text{smooth}$ is too strong.
+    - In the extreme case, **flattening** (bias) occurs and $V_\theta \rightarrow \text{const}$.
+  - If $\lambda_\text{smooth}$ is too weak, noisy perturbations (wiggles) manifest.
+  - 
 - **Boundary artifacts** are more likely to manifest due to the model being less constricted near the boundaries.
 
 ---
@@ -55,8 +57,10 @@
 ![Overlap Heatmap](demo_visuals/overlap_heatmap.png)
 
 ### 🏡 Take-Home Messages
-- **Near-orthogonality emerges**
-- **Coupling** through shared $V(x)$ (❓)
+- **Near-orthogonality emerges** $\rightarrow$ agrees with ground truth wavefunctions.
+- **Coupling** through shared $V_\theta(x)$.
+  - Specifically, All $\psi_n^\theta$ are learned simultaneously via a *single shared* potential $V_\theta(x)$
+  - Thus, any error in $V_\theta(x)$ will 'leak' into $\psi_n^\theta$. "❓❓❓❓❓Any error in $V_\theta$ couples all states together; if the potential is wrong in a region, it distorts all modes that have support there. This is why off-diagonal overlaps are possible even without an explicit interaction term ❓❓❓❓❓"
 
 ✨ This is important for interpretability!
 
