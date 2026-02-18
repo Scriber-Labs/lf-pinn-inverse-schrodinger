@@ -21,7 +21,7 @@ import matplotlib.colors as mcolors
 import numpy as np
 import torch
 
-from pod import pod_decomposition
+from pod import pod_decomposition, cross_overlap_matrix
 
 # ----------------------------------------------------------------------
 # 🌍 Global style helper
@@ -614,7 +614,7 @@ def plot_overlap_heatmap(
             txt = f"{overlap[i, j]:{fmt}}"
             ax.text(j, i, txt,
                     ha="center", va="center",
-                    color="white" if overlap[i, j] < 0.5 else "black",
+                    color="black",
                     fontsize=9)
     ax.set_title(r"Overlap Matrix $\langle \psi_m^\theta | \psi_n^\theta \rangle$ (POD Diagnostic)", fontsize=16)
     fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="Overlap matrix")
@@ -626,7 +626,7 @@ def plot_overlap_heatmap(
         _add_lambda_row(fig, lambdas, ax=ax)
 
     # ------------------------------------------------------------------
-    # 4️⃣ Save if requestec
+    # 4️⃣ Save if requested
     # ------------------------------------------------------------------
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -823,6 +823,110 @@ def plot_pod_first_three_spatial_modes(
     # ------------------------------------------------------------------
     if lambdas is not None:
         _add_lambda_row(fig, lambdas, ax=axs[0])
+
+    # ------------------------------------------------------------------
+    # 3️⃣ Optional save
+    # ------------------------------------------------------------------
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+
+    return fig
+
+# ----------------------------------------------------------------------
+# 📊7️⃣c) Cross-overlap matrix heatmap
+# ----------------------------------------------------------------------
+def plot_cross_overlap_heatmap(
+    pod_modes_physical: Sequence[torch.Tensor] | torch.Tensor,
+    psi_matrix: Sequence[torch.Tensor] | torch.Tensor,
+    *,
+    dx: float | None = None,
+    cmap: str = "cool",
+    fmt: str = ".2f",
+    lambdas: Dict[str, float] | None = None,
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """
+    Create a heatmap of the *cross* overlap matrix <u_k | psi_n^theta> where ``u_k`` are the physical POD modes and ``psi_n^theta`` are learned wavefunctions.
+
+    This function uses the ``cross_overlap_matrix`` routine defined `src.pod.py`.
+
+    Parameters
+    ----------
+    pod_modes_physical : Sequence[torch.Tensor]
+        Physical POD modes (each 1-D, same length). If a single tensor is passed it is interpreted as a stacked matrix of shape ``(n_modes, N)``.
+    psi_matrix : Sequence[torch.Tensor]
+        Learned wavefunctions Psi^theta = [psi_1^theta psi_2^theta ...]
+    dx : float | None, optional
+    cmap, fmt : str, optional
+        Colormap and numeric formatting for the cell.
+    lambdas : Dict[str, float], optional
+        Optional loss-weight dictionary.
+    out_path : pathlib.Path | None, optional
+        Optional output path to save the image (PNG).
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        Cross overlap matrix <u_k | psi_n^theta> heatmap.
+    """
+    cross_overlap = cross_overlap_matrix(
+        pod_modes_physical,
+        psi_matrix,
+        dx=dx,
+    )       # Expected shape: (n_modes, n_modes)
+
+    n_modes = cross_overlap.shape[0]
+
+    fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5))
+
+    im = ax.imshow(
+        cross_overlap,
+        cmap=cmap,
+        vmin=-1.0,
+        vmax=1.0
+    )
+
+    # Axis ticks
+    ax.set_xticks(np.arange(n_modes))
+    ax.set_yticks(np.arange(n_modes))
+    ax.set_xticklabels([rf"$n={i}$" for i in range(n_modes)],
+                            rotation=45, ha="right")
+    ax.set_yticklabels([rf"$n={i}$" for i in range(n_modes)])
+
+    # ------------------------------------------------------------------
+    # #️⃣ Annotate every cell with its numeric value
+    # ------------------------------------------------------------------
+    for i in range(n_modes):
+        for j in range(n_modes):
+            txt = f"{cross_overlap[i, j]:{fmt}}"
+            ax.text(
+                j,
+                i,
+                txt,
+                ha="center",
+                va="center",
+                color="black",
+                fontsize=9,
+            )
+
+    # ------------------------------------------------------------------
+    # 🔖 Titles, color‑bar and optional λ‑row
+    # ------------------------------------------------------------------
+    ax.set_title(r"Cross Overlap Matrix $\langle u_k | \psi_n^\theta \rangle$",
+                 fontsize=16,
+                 )
+
+    fig.colorbar(
+        im,
+        ax=ax,
+        fraction=0.046,
+        pad=0.04,
+        label="Overlap matrix",
+    )
+
+    if lambdas is not None:
+        _add_lambda_row(fig, lambdas, ax=ax)
 
     # ------------------------------------------------------------------
     # 3️⃣ Optional save

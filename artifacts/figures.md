@@ -74,3 +74,7 @@
 ### 🏡 Take-Home Messages
 - Learned basis is not equivalent to ground-truth physical eigenbasis
 - Still explains the data
+
+## Figure 7c - $\langle u_k | \psi_n^\theta\rangle$ Overlap Matrix
+![Cross Overlap Heat Matrix](demo_visuals/cross_overlap_heatmap.png)
+Columns correspond to learned wavefunctions $\psi_n^\theta$ and rows correspond to POD eigenmodes $u_k$.

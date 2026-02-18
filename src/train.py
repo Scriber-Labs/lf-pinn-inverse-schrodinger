@@ -4,6 +4,7 @@ Training loop for the inverse Schrödinger problem.
 
 The loss is a weighted sum of three physically motivated terms:
 - **Physics loss**: enforces the TISE on the learned wavefunctions.
+- **Wavefunction normalization loss**: enforces normalization of the learned wavefunctions.
 - **Smoothness loss**: regularizes the potential to avoid spurious wiggles.
 - **Data-fit loss**: matches learned quantities to observed densities/energies.
 

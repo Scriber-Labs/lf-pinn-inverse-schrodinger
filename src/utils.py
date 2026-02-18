@@ -157,13 +157,6 @@ def grid_spacing(grid: torch.Tensor) -> float:
         raise ValueError("Grid must have at least 2 elements.")
     return ((g[-1] - g[0]) / ( g.numel() - 1)).item()
 
-def l2_normalization(
-    u: torch.Tensor,
-    dx: float,
-) -> torch.Tensor:
-    norm = torch.sqrt(torch.sum(u**2) * dx)
-    return u / norm
-
 # ----------------------------------------------------------------------
 # 2️⃣ Smoke test & entry point
 # ----------------------------------------------------------------------
