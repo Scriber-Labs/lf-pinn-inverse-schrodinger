@@ -60,7 +60,7 @@ Project 1 questions that said i'd address in this project(at least conceptually 
  - [ ] Hamiltonian mechanics from geometry (kinetic + potential 
 →
  flow)
- - [ ] Laplacian from Hamiltonian structure
+ - [x] Laplacian from Hamiltonian structure
  - [ ] Duals of covectors (contrast with cross vs. wedge products)
  - [ ] Convince myself that J = [0 1; -1 0] is the matrix representation of the canonical symplectic form.
  - [ ] Bivector contractions and Poisson brackets.

@@ -55,8 +55,8 @@
 ![Overlap Heatmap](demo_visuals/overlap_heatmap.png)
 
 ### 🏡 Take-Home Messages
-- **Near-orthogonality emerges (or not)**
-- **Coupling** through shared $V(x)$
+- **Near-orthogonality emerges**
+- **Coupling** through shared $V(x)$ (❓)
 
 ✨ This is important for interpretability!
 
