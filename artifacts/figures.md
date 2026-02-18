@@ -3,7 +3,7 @@
 ![Training Curves](demo_visuals/training_curves.png)
 
 > 🏡 *"The inverse problem stabilizes under competing physical and data-driven objectives."*
-
+![loss_table](./assets/images/loss_table_large.png)
 ---
 
 ## Figure 2 - Learned Potential $V_\theta(x)$ vs. Ground Truth Potential $V(x)$ (Harmonic Oscillator)
@@ -52,6 +52,25 @@
 
 
 ---
+# POD Diagnostics
+
+> 💡**Big Idea:** POD does not enforce physics. It reveals structure.
+
+
+### Specific Questions POD Answers
+
+| 🧙🏻‍♂️ Question                                                                            | ✨ Relvance                     |
+|---------------------------------------------------------------------------------------------| ------------------------------- |
+| Are $\psi_n^\theta(x)$ distinct or collapsing?                                              | Detects mode collapse           |
+| How many effective modes exist?                                                             | Identifiability                 |
+| Are learned states (❓is this just the same thing as saying 'learned eigenmodes') redundant? | Overparameterization            |
+| Do modes align with energy ordering?                                                        | Model consistency               |
+| Is orthogonality emerging naturally?                                                        | Strength of physics constraints |
+
+### 🏡 Take-Home Messages:
+- POD allows us to make statements about whether the learned eigenfunctions exhibit partial orthogonality, even in the absence of explicit orthogonality constraints.
+- POD tells us whether mode collapse occurs without additional structure (❓ what 'additional structure' specicially refer to?❓).
+
 
 ## Figure 6 - Overlap Heatmap
 ![Overlap Heatmap](demo_visuals/overlap_heatmap.png)
