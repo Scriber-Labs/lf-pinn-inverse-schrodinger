@@ -41,7 +41,7 @@
 
 ---
 
-## Figure 5 - Learned vs. (Fake) Observed Probability Densities
+## Figure 5 - Learned vs. (Dummy) Observed Probability Densities
 ![Probability Densities](demo_visuals/density.png)
 > Inferred probability densities $|\psi_n^\theta(x)|^2$ vs. fake observed probability densities $\rho_n^\text{obs}(x)$ for the first three eigenmodes.
 
