@@ -2,33 +2,55 @@
 ## Figure 1 - Training Curves
 ![Training Curves](demo_visuals/training_curves.png)
 
-> 🏡 *"The inverse problem stabilizes under competing physical and data-driven objectives."*
-![loss_table](./assets/images/loss_table_large.png)
+> 🏡 The inverse problem converges to a stable multi-objective equilibrium. Physics residual and data mismatch are minimized concurrently, while normalization and smoothness constraint terms regulate solution geometry.
+> 
+> Training dynamics exhibit staged constraint resolution:
+>   - Early objective competition
+>   - Mid-stage geometry stabilization
+>   - Late-stage oscillatory constraint enforcement as normalization corrections stabilize the solution manifold.
+>     - 📝 Similar staged dynamics were observed in [Project 1 (Figure 1)](https://github.com/Scriber-Labs/lf-pinn-harmonic-oscillator/blob/main/artifacts/figures.md), suggesting consistent constraint geometry behavior across problem classes.
+
+<p align="center">
+  <img src="../assets/images/loss_table_large.png"
+       alt="Loss table."
+       height="300">
+</p>
+
 ---
 
 ## Figure 2 - Learned Potential $V_\theta(x)$ vs. Ground Truth Potential $V(x)$ (Harmonic Oscillator)
 ![Potential Functions](demo_visuals/learned_potential.png)
 
-### 🏡 Take-Home Messages
-- **Smoothness prior effect** pulls $V_\theta(x)$ towards a low-curvature shape.
-- **Non-uniqueness of $V_\theta$**: The same set of eigenstates (wavefunctions and their associated eigenvalue energies) can be produced by more than one $V(x)$ $\rightarrow$ Thus, the inverse Schrodinger problem is fundamentally ill-posed.
+### 🔑 Key Take-Aways
+- **Smoothness prior effect:**  Regularization of $\mathcal{L}_\text{smooth}$ encourages low-curvature solutions, guiding $V_\theta(x)$ toward a geometrically stable (and thus, physically viable) state.
+- **Inverse problem non-uniqueness:** The inverse Schrödinger problem is fundamentally ill-posed. Specifically, the same finite set of eigenfunctions and associated eigenvalues can be produced by multiple potentials.
   - $\mathcal{L}_\text{smooth}$ helps guide the model to a physically plausible solution (e.g., no sharpe curves).
-  - ⚠️ However, $\mathcal{L}_\text{smooth}$ does not guarantee uniqueness!!
+  - However, $\mathcal{L}_\text{smooth}$ does not guarantee uniqueness!!
+- **Domain-dependent identifiability:** Divergence near boundaries arise due to the wavefunctions having negligible amplitude in those regions. 
+  - This results in:
+    - Numerical weakening of the physics residual.
+    - Data set provides minimal constraint.
+    - The smoothness term biases the solution toward flattening.
+  - Thus, the potential is identifiable within the spectral support of the trained eigenstates.
+
 ### ✖️ Failure Modes
 - **Bias vs. variance tradeoff:** 
-  - If $\lambda_\text{smooth}$ is too strong, flattening (bias) occurs.
-    - **Over-smoothing** (bias) occurs if $\lambda_\text{smooth}$ is too strong.
-    - In the extreme case, **flattening** (bias) occurs and $V_\theta \rightarrow \text{const}$.
-  - If $\lambda_\text{smooth}$ is too weak, noisy perturbations (wiggles) manifest.
-  - 
-- **Boundary artifacts** are more likely to manifest due to the model being less constricted near the boundaries.
+  - If $\lambda_\text{smooth}$ is too large, **over-smoothing** (bias) occurs. In the extreme case, **flattening** occurs and $V_\theta \rightarrow \text{const}$.
+  - If $\lambda_\text{smooth}$ is too small, noisy perturbations and high-frequency artifacts emerge in $V_\theta(x)$.
+- **Boundary artifacts** are more likely to manifest due to the model being less constricted near the boundaries (see domain-dependent identifiability).
 
+---
+
+> 🏡 Together, Figure 1 and Figure 2 suggest the low-fidelity PINN formulation aligns operator spectrum, solution support, and constraint geometry into a stable, interpretable equilibrium.
 ---
 
 ## Figure 3 - Learned Wavefunctions $\psi_n^\theta(x)$ vs. Ground Truth Wavefunctions $\psi_n(x)$ (Quantum Harmonic Oscillator)
 ![Learned Wavefunctions](demo_visuals/learned_wavefunctions.png)
 
-### 🏡 Take-Home Messages
+> 🏡 The learned operator is spectrally aligned across multiple eigenmodes.
+
+
+### 🔑 Key Take-Aways
 - **Phase ambiguity:** overall sign may flip 
 - **Shape consistency:** learned curves retain the same envelope
 - **Node structure:** zeros line up with the true wavefunctions.
