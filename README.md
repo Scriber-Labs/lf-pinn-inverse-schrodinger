@@ -37,12 +37,13 @@ python -m cli_train
 ```bash
 python -m cli_train \
   --n_modes 3 \
+  --hidden 64 \
   --epochs 4000 \ 
-  --lr 5e-4 \ 
+  --lr 5e-3 \ 
   --n_points 256 \
   --device cuda \ 
+  --seed 27 \
   --log_every 500
-  
 ```
 
 ---

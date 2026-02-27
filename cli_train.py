@@ -4,7 +4,7 @@ Command-line interface for the inverse Schrödinger training routine (src/train.
 
 Usage examples
 --------------
-$ python -m cli_train --hidden 128 --epochs 5000 --lr 5e4 --device cuda
+$ python -m cli_train --hidden 128 --epochs 5000 --lr 5e-4 --device cuda
 $ cli-trian --hidden 64 --epochs 3000       # if installed as a console script
 """
 
@@ -39,11 +39,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         help="Number of eigenmodes and associated energy eigenvalues to learn")
     parser.add_argument("--hidden", type=int, default=64,
                         help="Number of neurons per hidden layer")
-    parser.add_argument("--epochs", type=int, default=3000,
+    parser.add_argument("--epochs", type=int, default=6_000,
                         help="Number of training epochs")
-    parser.add_argument("--lr", type=float, default=1e-3,
+    parser.add_argument("--lr", type=float, default=5e-3,
                         help="Learning rate")
-    parser.add_argument("--n_points", type=int, default=200,
+    parser.add_argument("--n_points", type=int, default=256,
                         help="Number of spatial collocation points (i.e., grid resolution)")
     parser.add_argument("--seed", type=int, default=27,
                         help="Random seed")
@@ -53,7 +53,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default="cuda" if torch.cuda.is_available() else "cpu",
         help="cpu | cuda | cuda:0 | ...",
     )
-    parser.add_argument("--log-every", type=int, default=500,
+    parser.add_argument("--log-every", type=int, default=800,
                         help="Print interval every x epochs")
     return parser.parse_args(argv)
 
@@ -62,7 +62,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 # ----------------------------------------------------------------------
 def _build_problem(args: argparse.Namespace):
     """
-    Build the model and synthetic data (similar to a smoke test).
+    Build the model and synthetic data for the quantum harmonic oscillator (similar to a smoke test).
 
     Parameters
     ----------
@@ -88,9 +88,21 @@ def _build_problem(args: argparse.Namespace):
     x = make_grid(-5.0, 5.0, args.n_points, device=device)
     dx = float(x[1] - x[0])
 
+    # Analytic eigenfunctions (Hermite-Gaussians) for the chosen analytic potential (harmonic oscillator)
+    def hermite_gauss(n: int, x_vals: torch.Tensor) -> torch.Tensor:
+        """Return the nth normalized harmonic oscillator eigenfunction."""
+        from math import factorial, sqrt, pi
+        import scipy.special as sp
+        norm = 1.0 / sqrt(2.0 ** n * factorial(n)) * (pi ** -0.25)
+        # sp.hermite returns a callable polynomial; evaluate on x_vals
+        return norm * sp.hermite(n)(x_vals) * torch.exp(-0.5 * x_vals ** 2)
+
     # Synthetic observations (replace these with real data as you see fit)
-    rho_obs = [torch.exp(-x**2).squeeze() for _ in range(args.n_modes)]
-    E_obs = torch.arange(start=0.5, end=0.5+0.5*args.n_modes, step=0.5)
+    psi_true = [hermite_gauss(n, x.squeeze()) for n in range(args.n_modes)]
+    E_true = torch.arange(args.n_modes, dtype=torch.float32) + 0.5  # exact energies for the quantum harmonic oscillator  (hbar = omega = 1)
+
+    rho_obs = [psi ** 2 + 0.02 * torch.randn_like(psi) for psi in psi_true]
+    E_obs = E_true + 0.05 * torch.randn_like(E_true)
 
     # Loss weights (feel free to add these to CLI arguments)
     lambdas = {
