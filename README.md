@@ -98,7 +98,7 @@ inverse-piml-schrodinger/
             "lineColor": "#14b5ff",
             "textColor": "#ffffff",
             "fontFamily": "'Aclonica', sans-serif",
-            "borderRadius": "16"
+            "borderRadius": "16",
         },
         "handDrawn": true
     } }%%
@@ -140,7 +140,7 @@ flowchart TB
         end
         synthetic_data:::Observed_data
 
-        C["2️⃣ Neural Ansatz\nMLPs (potential function and \n wavefunction-energy eigenvalue pairs"]:::stage2
+        C["2️⃣ Neural Ansatz\nMLPs (potential function and \n wavefunction-energy eigenvalue pairs)"]:::stage2
 
         D["3️⃣ Automatic Differentiation"]:::stage3
 
@@ -165,7 +165,7 @@ flowchart TB
     %%--------------------------------------------------------------
     %%  POST‑TRAINING DIAGNOSTICS
     %%--------------------------------------------------------------
-    H["6️⃣ Sanity Checks\n (e.g., orthogonality between learned wavefunctions,\n learned eigenvalues are increase with eigenmode index,\n smooth potential function, boundary decay)"]:::stage6
+    H["6️⃣ Sanity Checks"]:::stage6
 
     subgraph POD["7️⃣ POD Diagnostics"]
         direction TB
@@ -190,11 +190,11 @@ flowchart TB
 ```
 
 ### 🗺️ Mathematical Mapping for PIML Architecture
-#### 0️⃣ Problem Setup - The 1D time-independent Schrödinger equation (TISE)
+#### 0️⃣ Problem Setup - Initialize the 1D time-independent Schrödinger equation (TISE) with random values and weights
 ##### Mathematical Formulation:
-$$-\frac{1}{2}\frac{d^2}{dx^2}\psi_n(x) + V(x)\psi_n(x)=E_n\psi_n(x), \quad x\in[-5,5]$$
+$$-\frac{1}{2}\frac{d^2}{dx^2}\psi^\theta_n(x) + V_\theta(x)\psi_n^\theta(x)=E_n^\theta\psi_n^\theta(x), \quad x\in[-5,5]$$
 
-> 📝 The overall goal is to learn an unknown potential $V(x)$, unknown wavefunctions $\psi_n$ and their associated energy eigenvalues $E_n$ from noisy, low-fidelity data.
+> 🥅 The overall goal is to learn an unknown ground-truth potential $V(x)$ and wavefunctions $\psi_n$ along with their associated energy eigenvalues $E_n$ from noisy, low-fidelity data.
 
 #### 1️⃣ Synthetic Data - Physics enforcement via noisy observations
 ##### Mathematical Formulation:
