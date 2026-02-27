@@ -203,8 +203,11 @@ $$x_i=x_0+i\Delta x  \quad \forall i\in\{ 0,1,2,\dots, N-1 \}$$ where $$\Delta x
 
 ###### Noisy observations
 1. **Observed probability densities:**
+
 $$\rho_n(x_i)^\text{obs}=|\psi_n^\text{true}(x_i)|^2+\sigma_\rho\,\mathcal{N}(0,1),  \qquad  \sigma_\rho = 0.02$$
+
 2. **Observed energies:**
+
 $$E_n^\text{obs}=E_n^\text{true}+\sigma_E\,\mathcal{N}(0,1), \qquad \sigma_E=0.05$$
 
 > 📝 Noisy observations simulate sparse experimental observations.
@@ -216,6 +219,8 @@ $$\psi_n^\theta=\text{MLP}_\psi(\theta_\psi;x)$$
 $$E_n^\theta=\text{learnable scalar}$$
 
 #### 3️⃣ Automatic Differentiation - Recover the first and second partial deriviatives of the learned wavefunctions with respect to $x$
+##### 🧩 Mathematical Formulation
+
 $$\frac{\partial}{\partial x}\psi_n^\theta$$
 $$\frac{\partial^2}{\partial x^2}\psi_n^\theta$$
 
