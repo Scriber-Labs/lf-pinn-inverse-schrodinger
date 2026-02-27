@@ -252,7 +252,10 @@ $$\mathbf{\Psi^\theta}=[\psi_0^\theta, \dots, \psi_{N-1}^\theta] \quad \text{(sn
 
 where each column corresponds to a learned wavefunction for each spatial grid point for the $N-1^\text{th}$ eigenmode.
 
-Taking the SVD of $\mathbf{\Psi^\theta}$ gives $$\mathbf{\Psi^\theta}=U\Sigma W^T$$
+Taking the SVD of $\mathbf{\Psi^\theta}$ gives 
+
+$$\mathbf{\Psi^\theta}=U\Sigma W^T$$
+
 where 
 - the columns of $U$ are POD spatial modes of the learned eigenfunctions.
 - the diagonal elements of $\Sigma$ are the corresponding singular values.
