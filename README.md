@@ -226,11 +226,11 @@ $$\frac{\partial^2}{\partial x^2}\psi_n^\theta$$
 <p align="center">
   <img src="./assets/images/loss_table_numbered.png"
        alt="Loss table."
-       height="150">
+       height="250">
 </p>
 
 **Composite Objective:** 
-$$ \mathcal{L}_\text{total} = \lambda_\text{TISE}\mathcal{L}_\text{TISE} + \lambda_\text{norm}\mathcal{L}_\text{norm} + \lambda_\text{smooth}\mathcal{L}_\text{smooth} + \lambda_\text{data}\mathcal{L}_\text{data}$$
+$$\mathcal{L}_\text{total} = \lambda_\text{TISE}\mathcal{L}_\text{TISE} + \lambda_\text{norm}\mathcal{L}_\text{norm} + \lambda_\text{smooth}\mathcal{L}_\text{smooth} + \lambda_\text{data}\mathcal{L}_\text{data}$$
 
 
 #### 5️⃣ Optimization - Gradient descent update
