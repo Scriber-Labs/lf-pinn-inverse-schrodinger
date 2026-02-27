@@ -1,4 +1,4 @@
-# inverse-piml-schrodinger
+# inverse-pinn-schrodinger
 
 > 🥅 **Goal:** understand which operator features are robustly recoverable under strong physics priors and limited data.
 
