@@ -191,20 +191,26 @@ flowchart TB
 
 ### 🗺️ Mathematical Mapping for PIML Architecture
 #### 0️⃣ Problem Setup - Initialize the 1D time-independent Schrödinger equation (TISE) with random values and weights
-##### Mathematical Formulation:
+##### 🧩 Mathematical Formulation
 $$-\frac{1}{2}\frac{d^2}{dx^2}\psi^\theta_n(x) + V_\theta(x)\psi_n^\theta(x)=E_n^\theta\psi_n^\theta(x), \quad x\in[-5,5]$$
 
 > 🥅 The overall goal is to learn an unknown ground-truth potential $V(x)$ and wavefunctions $\psi_n$ along with their associated energy eigenvalues $E_n$ from noisy, low-fidelity data.
 
 #### 1️⃣ Synthetic Data - Physics enforcement via noisy observations
-##### Mathematical Formulation:
-$$x\in [-5,5] \quad \text{(spatial grid)}$$
-$$\begin{align*}x\sim \mathcal{U}[-5,5] \\ \tilde{\psi}_n(x_i)=\psi_n^\text{true}(x_i)+\varepsilon_i, \quad \varepsilon\sim\mathcal{N}(0,\sigma^2) & \quad \text{(noisy observations)}\end{align*}$$
+##### 🧩 Mathematical Formulation
+###### Deterministic, uniformly spaced 1D grid of spatial points:
+$$x_i=x_0+i\Delta x  \quad \forall i\in\{ 0,1,2,\dots, N-1 \}$$ where $$\Delta x=\frac{x_{N-1}-x_0}{N-1} \ .$$
+
+###### Noisy observations
+1. **Observed probability densities:**
+$$\rho_n(x_i)^\text{obs}=|\psi_n^\text{true}(x_i)|^2+\sigma_\rho\,\mathcal{N}(0,1),  \qquad  \sigma_\rho = 0.02$$
+2. **Observed energies:**
+$$E_n^\text{obs}=E_n^\text{true}+\sigma_E\,\mathcal{N}(0,1), \qquad \sigma_E=0.05$$
 
 > 📝 Noisy observations simulate sparse experimental observations.
 
 #### 2️⃣ Neural Ansatz - Learned potential and eigenstates
-##### Mathematical Formulation:
+##### 🧩 Mathematical Formulation:
 $$V_\theta(x)=\text{MLP}_V(\theta_V;x)$$
 $$\psi_n^\theta=\text{MLP}_\psi(\theta_\psi;x)$$
 $$E_n^\theta=\text{learnable scalar}$$
@@ -214,11 +220,21 @@ $$\frac{\partial}{\partial x}\psi_n^\theta$$
 $$\frac{\partial^2}{\partial x^2}\psi_n^\theta$$
 
 #### 4️⃣ Loss Function- Low fidelity PINN objective function with four loss terms
-##### Mathematical Formulation:
-![Loss_Table_equations](assets/images/loss_table_large.png)
+##### 🧩 Mathematical Formulation
+**Individual terms:**
+
+<p align="center">
+  <img src="./assets/images/loss_table_numbered.png"
+       alt="Loss table."
+       height="150">
+</p>
+
+**Composite Objective:** 
+$$ \mathcal{L}_\text{total} = \lambda_\text{TISE}\mathcal{L}_\text{TISE} + \lambda_\text{norm}\mathcal{L}_\text{norm} + \lambda_\text{smooth}\mathcal{L}_\text{smooth} + \lambda_\text{data}\mathcal{L}_\text{data}$$
+
 
 #### 5️⃣ Optimization - Gradient descent update
-##### Mathematical Formulation:
+##### 🧩 Mathematical Formulation:
 $$\theta \leftarrow \theta - \eta\nabla_\theta\mathcal{L}_\theta$$
 
 #### 6️⃣ Sanity Checks - Validate the following:
@@ -230,8 +246,9 @@ $$\theta \leftarrow \theta - \eta\nabla_\theta\mathcal{L}_\theta$$
 > 📝 Sanity checks via figure analysis are an essential component of the sanity check process and for providing interpretable insights (see `./artifacts/figures.md`).
 
 #### 7️⃣ Proper Orthogonal Decomposition (POD) Diagnostics - Take the SVD of the snapshot matrix for learned wavefunctions
-##### Mathematical Formulation:
+##### 🧩 Mathematical Formulation:
 $$\mathbf{\Psi^\theta}=[\psi_0^\theta, \dots, \psi_{N-1}^\theta] \quad \text{(snapshot matrix)}$$
+where each column corresponds to a learned wavefunction for each spatial grid point for the $N-1^\text{th}$ eigenmode.
 
 Taking the SVD of $\mathbf{\Psi^\theta}$ gives $$\mathbf{\Psi^\theta}=U\Sigma W^T$$
 where 
@@ -260,6 +277,7 @@ Orthogonality
 
 ---
 ## 🔮 Future possible implementations
+- stochastic spatial grid sampling ($x\sim\mathcal{U}(x_\text{min},x_\text{max})$ instead of deterministic, equally-spaced spatial grid)
 - unnormalized densities
 - increase the number of learned eigenmodes
 - partial observation windows

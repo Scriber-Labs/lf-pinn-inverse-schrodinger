@@ -11,9 +11,9 @@
 >     - 📝 Similar staged dynamics were observed in [Project 1 (Figure 1)](https://github.com/Scriber-Labs/lf-pinn-harmonic-oscillator/blob/main/artifacts/figures.md), suggesting consistent constraint geometry behavior across problem classes.
 
 <p align="center">
-  <img src="../assets/images/loss_table_large.png"
+  <img src="../assets/images/loss_table_extended.png"
        alt="Loss table."
-       height="300">
+       height="350">
 </p>
 
 ---
