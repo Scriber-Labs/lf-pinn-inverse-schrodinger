@@ -127,7 +127,7 @@ def main(argv: list[str] | None = None) -> None:    # noqa: D401
     set_global_seed(args.seed, deterministic=True)
 
     device: Final = torch.device(args.device)
-    print(f"🖥️ Using device: {device}")
+    print(f"🖥️  Using device: {device}")
 
     # Build model, optimizer, data, etc.
     model, optimizer, x, dx, rho_obs, E_obs, lambdas = _build_problem(args)
