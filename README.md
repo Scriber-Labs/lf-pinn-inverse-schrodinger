@@ -37,8 +37,8 @@ inverse-piml-schrodinger/
 ├── notebooks/
 │   └── demo.ipynb        # visual + narrative
 ├── references/
-│   ├── README.md         # a blank README.md idk what for though. chat gpt told me to include to when i decided to make the references folder
-│   └── references.bib    # sources (❓🙋🏻‍♀️ not necessarily used explicity by the github repo code, but that's mainly because i have no idea how to do that. if there is a standard way of implementing bib files easily like in overleaf im open to something like that... just no relearning entire languages and new software related bullshit (pardon my French)
+│   ├── README.md         # a blank README.md idk what for though ❓
+│   └── references.bib    # sources 
 ├── assets/
 │   ├── images/
 │   │   └── interpratibility_axis.png    
@@ -217,32 +217,34 @@ Orthogonality
 
 ---
 ## 🔮 Future possible implementations
-- noisy or unnormalized densities
+- unnormalized densities
+- increase the number of learned eigenmodes
 - partial observation windows
-- unknown normalization constants
-- orthogonality constraints between $\psi_n(\theta,x)$ 
-- add energy ordering regularization
-- add symplectic loss
+- Additional loss terms:
+  - orthogonality constraints between $\psi_n(\theta,x)$ 
+  - add energy ordering regularization
+  - add symplectic loss
+  - Dynamic weighting of the loss terms
+    - 📝 For this project, the loss weights are assigned to a static `dict`. 
+    - Plan of Action
+      - Focus on data first, then enforce physics loss.
+      - Prevent over-smoothing early during training.
+      - **Adaptive balancing:** Compute the magnitude of each loss term every epoch and scale the $\lambda$'s so that all terms contribute roughly the same amount.
+      - **Bayesian/ probabilistic sampling:** Treat each $\lambda$ as a learnable hyperparameter and update it with gradient descent.
+    - Tips
+      - Start with a static `dict` for the first pass. This will provide a baseline to compare against.
+      - Add a **scheduler** only if you see a failure mode symptom.
+    
+        | **Symptom** | **Remedy**                                                       |
+        | ----------- |------------------------------------------------------------------|
+        | Physics residual stalls while the data-fit continues to improve. | Increase $\lambda_\text{physics}$.                               |
+        | Flattening failure mode | Decrease $\lambda_\text{smooth}$ or slow down its schedule.      |
+         | Wildly oscillating loss curves | Use a **smooth ramp** for all $\lambda$'s to stabilize training. | 
+    
+      - Log the effective $\lambda$ values each epoch and plot them alongside the training curves. This will help reveal whether a scheduler helped or hindered learning.
 - use PySR architecture instead of 'pure' neural network (Crammer, 2023)
   - ✨ adds to interpretability discussion in `lf-pinn-inversse-schrodinger`
-- Dynamic weighting of the loss terms
-  - 📝 For this project, the loss weights are assigned to a static `dict`. 
-  - Plan of Action
-    - Focus on data first, then enforce physics loss.
-    - Prevent over-smoothing early during training.
-    - **Adaptive balancing:** Compute the magnitude of each loss term every epoch and scale the $\lambda$'s so that all terms contribute roughly the same amount.
-    - **Bayesian/ probabilistic sampling:** Treat each $\lambda$ as a learnable hyperparameter and update it with gradient descent.
-  - Tips
-    - Start with a static `dict` for the first pass. This will provide a baseline to compare against.
-    - Add a **scheduler** only if you see a failure mode symptom.
-    
-      | **Symptom** | **Remedy**                                                       |
-      | ----------- |------------------------------------------------------------------|
-      | Physics residual stalls while the data-fit continues to improve. | Increase $\lambda_\text{physics}$.                               |
-      | Flattening failure mode | Decrease $\lambda_\text{smooth}$ or slow down its schedule.      |
-       | Wildly oscillating loss curves | Use a **smooth ramp** for all $\lambda$'s to stabilize training. | 
-    
-    - Log the effective $\lambda$ values each epoch and plot them alongside the training curves. This will help reveal whether a scheduler helped or hindered learning.
+
 ---
 ## ✅ To Do
 - [ ] Figure 8 (bifurcation diagram) in `demo.ipynb`
