@@ -6,9 +6,16 @@
 This project extends the `lf-pinn-harmonic-oscillator` framework to an inverse quantum problem.
 While project 1 investigated the robustness  of physics-informed neural networks (PINNs) under low fidelity discretization for a *known Hamiltonian*, this project is concerned with the information about an *unknown potential* that can be recovered from partial, noisy observations of quantum states.
 
-Using the time-independent Schrodinger equation (TISE) as a physics constraint, we treat the potential $V(x)$ as a learnable function while wavefunctions act as auxiliary fields constrained by the PDE. The model is trained using noisy spectral data and probability densities, mimicking low-fidelity experimental measurements.
+Using the time-independent Schrödinger equation (TISE) as a physics constraint, we treat the potential $V(x)$ as a learnable function while wavefunctions act as auxiliary fields constrained by the PDE. The model is trained using noisy spectral data and probability densities, mimicking low-fidelity experimental measurements.
 
 As with project 1, the goal is not high-precision reconstruction, but interpretability and identifability.
+
+---
+## Quick Start
+```bash
+pip install -r requirements.txt
+python src/train.py --config ✅❓figure out what these are❓✅
+```
 
 ---
 
@@ -139,19 +146,57 @@ flowchart TB
     PIML -- Snapshot Matrix --> POD:::POD_diagnostics
 ```
 
-### Mathematical Mapping for PIML Architecture
+### 🗺️ Mathematical Mapping for PIML Architecture
+#### 0️⃣ Problem Setup - The 1D time-independent Schrödinger equation (TISE)
+##### Mathematical Formulation:
+$$-\frac{1}{2}\frac{d^2}{dx^2}\psi_n(x) + V(x)\psi_n(x)=E_n\psi_n(x), \quad x\in[-5,5]$$
 
-| Step | Component                 | Mathematical Description                                                                                                                                                                                 | Interpretation                                                                                |
-|----|---------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
-| 0️⃣ | Problem setup             |                                                                                                                                                                                                          | Define the physical system                                                                    |
-| 1️⃣ | Spatial grid              | $x \in [-5, 5]$                                                                                                                                                                                          | Synthetic “data” for physics enforcement                                                      |
-| 2️⃣ | Neural ansatz             | $$\begin{align*} V_\theta(x) &= \text{MLP}_V(x; \theta_V) \\ \psi_n^\theta(x) &= \text{MLP}_\psi(x; \theta_\psi) \\ E_n^\theta &= \text{learnable scalar}  \end{align*}$$                                | Learned potential and eigenstates                                                             |
-| 3️⃣ | Automatic differentiation | $\frac{\partial}{\partial x}\psi_n^\theta$ and $\frac{\partial^2}{\partial x^2}\psi_n^\theta$                                                                                                            | Recover first and second partial derivatives of the learned wavefunctions with respect to $x$ |
-| 4️⃣ | Total loss                | $\mathcal{L}_\text{tot}=\lambda_\text{TISE}\mathcal{L}_\text{TISE}+\lambda_\text{norm}\mathcal{L}_\text{norm}+\lambda_\text{smooth}\mathcal{L}_\text{smooth}+\lambda_\text{data}\mathcal{L}_\text{data}$ | Low-fidelity PINN objective                                                                   |
-| 5️⃣ | Optimization              | $\theta \leftarrow \theta - \eta\nabla_\theta \mathcal{L}$                                                                                                                                               | Gradient-based learning                                                                       |
-| 6️⃣ | Sanity Checks             |                                                                                                                                                                                                          | Sanity checks and structure validation                                                        |
-| 7️⃣ | POD Diagnostics           |                                                                                                                                                                                                          | Proper Orthogonal Decomposition of the learned eigenfunctions                                 |
+> 📝 The overall goal is to learn an unknown potential $V(x)$, unknown wavefunctions $\psi_n$ and their associated energy eigenvalues $E_n$ from noisy, low-fidelity data.
 
+#### 1️⃣ Synthetic Data - Physics enforcement via noisy observations
+##### Mathematical Formulation:
+$$x\in [-5,5] \quad \text{(spatial grid)}$$
+$$\begin{align*}x\sim \mathcal{U}[-5,5] \\ \tilde{\psi}_n(x_i)=\psi_n^\text{true}(x_i)+\varepsilon_i, \quad \varepsilon\sim\mathcal{N}(0,\sigma^2) & \quad \text{(noisy observations)}\end{align*}$$
+
+> 📝 Noisy observations simulate sparse experimental observations.
+
+#### 2️⃣ Neural Ansatz - Learned potential and eigenstates
+##### Mathematical Formulation:
+$$V_\theta(x)=\text{MLP}_V(\theta_V;x)$$
+$$\psi_n^\theta=\text{MLP}_\psi(\theta_\psi;x)$$
+$$E_n^\theta=\text{learnable scalar}$$
+
+#### 3️⃣ Automatic Differentiation - Recover the first and second partial deriviatives of the learned wavefunctions with respect to $x$
+$$\frac{\partial}{\partial x}\psi_n^\theta$$
+$$\frac{\partial^2}{\partial x^2}\psi_n^\theta$$
+
+#### 4️⃣ Loss Function- Low fidelity PINN objective function with four loss terms
+##### Mathematical Formulation:
+![Loss_Table_equations](assets/images/loss_table_large.png)
+
+#### 5️⃣ Optimization - Gradient descent update
+##### Mathematical Formulation:
+$$\theta \leftarrow \theta - \eta\nabla_\theta\mathcal{L}_\theta$$
+
+#### 6️⃣ Sanity Checks - Validate the following:
+- Orthogonality of learned eigenfunctions
+- Energy ordering $E_0^\theta < E_1^\theta < E_2^\theta$
+- Smoothness of learned potential
+- Boundary decay behavior
+
+> 📝 Sanity checks via figure analysis are an essential component of the sanity check process and for providing interpretable insights (see `./artifacts/figures.md`).
+
+#### 7️⃣-9️⃣ Proper Orthogonal Decomposition (POD) Diagnostics - Take the SVD of the snapshot matrix for learned wavefunctions
+##### Mathematical Formulation:
+$$\mathbf{\Psi^\theta}=[\psi_0^\theta, \dots, \psi_{N-1}^\theta] \quad \text{(snapshot matrix)}$$
+Taking the SVD of $\mathbf{\Psi^\theta}$ gives $$\mathbf{\Psi^\theta}=U\Sigma W^T$$
+where 
+- the columns of $U$ are POD modes of the learned eigenfunctions.
+- the diagonal elements of $\Sigma$ are the corresponding singular values.
+- ❓I don't really care about $W$ in this context, but what is the interpreation again?❓
+> 📝 The spectrum (❓what does this refer to again in the context of the SVD?❓) reveals learned structure where large gaps in consecutive singular values indicate low-rank structure is learned correctly. 
+
+> ✨ Importantly, POD does not enforce physics. It reveals structure. This is important for interpretability!
 ---
 ## 🌍 Global Design Choices
 Assumptions:
@@ -168,16 +213,6 @@ What is being learned:
 Orthogonality
 - For our low fidelity design, we are not _enforcing_ orthogonality directly.
 - However, our POD function (`src/pod.py`) allows us to _diagnose_ orthogonality.
-
----
-## 📉 Loss Function
-![Loss_Table_equations](assets/images/loss_table.png)
-
-
----
-## Proper Orthogonal Decomposition (POD)
-> ✨ POD does not enforce physics. It reveals structure.
-
 
 ---
 ## 🔮 Future possible implementations
