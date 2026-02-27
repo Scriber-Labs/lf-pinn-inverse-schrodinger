@@ -89,7 +89,7 @@ inverse-piml-schrodinger/
 ## 🏗️ PIML Architecture
 ```mermaid
 %%====================================================================
-%%  CURVED-CORNER MERMAID WITH SUBGRAPH HEADER
+%%  CURVED‑CORNER MERMAID – DARK THEME + PURPLE ACCENT
 %%====================================================================
 %%{ init: {
         "theme": "base",
@@ -98,81 +98,95 @@ inverse-piml-schrodinger/
             "lineColor": "#14b5ff",
             "textColor": "#ffffff",
             "fontFamily": "'Aclonica', sans-serif",
-            "borderRadius": "16"       /* larger radius for more rounded corners */
+            "borderRadius": "16"
         },
         "handDrawn": true
     } }%%
 %%====================================================================
 
 flowchart TB
-
     %%--------------------------------------------------------------
-    %%  COLOR RAMP (pseudo-gradient)
+    %%  STYLE DEFINITIONS – keep original dark shades, add purple
     %%--------------------------------------------------------------
-    classDef stage0 fill:#0b1c2d,stroke:#14b5ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef stage1 fill:#0f2a3d,stroke:#14b5ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef stage2 fill:#103b4f,stroke:#00f5db,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef stage3 fill:#124f55,stroke:#00f5db,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef stage4 fill:#1a6b63,stroke:#00f5db,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef stage5 fill:#1f4e5f,stroke:#f78166,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef stage6 fill:#3a2f2a,stroke:#f78166,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef stage7 fill:#0f2a3d,stroke:#14b5ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+    classDef stage0 fill:#301934,stroke:#5D3FD3,stroke-width:2px,color:#ffffff,rx:12,ry:12;   %% deep purple for physics 
+    classDef stage1 fill:#0f2a3d,stroke:#14b5ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;   %% original dark indigo 
+    classDef stage2 fill:#103b4f,stroke:#00f5db,stroke-width:2px,color:#ffffff,rx:12,ry:12;   %% original teal blue 
+    classDef stage3 fill:#124f55,stroke:#00f5db,stroke-width:2px,color:#ffffff,rx:12,ry:12;   %% original cyan/green 
+    classDef stage4 fill:#1a6b63,stroke:#00f5db,stroke-width:2px,color:#ffffff,rx:12,ry:12;   %% original orangeish teal 
+    classDef stage5 fill:#1f4e5f,stroke:#f78166,stroke-width:2px,color:#ffffff,rx:12,ry:12;   %% optimizer 
+    classDef stage6 fill:#3a2f2a,stroke:#f78166,stroke-width:2px,color:#ffffff,rx:12,ry:12;   %% diagnostics
+    classDef stage7 fill:#0f2a3d,stroke:#14b5ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;   %% notes / tiny bubbles 
 
     classDef PIML_framework fill:#161b22,stroke:#14b5ff,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
     classDef Observed_data stroke:#0f2a3d,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
     classDef Total_loss stroke:#00f5db,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
     classDef POD_diagnostics stroke:#f78166,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-    
+
     %%--------------------------------------------------------------
-    %%  MAIN PIPELINE SUBGRAPH WITH HEADER
+    %%  LIGHT‑GRAY ARROW STYLE (so arrows stay subtle)
+    %%--------------------------------------------------------------
+    linkStyle default stroke:#888,stroke-width:2px
+
+    %%--------------------------------------------------------------
+    %%  CORE PIML PIPELINE
     %%--------------------------------------------------------------
     subgraph PIML["PIML Framework"]
         direction TB
+
         subgraph synthetic_data["1️⃣ Synthetic Data"]
             direction TB
-            B["Spatial Grid"]:::stage1
-            obs["Noisy Observations"]:::stage1
+            B["Spatial grid"]:::stage1
+            obs["Noisy density & energy samples"]:::stage1
         end
-        
         synthetic_data:::Observed_data
-        C["2️⃣ Neural Ansatz"]:::stage2
+
+        C["2️⃣ Neural Ansatz\nMLPs (potential function and \n wavefunction-energy eigenvalue pairs"]:::stage2
+
         D["3️⃣ Automatic Differentiation"]:::stage3
-        F["5️⃣ Optimizer (Adam)"]:::stage5
-        
+
         subgraph loss["4️⃣ Total Loss"]
             direction TB
-            physics["Physics Loss + Wavefunction Normalization Loss + Smoothness Regularization"]:::stage4
-
-            data["Data mismatch loss"]:::stage4
+            physics["- Physics residual loss\n- Wavefunction‑norm loss\n- Smoothness regularizer"]:::stage4
+            data["Data‑misfit loss (density & energy)"]:::stage4
         end
-        
+        loss:::Total_loss
+
+        F["5️⃣ Optimizer (Adam)\nupdates all MLP weights"]:::stage5
+
+        %% Connections (light‑gray arrows)
         B --> C
         obs --> data
         C --> D
-        D --> loss:::Total_loss
+        D --> loss
         loss --> F
         F -- training loop --> C
     end
-    
+
     %%--------------------------------------------------------------
-    %%  CONTEXT & DIAGNOSTICS
+    %%  POST‑TRAINING DIAGNOSTICS
     %%--------------------------------------------------------------
-    A["0️⃣ Define TISE Dynamics"]:::stage0
-    H["6️⃣ Sanity Checks"]:::stage6
-    
-    subgraph POD["POD Diagnostics"]
+    H["6️⃣ Sanity Checks\n (e.g., orthogonality between learned wavefunctions,\n learned eigenvalues are increase with eigenmode index,\n smooth potential function, boundary decay)"]:::stage6
+
+    subgraph POD["7️⃣ POD Diagnostics"]
         direction TB
-        SVD["7️⃣ SVD"]:::stage6
-        sigma["8️⃣ POD Singular Values"]:::stage6
-        U["9️⃣ POD Eigenmodes"]:::stage6
-        
+        SVD["SVD of snapshot matrix"]:::stage6
+        sigma["POD spectrum (i.e., singular values)"]:::stage6
+        U["POD eigenmodes (columns of U)"]:::stage6
+        %% noteW["Wᵀ holds temporal coefficients – not needed for static eigenmode analysis"]:::stage7
+        %% noteSpec["‘Spectrum’ = the set of singular values; gaps signal low‑rank structure"]:::stage7
+
         SVD --> sigma
         SVD --> U
     end
     
+    A["0️⃣ Define TISE dynamics"]:::stage0
+
+    %%--------------------------------------------------------------
+    %%  OUTER LINKS
+    %%--------------------------------------------------------------
     A --> PIML:::PIML_framework
     PIML --> H
-    PIML -- Snapshot Matrix --> POD:::POD_diagnostics
+    PIML -- snapshot matrix --> POD:::POD_diagnostics
 ```
 
 ### 🗺️ Mathematical Mapping for PIML Architecture
@@ -215,16 +229,16 @@ $$\theta \leftarrow \theta - \eta\nabla_\theta\mathcal{L}_\theta$$
 
 > 📝 Sanity checks via figure analysis are an essential component of the sanity check process and for providing interpretable insights (see `./artifacts/figures.md`).
 
-#### 7️⃣-9️⃣ Proper Orthogonal Decomposition (POD) Diagnostics - Take the SVD of the snapshot matrix for learned wavefunctions
+#### 7️⃣ Proper Orthogonal Decomposition (POD) Diagnostics - Take the SVD of the snapshot matrix for learned wavefunctions
 ##### Mathematical Formulation:
 $$\mathbf{\Psi^\theta}=[\psi_0^\theta, \dots, \psi_{N-1}^\theta] \quad \text{(snapshot matrix)}$$
 
 Taking the SVD of $\mathbf{\Psi^\theta}$ gives $$\mathbf{\Psi^\theta}=U\Sigma W^T$$
 where 
-- the columns of $U$ are POD modes of the learned eigenfunctions.
+- the columns of $U$ are POD spatial modes of the learned eigenfunctions.
 - the diagonal elements of $\Sigma$ are the corresponding singular values.
-- ❓I don't really care about $W$ in this context, but what is the interpreation again?❓
-> 📝 The spectrum (❓what does this refer to again in the context of the SVD?❓) reveals learned structure where large gaps in consecutive singular values indicate low-rank structure is learned correctly. 
+- $W^T$ contains temporal coefficients (not needed for TISE).
+> 📝 The spectrum reveals learned structure where large gaps in consecutive singular values indicate low-rank structure is learned correctly. 
 
 > ✨ Importantly, POD does not enforce physics. It reveals structure. This is important for interpretability!
 ---
