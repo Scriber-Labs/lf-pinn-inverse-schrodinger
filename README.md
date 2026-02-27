@@ -189,6 +189,7 @@ $$\theta \leftarrow \theta - \eta\nabla_\theta\mathcal{L}_\theta$$
 #### 7️⃣-9️⃣ Proper Orthogonal Decomposition (POD) Diagnostics - Take the SVD of the snapshot matrix for learned wavefunctions
 ##### Mathematical Formulation:
 $$\mathbf{\Psi^\theta}=[\psi_0^\theta, \dots, \psi_{N-1}^\theta] \quad \text{(snapshot matrix)}$$
+
 Taking the SVD of $\mathbf{\Psi^\theta}$ gives $$\mathbf{\Psi^\theta}=U\Sigma W^T$$
 where 
 - the columns of $U$ are POD modes of the learned eigenfunctions.
