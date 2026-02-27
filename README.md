@@ -33,7 +33,7 @@ Core CLI usage (from project root where `cli_train.py` lives)
 python -m cli_train
 ```
 
-🔵 **Example:** Optional CLI flags 
+🔵 **Example:** Optional CLI flags ✅Make sure this is accurate!✅
 ```bash
 python -m cli_train \
   --n_modes 3 \
