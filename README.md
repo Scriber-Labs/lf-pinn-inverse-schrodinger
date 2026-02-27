@@ -3,17 +3,34 @@
 > 🥅 **Goal:** understand which operator features are robustly recoverable under strong physics priors and limited data.
 
 
-This project extends the `lf-pinn-harmonic-oscillator` framework to an inverse quantum problem.
-While project 1 investigated the robustness  of physics-informed neural networks (PINNs) under low fidelity discretization for a *known Hamiltonian*, this project is concerned with the information about an *unknown potential* that can be recovered from partial, noisy observations of quantum states.
+This project extends the `lf-pinn-harmonic-oscillator` framework to an inverse 1D Schrödinger problem.
 
-Using the time-independent Schrödinger equation (TISE) as a physics constraint, we treat the potential $V(x)$ as a learnable function while wavefunctions act as auxiliary fields constrained by the PDE. The model is trained using noisy spectral data and probability densities, mimicking low-fidelity experimental measurements.
+While project 1 investigated the robustness  of Physics-Informed Neural Networks (PINNs) under low fidelity discretization for a *known Hamiltonian*, this project investigates what information about an *unknown potential* that can be recovered from partial, noisy observations of quantum states.
 
-As with project 1, the goal is not high-precision reconstruction, but interpretability and identifability.
+Using the time-independent Schrödinger equation (TISE) as a physics constraint, we treat:
+- The potential $V(x)$ as a learnable function 
+- The wavefunctions act as auxiliary fields (❓❓what do we mean by auxiliary fields in this context?❓❓) constrained by the PDE 
+- The eigenvalues $E_n$ as trainable scalars.
+
+The model is trained using noisy spectral data and probability densities, mimicking low-fidelity experimental measurements.
+
+> ✨  As with project 1, the goal is not high-precision reconstruction, but interpretability and identifability.
 
 ---
-## Quick Start
+## 🔰 Quick Start
 ```bash
-pip install -r requirements.txt
+# Install dependencies
+pip install -e .
+
+# Train a model with default settings
+python -m train
+
+# Launch demo notebook
+jupyter lab notebooks/demo.ipynb
+```
+
+Optional CLI flags
+```bash
 python src/train.py --config ✅❓figure out what these are❓✅
 ```
 
