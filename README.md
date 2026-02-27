@@ -33,7 +33,7 @@ jupyter lab notebooks/demo.ipynb
 python -m cli_train
 ```
 
-🔷 Optional CLI flags ✅Make sure this is accurate!✅
+🔷 Optional CLI flags (✅ fix whatever is causing training results to differ from demo.ipynb ✅)
 ```bash
 python -m cli_train --n_modes 3 --hidden 64 --epochs 6000 --lr 5e-3 --n_points 256 --device cpu --seed 27 --log_every 800
 ```
@@ -48,6 +48,7 @@ inverse-piml-schrodinger/
 ├── README.md
 ├── requirements.txt
 ├── pyproject.toml
+├── cli_train.py            # CLI support for generating training data
 ├── src/
 │   ├── model.py            # neural network ansatz for V_theta(x)
 │   ├── physics.py          # TISE residual, data mismatch, scale-aware smoothness
@@ -59,13 +60,13 @@ inverse-piml-schrodinger/
 ├── notebooks/
 │   └── demo.ipynb        # visual + narrative
 ├── references/
-│   ├── README.md         # a blank README.md idk what for though ❓
+│   ├── README.md         # a blank README.md (✅ need to decide if I want to keep all this ✅)
 │   └── references.bib    # sources 
 ├── assets/
 │   ├── images/
 │   │   └── interpratibility_axis.png    
 └── artifacts/
-    ├── notes.md                         # conceptual notes and reflection
+    ├── project_1_followup.md            # conceptual notes and reflection
     ├── figures.md                       # structure-based analysis of demo visuals
     └── demo_visuals/    
         ├── density.png
