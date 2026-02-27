@@ -53,7 +53,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default="cuda" if torch.cuda.is_available() else "cpu",
         help="cpu | cuda | cuda:0 | ...",
     )
-    parser.add_argument("--log-every", type=int, default=800,
+    parser.add_argument("--log_every", type=int, default=800,
                         help="Print interval every x epochs")
     return parser.parse_args(argv)
 

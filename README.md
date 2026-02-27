@@ -28,23 +28,16 @@ python -m train
 # Launch demo notebook
 jupyter lab notebooks/demo.ipynb
 ```
-Core CLI usage (from project root where `cli_train.py` lives)
+🔷 Core CLI usage (from project root where `cli_train.py` lives)
 ```bash
 python -m cli_train
 ```
 
-🔵 **Example:** Optional CLI flags ✅Make sure this is accurate!✅
+🔷 Optional CLI flags ✅Make sure this is accurate!✅
 ```bash
-python -m cli_train \
-  --n_modes 3 \
-  --hidden 64 \
-  --epochs 4000 \ 
-  --lr 5e-3 \ 
-  --n_points 256 \
-  --device cuda \ 
-  --seed 27 \
-  --log_every 500
+python -m cli_train --n_modes 3 --hidden 64 --epochs 6000 --lr 5e-3 --n_points 256 --device cpu --seed 27 --log_every 800
 ```
+
 
 ---
 
