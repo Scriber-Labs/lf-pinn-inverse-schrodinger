@@ -28,10 +28,21 @@ python -m train
 # Launch demo notebook
 jupyter lab notebooks/demo.ipynb
 ```
-
-Optional CLI flags
+Core CLI usage (from project root where `cli_train.py` lives)
 ```bash
-python src/train.py --config ✅❓figure out what these are❓✅
+python -m cli_train
+```
+
+🔵 **Example:** Optional CLI flags 
+```bash
+python -m cli_train \
+  --n_modes 3 \
+  --epochs 4000 \ 
+  --lr 5e-4 \ 
+  --n_points 256 \
+  --device cuda \ 
+  --log_every 500
+  
 ```
 
 ---
