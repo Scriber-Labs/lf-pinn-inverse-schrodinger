@@ -1,4 +1,5 @@
-# Interpretability Axis
+# 🧠 Interpretability Axis
+
 ## 💡Ideas:
 For the nondimensionalized quantum harmonic oscillator (QHO), eigenstates are eigenfunctions of:
 

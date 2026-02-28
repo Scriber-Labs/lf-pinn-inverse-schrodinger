@@ -88,32 +88,27 @@
 > 💡**Big Idea:** POD does not enforce physics. It reveals structure.
 
 
-### Specific Questions POD Answers
-
-| 🧙🏻‍♂️ Question                                                                            | ✨ Relvance                     |
-|---------------------------------------------------------------------------------------------| ------------------------------- |
-| Are $\psi_n^\theta(x)$ distinct or collapsing?                                              | Detects mode collapse           |
-| How many effective modes exist?                                                             | Identifiability                 |
-| Are learned states (❓is this just the same thing as saying 'learned eigenmodes') redundant? | Overparameterization            |
-| Do modes align with energy ordering?                                                        | Model consistency               |
-| Is orthogonality emerging naturally?                                                        | Strength of physics constraints |
-
-### 🏡 Take-Home Messages:
-- POD allows us to make statements about whether the learned eigenfunctions exhibit partial orthogonality, even in the absence of explicit orthogonality constraints.
-- POD tells us whether mode collapse occurs without additional structure (❓ what 'additional structure' specicially refer to?❓).
 
 
 ## Figure 6 - Overlap Heatmap
 ![Overlap Heatmap](demo_visuals/overlap_heatmap.png)
+> 🏡 The learned model is not just interpolating. It is learning a coherent operator!
 
-### 🏡 Take-Home Messages
+### 🔑 Key Take-Aways
 - **Near-orthogonality emerges** $\rightarrow$ agrees with ground truth wavefunctions.
-- **Coupling** through shared $V_\theta(x)$.
-  - Specifically, All $\psi_n^\theta$ are learned simultaneously via a *single shared* potential $V_\theta(x)$
-  - Thus, any error in $V_\theta(x)$ will 'leak' into $\psi_n^\theta$. "❓❓❓❓❓Any error in $V_\theta$ couples all states together; if the potential is wrong in a region, it distorts all modes that have support there. This is why off-diagonal overlaps are possible even without an explicit interaction term ❓❓❓❓❓"
-
-✨ This is important for interpretability!
-
+- **Coupling** of all $\psi_n^\theta(x)$ through shared $V_\theta(x)$. Thus:
+  - The learned operator
+  
+    $$H_\theta=-\frac{1}{2}\frac{\partial^2}{\partial x^2} + V_\theta(x)$$ 
+  
+    is global.
+  
+  - Any error in $V_\theta(x)$ will 'leak' into $\psi_n^\theta$.
+    - If $V_\theta$ is wrong in region $x_0$, then every eigenstate with support near $x_0$ will 'inherit' that error.
+    - This means that errors are correlated across learned eigenstates. This is why you might observe:
+      - Slight systematic energy underestimation.
+      - Consistent broadening across learned wavefunctions.
+      - Off-diagonal overlaps (if $H_\theta$ is badly learned).
 ---
 
 ## Figure 7 - POD Diagnostics 
@@ -132,3 +127,24 @@
 ## Figure 7c - $\langle u_k | \psi_n^\theta\rangle$ Overlap Matrix
 ![Cross Overlap Heat Matrix](demo_visuals/cross_overlap_heatmap.png)
 Columns correspond to learned wavefunctions $\psi_n^\theta$ and rows correspond to POD eigenmodes $u_k$.
+
+### Specific Questions POD Answers
+
+| 🧙🏻‍♂️ Question                                                                                              | ✨ Relevance            | ✔️ Answer | 🖼️ Figure(s) | 💬 Comments                                                                                                                                                                                                                                                                                        | 🧠 Interpratibility                                                             |
+|---------------------------------------------------------------------------------------------------------------|------------------------|-----------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
+| Are $\psi_n^\theta(x)$ distinct or collapsing?                                                                | Detects mode collapse  | distinct  | Figure 6      | Flattening of learned wavefunctions occurs without wavefunction normalization loss term. <br/> <br/> Moreover, the smoothness regularization term keeps the learned potential structurally constrained so that curvature isn't too steep.                                                          | Orthogonality is (approximately) observed in learned wavefunctions.             |
+| How many effective modes exist?                                                                               | Identifiability        |           |               |                                                                                                                                                                                                                                                                                                    |                                                                                 |
+| Are learned eigenstates redundant?                                                                            | Overparameterization   |           |               |                                                                                                                                                                                                                                                                                                    |                                                                                 |
+| Do modes (❓learned or is there a way to extract evalues from POD modes or both?❓) align with energy ordering? | Model consistency      |           |               |                                                                                                                                                                                                                                                                                                    |                                                                                 |
+| Is orthogonality emerging naturally?                                                                          | Structural consistency | yes       | Figure 6      | Importantly, this architecture does NOT enforce $\langle \psi_m^\theta , \psi_n^\theta \rangle=\delta_{mn}$. However, we observe near-orthogonality in Figure 6. <br/> <br/>This result is structurally consistent with Hermitian operators (orthogonal eigenfunctions with distinct eigenvalues). | The learned potential is consistent enough to preserve orthogonality structure. |
+
+---
+## ✨ General Insights (Figures 2-6)
+> #### 🧠 Big Interpretation Insight: Three 'layers' of structure 
+> - [ ] (✅ Need to update this after reviewing the last three figures✅)
+> 
+> **Layer 1** - Observable consistency: $|\psi_n^\theta|^2$ matches noisy data.
+> 
+> **Layer 2** - Spectral geometry: Nodes, parity, and ordering are preserved.
+> 
+> **Layer 3 (POD Anlaysis)** - Operator coherence: Near-orthogonality and energy spacing emerge naturally. 
