@@ -672,9 +672,23 @@ def plot_pod_singular_values(
     # 1️⃣ Convert to NumPy (detach, CPU) -> no gradients needed
     # ------------------------------------------------------------------
     sv = singular_values.detach().cpu().numpy()
+    sv = singular_values.detach().cpu().numpy()
+
+    # -------------------------------------------------
+    # 2️⃣ Structured console printout
+    # -------------------------------------------------
+    print("\nSingular Values:")
+    print("-" * 30)
+    print(f"{'Mode (k)':>10} | {'Sigma_k':>15}")
+    print("-" * 30)
+
+    for i, val in enumerate(sv, start=1):
+        print(f"{i:10d} | {val:15.6e}")
+
+    print("-" * 30)
 
     # ------------------------------------------------------------------
-    # 2️⃣ Plot
+    # 3️⃣ Plot
     # ------------------------------------------------------------------
     fig, ax = plt.subplots()
     ax.semilogy(
@@ -693,7 +707,7 @@ def plot_pod_singular_values(
     ax.legend(loc="upper right", fontsize=10)
 
     # ------------------------------------------------------------------
-    # 3️⃣ Optional save
+    # 4️⃣ Optional save
     # ------------------------------------------------------------------
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
