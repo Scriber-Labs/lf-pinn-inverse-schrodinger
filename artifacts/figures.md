@@ -198,22 +198,12 @@ $$u_2\approx -0.81\psi_0^\theta$$
 | Is orthogonality emerging naturally?                                                                                  | Structural consistency | yes           | Figure 6      | Importantly, this architecture does NOT enforce $\langle \psi_m^\theta , \psi_n^\theta \rangle=\delta_{mn}$. However, we observe near-orthogonality in Figure 6. <br/> <br/>This result is structurally consistent with Hermitian operators (orthogonal eigenfunctions with distinct eigenvalues). | The learned potential is consistent enough to preserve orthogonality structure. |
 
 ---
-## ✨ General Insights (Figures 2-6)
-> #### 🧠 Big Interpretation Insight: Three 'layers' of structure 
-> - [ ] (✅ Need to update this after reviewing the last three figures✅)
+## ✨ General Insights (Figures 2-7)
+> #### 🧠 Big Interpretation Insight: Three (Four ❓) 'layers' of structure
 
-| **Layer**          | **Interpretation**     | **📝 Notes**                              |
-|--------------------|------------------------|-------------------------------------------|
-| 1️⃣                | data fidelity          |                                           |
-| 2️⃣                | observable consistency | $\|\psi_n^\theta \|^2$ matches noisy data |
-| 3️⃣                | spectral geometry      | nodes, parity, and ordering are preserved |
+| **Layer**          | **Interpretation**     | **📝 Notes**                                           |
+|--------------------|------------------------|--------------------------------------------------------|
+| 1️⃣                | data fidelity          |                                                        |
+| 2️⃣                | observable consistency | $\|\psi_n^\theta \|^2$ matches noisy data              |
+| 3️⃣                | spectral geometry      | nodes, parity, and ordering are preserved              |
 | 4️⃣  POD analysis (❓) | operator coherence     | near-orthogonality and energy spacing naturally emerge |
-> 
-> **Layer 1**
-
-- 
-- Observable consistency: $|\psi_n^\theta|^2$ matches noisy data.
-> 
-> **Layer 2** - Spectral geometry: Nodes, parity, and ordering are preserved.
-> 
-> **Layer 3 (POD Anlaysis)** - Operator coherence: Near-orthogonality and energy spacing emerge naturally. 
