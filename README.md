@@ -115,46 +115,109 @@ flowchart TB
     classDef Observed_data stroke:#0f2a3d,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
     classDef Total_loss stroke:#00f5db,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
     classDef POD_diagnostics stroke:#f78166,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-
+    
+    classDef dashed_blue fill:#161b22,stroke:#14b5ff,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
+    classDef dashed_green fill:#555555,stroke:#3EB489,stroke-width:3px,stroke-dasharray:6 6,color:#fffff,rx:12,ry:12;
+    classDef dashed_orange fill:161b22, stroke:#f78166, stroke-dasharray: 6 6,color:#ffffff,rx:12,ry:12;
     %%--------------------------------------------------------------
     %%  LIGHT‑GRAY ARROW STYLE (so arrows stay subtle)
     %%--------------------------------------------------------------
     linkStyle default stroke:#888,stroke-width:2px
 
     %%--------------------------------------------------------------
-    %%  CORE PIML PIPELINE
+    %% CORE PINN PIPELINE
     %%--------------------------------------------------------------
-    subgraph PIML["PIML Framework"]
-        direction TB
 
+    subgraph PINN["Physics-Informed Neural Network"]
+    direction TB
+    
         subgraph synthetic_data["1️⃣ Synthetic Data"]
-            direction TB
-            B["Spatial grid"]:::stage1
-            obs["Noisy density & energy samples"]:::stage1
+            A["Spatial grid x"]:::stage1
+            obs["Observed density ρ(x) & energies E"]:::stage1
         end
-        synthetic_data:::Observed_data
+    
+        %% Neural parameterizations
+        subgraph NN["2️⃣ Neural parameterizations"]
+        direction TB
+            subgraph potential["Potential network"]
+              Vnet["MLP"] --> V["Vθ(x)"]
+            end
 
-        C["2️⃣ Neural Ansatz\nMLPs (potential function and \n wavefunction-energy eigenvalue pairs)"]:::stage2
+            subgraph states["Eigenfunction networks"]
+                psi0net["MLP"] --> psi0["ψ₀(x)"]
+                psinet["MLP"] --> psii["ψᵢ(x)"]
+                psin["MLP"] --> psif["ψ_{N−1}(x)"]
+            end
 
-        D["3️⃣ Automatic Differentiation"]:::stage3
-
-        subgraph loss["4️⃣ Total Loss"]
-            direction TB
-            physics["- Physics residual loss\n- Wavefunction‑norm loss\n- Smoothness regularizer"]:::stage4
-            data["Data‑misfit loss (density & energy)"]:::stage4
+            Eparam["Trainable parameters"] --> Etheta["Eθₙ"]
         end
-        loss:::Total_loss
 
-        F["5️⃣ Optimizer (Adam)\nupdates all MLP weights"]:::stage5
+        %% Derivatives
+        subgraph derivatives["Finite difference operators"]
+        direction TB
+            psiDD["ψ''(x) via stencil"]
+            VDD["V''(x) via stencil"]
+        end
 
-        %% Connections (light‑gray arrows)
-        B --> C
-        obs --> data
-        C --> D
-        D --> loss
-        loss --> F
-        F -- training loop --> C
-    end
+        %% Physics residual
+        subgraph physics["Physics residual"]
+            R["Rₙ(x) = −½ψ'' + Vψ − Eψ"]
+        end
+
+        %% Loss terms
+        subgraph loss["Total Loss"]
+        direction TB
+            Lphys["Physics loss\n‖R(x)‖²"]
+            Lnorm["Normalization loss\n(∫ψ²dx −1)²"]
+            Lsmooth["Smoothness\n‖V''‖²"]
+            Ldata["Data mismatch\nρ(x), E"]
+        end
+        
+        NN:::dashed_green
+        opt["5️⃣ Optimizer (Adam)"]:::stage5
+
+        end
+
+    %%--------------------------------------------------------------
+    %% Connections
+    %%--------------------------------------------------------------
+
+    A --> Vnet:::stage2
+    A --> psi0net:::stage2
+    A --> psinet:::stage2
+    A --> psin:::stage2
+
+psi0 --> psiDD
+psii --> psiDD
+psif --> psiDD
+
+V --> VDD
+
+psiDD --> R
+V --> R
+Etheta --> R
+
+R --> Lphys
+
+psi0 --> Lnorm
+psii --> Lnorm
+psif --> Lnorm
+
+VDD --> Lsmooth
+
+psi0 --> Ldata
+psii --> Ldata
+psif --> Ldata
+Etheta --> Ldata
+obs --> Ldata
+
+Lphys --> opt
+Lnorm --> opt
+Lsmooth --> opt
+Ldata --> opt
+
+opt --> NN
+
 
     %%--------------------------------------------------------------
     %%  POST‑TRAINING DIAGNOSTICS
@@ -173,14 +236,10 @@ flowchart TB
         SVD --> U
     end
     
-    A["0️⃣ Define TISE dynamics"]:::stage0
-
-    %%--------------------------------------------------------------
-    %%  OUTER LINKS
-    %%--------------------------------------------------------------
-    A --> PIML:::PIML_framework
-    PIML --> H
-    PIML -- snapshot matrix --> POD:::POD_diagnostics
+    step0["0️⃣ Define TISE Dynamics"]:::stage0 --> PINN:::dashed_blue
+    synthetic_data:::dashed_blue
+    PINN --> H
+    PINN --> POD:::dashed_orange
 ```
 
 ### 🗺️ Mathematical Mapping for PIML Architecture
