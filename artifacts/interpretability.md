@@ -1,6 +1,16 @@
 # 🧠 Interpretability Axis
 
 ## 💡Ideas:
+
+Three interpretability layers (Figure 6 analysis so far):
+
+| **Layer** | **Diagnostic** |
+|-----------|----------------|
+| Observable level | density matching |
+| Geometric level | node/ parity structure |
+| Operator level | orthogonality & spectrum |
+
+---
 For the nondimensionalized quantum harmonic oscillator (QHO), eigenstates are eigenfunctions of:
 
 $$ H = -\frac{1}{2}\frac{\partial^2}{
