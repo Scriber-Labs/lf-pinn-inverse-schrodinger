@@ -716,7 +716,7 @@ def plot_pod_singular_values(
     return fig
 
 # ----------------------------------------------------------------------
-# 📊7️⃣b) First three spatial POD modes (should resemble the true eigenmodes)
+# 📊7️⃣ b) First three spatial POD modes (should resemble the true eigenmodes)
 # ----------------------------------------------------------------------
 def plot_pod_first_three_spatial_modes(
     x: torch.Tensor,
