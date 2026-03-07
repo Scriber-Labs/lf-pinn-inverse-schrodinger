@@ -1,0 +1,29 @@
+%%====================================================================
+%%  🏗️ PROJECT #2 ARCHITECTURE
+%%====================================================================
+%%{ init: {
+        "theme": "base",
+        "themeVariables": {
+            "background": "#0D1117",
+            "lineColor": "#14B5FF",
+            "textColor": "#fffff",
+            "fontFamily": "'Aclonica', sans-serif",
+            "borderRadius": "16",
+        },
+        "handDrawn": true,
+    }  }%%
+%%====================================================================
+flowchart LR
+    %%--------------------------------------------------------------
+    classDef grad1 fill:#301934,stroke:#5D3FD3,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
+
+    %% CORE PIPELINE
+    %%--------------------------------------------------------------
+    subgraph PIML["PIML Framework"]
+    direction LR
+
+    end
+
+    step0["Define TISE dynamics"] --> PIML
+
+    step0:::grad1
