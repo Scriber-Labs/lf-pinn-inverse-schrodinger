@@ -1,0 +1,115 @@
+%%====================================================================
+%%  ✨ SCRIBER EXPERIENCE GRADIENT (Cyan → Cobalt → Purple → Orange)
+%%====================================================================
+%%{ init: {
+ "theme":"base",
+ "themeVariables": {
+  "background":"#0d1117",
+  "primaryColor":"#161b22",
+  "lineColor":"#14b5ff",
+  "textColor":"#ffffff",
+  "fontFamily":"'Aclonica','Merriweather',serif"
+ },
+ "handDrawn":false
+}}%%
+%%====================================================================
+
+flowchart LR
+
+%%--------------------------------------------------------------
+%%  SCRIBER GRADIENT RAMP
+%%--------------------------------------------------------------
+
+classDef scriber_grad0 fill:#0d1117,stroke:#14b5ff,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
+classDef scriber_grad1 fill:#0f2a3d,stroke:#00e8ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+classDef scriber_grad2 fill:#103b4f,stroke:#14b5ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+classDef scriber_grad3 fill:#1a3e78,stroke:#5280ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+classDef scriber_grad4 fill:#352a6b,stroke:#7952f5,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+classDef scriber_grad5 fill:#5c2c6d,stroke:#ff66b3,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+classDef scriber_grad6 fill:#3a2f2a,stroke:#f78166,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+
+classDef scriber_grad7 fill:#1a2a44,stroke:#5280ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+classDef scriber_grad8 stroke:#f78166,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
+
+%%--------------------------------------------------------------
+%% CORE PIPELINE
+%%--------------------------------------------------------------
+
+subgraph scriber_0["0️⃣ Problem Definition"]
+direction TB
+
+    subgraph scriber_1A["1️⃣ Data & Inputs"]
+    direction TB
+
+        subgraph scriber_2A["2️⃣ Neural Representations"]
+        direction TB
+
+            subgraph scriber_3AA["3️⃣ Operator Construction"]
+            direction TB
+
+                scriber_4AB["4️⃣ Feature Encoding"]
+                    --> scriber_5A["5️⃣ Latent Mapping"]
+                    --> scriber_A["6️⃣ Prediction"]
+
+                scriber_4AB --> scriber_5B["5️⃣ Auxiliary Mapping"]
+                    --> scriber_6B["6️⃣ Constraint Head"]
+
+                scriber_5B --> scriber_6C["6️⃣ Regularization"]
+
+                scriber_5C --> scriber_6B
+
+                scriber_4C["4️⃣ Alternate Features"]
+                    --> scriber_5C["5️⃣ Projection"]
+                    --> scriber_6C
+
+            end
+        end
+
+        subgraph scriber_2B["2️⃣ Diagnostics"]
+        direction LR
+
+            subgraph scriber_8AB["8️⃣ Analysis"]
+            direction LR
+                scriber_7AA1["7️⃣ Spectral"]
+                scriber_7AA2["7️⃣ Residual"]
+            end
+
+            subgraph scriber_8BB["8️⃣ Visualization"]
+            direction LR
+                scriber_7AB1["7️⃣ Eigenmodes"]
+                scriber_7AB2["7️⃣ Statistics"]
+            end
+
+            scriber_8AB <--> scriber_8BB
+
+        end
+
+        scriber_2A --> scriber_2B
+
+    end
+end
+
+
+%%--------------------------------------------------------------
+%% APPLY GRADIENT
+%%--------------------------------------------------------------
+
+scriber_0:::scriber_grad0
+scriber_1A:::scriber_grad1
+scriber_2A:::scriber_grad2
+scriber_2B:::scriber_grad2
+scriber_3AA:::scriber_grad3
+scriber_4AB:::scriber_grad4
+scriber_4C:::scriber_grad4
+scriber_5A:::scriber_grad5
+scriber_5B:::scriber_grad5
+scriber_5C:::scriber_grad5
+scriber_A:::scriber_grad6
+scriber_6B:::scriber_grad6
+scriber_6C:::scriber_grad6
+scriber_7AA1:::scriber_grad7
+scriber_7AA2:::scriber_grad7
+scriber_7AB1:::scriber_grad7
+scriber_7AB2:::scriber_grad7
+scriber_8AB:::scriber_grad8
+scriber_8BB:::scriber_grad8

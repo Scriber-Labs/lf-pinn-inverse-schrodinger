@@ -13,7 +13,7 @@
         "handDrawn": true
     } }%%
 %%====================================================================
-flowchart TB
+flowchart LR
 
     %%--------------------------------------------------------------
     %%  COLOR RAMP (pseudo-gradient)
@@ -32,11 +32,11 @@ flowchart TB
     %% CORE PIPELINE
     %%--------------------------------------------------------------
     subgraph blue-orange_0["0️⃣ blue_orange_grad0"]
-    direction LR
+    direction TB
         subgraph blue-orange_1A["1️⃣ blue-orange_grad1"]
-        direction LR
+        direction TB
             subgraph blue-orange_2A["2️⃣ blue-orange_grad2"]
-            direction LR
+            direction TB
                 subgraph blue-orange_3AA["3️⃣ blue-orange_grad3"]
                 direction TB
                     blue-orange_4AB["4️⃣ blue-orange_grad4"] --> blue-orange_5A["5️⃣ blue-orange_grad5"] --> blue-orange_A["6️⃣ blue-orange_grad6"]
@@ -46,18 +46,31 @@ flowchart TB
                     blue-orange_4C["4️⃣ blue-orange_grad4"] --> blue-orange_5C["5️⃣ blue-orange_grad5"] --> blue-orange_6C
                 end
             end
-            subgraph blue-orange_8["8️⃣ blue-orange_grad8"]
+            
+            subgraph blue-orange_2B["2️⃣ blue-orange_2B"]
             direction LR
-                blue-orange_7A["7️⃣ blue-orange_grad7"]
-            end
+                subgraph blue-orange_8AB["8️⃣ blue-orange_grad8"]
+                direction LR
+                    blue-orange_7AA1["7️⃣ blue-orange_grad7"]
+                    blue-orange_7AA2["7️⃣ blue-orange_grad7"]
+                end
+
+                subgraph blue-orange_8BB["8️⃣ blue-orange_grad8"]
+                direction LR
+                    blue-orange_7AB1["7️⃣ blue-orange_grad7"]
+                    blue-orange_7AB2["7️⃣ blue-orange_grad7"]
+                end
+
+                blue-orange_8AB <--> blue-orange_8BB
         end
-
-
+        blue-orange_2A --> blue-orange_2B
+        end
     end
 
     blue-orange_0:::blue_orange_grad0
     blue-orange_1A:::blue_orange_grad1
     blue-orange_2A:::blue_orange_grad2
+    blue-orange_2B:::blue_orange_grad2
     blue-orange_3AA:::blue_orange_grad3
     blue-orange_4AB:::blue_orange_grad4
     blue-orange_4C:::blue_orange_grad4
@@ -67,5 +80,9 @@ flowchart TB
     blue-orange_A:::blue_orange_grad6
     blue-orange_6B:::blue_orange_grad6
     blue-orange_6C:::blue_orange_grad6
-    blue-orange_7:::blue_orange_grad7
-    blue-orange_8:::blue_orange_grad8
+    blue-orange_7AA1:::blue_orange_grad7
+    blue-orange_7AA2:::blue_orange_grad7
+    blue-orange_7AB1:::blue_orange_grad7
+    blue-orange_7AB2:::blue_orange_grad7
+    blue-orange_8AB:::blue_orange_grad8
+    blue-orange_8BB:::blue_orange_grad8
