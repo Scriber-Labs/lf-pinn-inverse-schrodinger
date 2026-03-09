@@ -4,9 +4,8 @@
 %%{ init: {
         "theme": "base",
         "themeVariables": {
-            "background": "#0D1117",
-            "lineColor": "#14B5FF",
-            "textColor": "#ffffff",
+            "background": "`#0D1117`",
+            "lineColor": "`#14B5FF`",
             "fontFamily": "'Aclonica', sans-serif",
             "borderRadius": "16",
         },
@@ -20,12 +19,7 @@ flowchart LR
     %%-----------------------------------------------------------
     %%  NODE DEFINITIONS
     %%-----------------------------------------------------------
-    step0["0️⃣ Define TISE dynamics."]
-
-
-
-
-
+    step0["0️⃣ Define TISE dynamics"]
 
     %%-----------------------------------------------------------
     %% CORE PIPELINE (PIML Framework)
@@ -43,6 +37,7 @@ flowchart LR
         end
 
 
+
         subgraph PINN["2️⃣ MLP"]
         direction LR
 
@@ -51,35 +46,41 @@ flowchart LR
             MLP3["MLP"]:::MLP
             MLP4["MLP"]:::MLP
 
-            potential["$$V_\theta(x)$$"]
+            potential(("$$V_\theta(x)$$"))
 
+            MLP1 --> potential
             subgraph wavefunctions["Learned Wavefunctions"]
             direction TB
+                wavefunction_0(("$$\psi_0^\theta(x)$$")):::wavefunction
+                wavefunction_1(("$$\psi_1^\theta(x)$$")):::wavefunction
+                wavefunction_final(("$$\psi_{n-1}^\theta(x)$$")):::wavefunction
 
-                wavefunction_0["$$\psi_0^\theta$$"]:::wavefunction
-                wavefunction_1["$$\psi_1^\theta$$"]:::wavefunction
-                wavefunction_final["$$\psi_{n-1}^\theta$$"]:::wavefunction
 
             end
 
-            %%-----------------------------------------------------------
-            %%  Connections
-            %%-----------------------------------------------------------
-            MLP1 --> potential
             MLP2 --> wavefunction_0
             MLP3 --> wavefunction_1
             MLP4 --> wavefunction_final
 
+
+
         end
 
+        subgraph loss["4️⃣ Loss Function"]
+        direction TB
+
+            loss_physics["$$L_\text{physics}$$"]
+        end
 
     spatial_grid --> MLP1
     spatial_grid --> MLP2
     spatial_grid --> MLP3
     spatial_grid --> MLP4
 
-    end
+    energy(("$$E_n^\theta$$"))
 
+
+    end
     %%-----------------------------------------------------------
     %%  External connections
     %%-----------------------------------------------------------
@@ -88,20 +89,15 @@ flowchart LR
     %%-----------------------------------------------------------
     %%  STYLE DEFINITIONS (inline, no external CSS)
     %%-----------------------------------------------------------
-    style step0 fill:#301934,stroke:#5D3FD3,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-
+    style step0 fill:#0A061D,stroke:#5D3FD3,stroke-width:2px,color:#ffffff,rx:12,ry:12;
     style PIML fill:#0B1C2D,stroke:#14b5ff,stroke-width:1px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
-
-    style synthetic fill:#11112ECE,stroke:#5D3FD3,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-
+    style synthetic fill:#11112ECE,stroke:#5D3FD3,stroke-dasharray:6 6,stroke-width:2px,color:#ffffff,rx:12,ry:12;
     style spatial_grid fill:#1E0026,stroke:#750071,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-
-    style observed_data fill:#1a2a44,stroke:#5280ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-
-    classDef wavefunction fill:#224261,stroke:#14B5FF,stroke-width:2px,color:#ffffff,rx:12,ry:12;14B5FF
-
-    style wavefunctions fill:#224261,stroke:#14B5FF,stroke-width:2px,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;14B5FF
-
+    style observed_data fill:#190E48,stroke:#5280ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+    classDef wavefunction fill:#005E99,stroke:#14B5FF,stroke-width:2px,color:#adc8ff,rx:12,ry:12;
+    style wavefunctions fill:#224261,stroke:#14B5FF,stroke-width:2px,stroke-dasharray:6 6,color:#C7F3FF,rx:12,ry:12;
     style PINN fill:#103b4f,stroke:#00E8FF,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+    classDef MLP fill:#350099,stroke:#5E17EB,stroke-width:4px,color:#ffffff,rx:12,ry:12;
+    style potential fill:#0062FF,stroke:#14B5FF,stroke-width:3px,color:#ffffff,rx:12,ry:12;
+    style energy width:480px,height:240px,fill:#004cff,stroke:#3e9eff,stroke-width:3px,color:#ffffff,rx:12,ry:12;
 
-    classDef MLP fill:#ddd6ffb7,stroke:#4b28e7,stroke-width:4px,color:#ffffff,rx:12,ry:12;
