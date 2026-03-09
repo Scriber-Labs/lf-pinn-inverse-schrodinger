@@ -80,10 +80,10 @@ inverse-piml-schrodinger/
 ```
 
 ---
-## 🏗️ PIML Architecture
+## 🧜‍♀️ PIML Architecture
 ```mermaid
 %%====================================================================
-%%  CURVED‑CORNER MERMAID – DARK THEME + PURPLE ACCENT
+%%  🏗️ PIML Architecture
 %%====================================================================
 %%{ init: {
         "theme": "base",

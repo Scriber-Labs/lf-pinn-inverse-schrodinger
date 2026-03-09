@@ -1,70 +1,107 @@
 %%====================================================================
-%%  🏗️ PROJECT #2 ARCHITECTURE
+%%  2️⃣ Project 2 Architecture
 %%====================================================================
 %%{ init: {
         "theme": "base",
         "themeVariables": {
             "background": "#0D1117",
             "lineColor": "#14B5FF",
-            "textColor": "#fffff",
+            "textColor": "#ffffff",
             "fontFamily": "'Aclonica', sans-serif",
             "borderRadius": "16",
         },
         "handDrawn": true,
-    }  }%%
+    }
+}%%
 %%====================================================================
+
 flowchart LR
-    %%--------------------------------------------------------------
-    %% 💜 PURPLE GRADIENT RAMP
-    %%--------------------------------------------------------------
-    classDef grad1 fill:,stroke:#5D3FD3,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-    classDef purple_grad0 fill:#301934,stroke:#5D3FD3,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-    classDef purple_grad1 fill:#45275a,stroke:#5D3FD3,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-    classDef purple_grad2 fill:#45275a,stroke:#5D3FD3,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-    classDef purple_grad3 fill:#5c3b80,stroke:#5D3FD3,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-    classDef purple_grad4 fill:#7495b5,stroke:#5D3FD3,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef purple_grad5 fill:#8ac9d9,stroke:#5D3FD3,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef purple_grad6 fill:#a0f0ff,stroke:#5D3FD3,stroke-width:2px,color:#ffffff,rx:12,ry:12;
 
-    %%--------------------------------------------------------------
-    %%  🩵💙💜🩷🧡 SCRIBER GRADIENT RAMP
-    %%--------------------------------------------------------------
-    classDef scriber_grad0 fill:#0d1117,stroke:#14b5ff,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-    classDef scriber_grad1 fill:#0f2a3d,stroke:#00e8ff,stroke-width:2px,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-    classDef scriber_grad2 fill:#103b4f,stroke:#14b5ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef scriber_grad3 fill:#1a3e78,stroke:#5280ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef scriber_grad4 fill:#352a6b,stroke:#7952f5,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef scriber_grad5 fill:#5c2c6d,stroke:#ff66b3,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef scriber_grad6 fill:#3a2f2a,stroke:#f78166,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef scriber_grad7 fill:#1a2a44,stroke:#5280ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef scriber_grad8 stroke:#f78166,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
+    %%-----------------------------------------------------------
+    %%  NODE DEFINITIONS
+    %%-----------------------------------------------------------
+    step0["0️⃣ Define TISE dynamics."]
 
-    %%--------------------------------------------------------------
-    %% 💙🩵🧡 BLUE TO ORANGE COLOR RAMP (pseudo-gradient)
-    %%--------------------------------------------------------------
-    classDef blue_orange_grad0 fill:#0b1c2d,stroke:#14b5ff,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
-    classDef blue_orange_grad1 fill:#0f2a3d,stroke:#14b5ff,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
-    classDef blue_orange_grad2 fill:#103b4f,stroke:#00f5db,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
-    classDef blue_orange_grad3 fill:#124f55,stroke:#00f5db,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
-    classDef blue_orange_grad4 fill:#1a6b63,stroke:#00f5db,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef blue_orange_grad5 fill:#1f4e5f,stroke:#f78166,stroke-width:2px,olor:#ffffff,rx:12,ry:12;
-    classDef blue_orange_grad6 fill:#3a2f2a,stroke:#f78166,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef blue_orange_grad7 fill:#3a2f2a,stroke:#14b5ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef blue_orange_grad8 stroke:#f78166,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
 
-    %%￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼
-    %%  LIGHT‑GRAY ARROW STYLE (so arrows stay subtle)
-    %%￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼￼–￼
-    linkStyle default stroke:#888,stroke-width:2px
 
-    %% CORE PIPELINE
+
+
+
+    %%-----------------------------------------------------------
+    %% CORE PIPELINE (PIML Framework)
     %%--------------------------------------------------------------
-    subgraph PIML["Physics Informed Machine Learning (PIML) \nWorkflow"]
+    subgraph PIML["PIML Framework"]
     direction LR
+
+
+        subgraph synthetic["1️⃣ Synthetic Data"]
+        direction TB
+
+            spatial_grid["$$x\in[-5,5]$$"]:::spatial
+            observed_data["$$\rho_n^\text{obs}, \, E_n^\text{obs} $$"]
+
+        end
+
+
+        subgraph PINN["2️⃣ MLP"]
+        direction LR
+
+            MLP1["MLP"]:::MLP
+            MLP2["MLP"]:::MLP
+            MLP3["MLP"]:::MLP
+            MLP4["MLP"]:::MLP
+
+            potential["$$V_\theta(x)$$"]
+
+            subgraph wavefunctions["Learned Wavefunctions"]
+            direction TB
+
+                wavefunction_0["$$\psi_0^\theta$$"]:::wavefunction
+                wavefunction_1["$$\psi_1^\theta$$"]:::wavefunction
+                wavefunction_final["$$\psi_{n-1}^\theta$$"]:::wavefunction
+
+            end
+
+            %%-----------------------------------------------------------
+            %%  Connections
+            %%-----------------------------------------------------------
+            MLP1 --> potential
+            MLP2 --> wavefunction_0
+            MLP3 --> wavefunction_1
+            MLP4 --> wavefunction_final
+
+        end
+
+
+    spatial_grid --> MLP1
+    spatial_grid --> MLP2
+    spatial_grid --> MLP3
+    spatial_grid --> MLP4
 
     end
 
-    step0["Define TISE dynamics"] --> PIML
+    %%-----------------------------------------------------------
+    %%  External connections
+    %%-----------------------------------------------------------
+    step0 --> PIML
 
-    step0:::purple_grad6
-    PIML:::blue_orange_grad0
+    %%-----------------------------------------------------------
+    %%  STYLE DEFINITIONS (inline, no external CSS)
+    %%-----------------------------------------------------------
+    style step0 fill:#301934,stroke:#5D3FD3,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+
+    style PIML fill:#0B1C2D,stroke:#14b5ff,stroke-width:1px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+
+    style synthetic fill:#11112ECE,stroke:#5D3FD3,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
+
+    style spatial_grid fill:#1E0026,stroke:#750071,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+
+    style observed_data fill:#1a2a44,stroke:#5280ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+
+    classDef wavefunction fill:#224261,stroke:#14B5FF,stroke-width:2px,color:#ffffff,rx:12,ry:12;14B5FF
+
+    style wavefunctions fill:#224261,stroke:#14B5FF,stroke-width:2px,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;14B5FF
+
+    style PINN fill:#103b4f,stroke:#00E8FF,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+
+    classDef MLP fill:#ddd6ffb7,stroke:#4b28e7,stroke-width:4px,color:#ffffff,rx:12,ry:12;

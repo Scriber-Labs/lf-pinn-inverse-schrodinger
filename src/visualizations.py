@@ -1,4 +1,4 @@
-# src/visualization.py
+# src/visualizations.py
 """
 🖼️ Visualization utilities for the inverse Schrödinger demo.
 
@@ -46,7 +46,7 @@ def _apply_style() -> None:
 def _plot_gradient_bar(ax, x, height, width, cmap, label=None):
     """
     Draw a bar with a smooth gradient fill (lighter at bottom, darker at top).
-    
+
     Parameters
     ----------
     ax : matplotlib.axes.Axes
@@ -67,7 +67,7 @@ def _plot_gradient_bar(ax, x, height, width, cmap, label=None):
     for i in range(n_segments):
         # Reverse the color index so lighter colors are at bottom (i=0) and darker at top
         color = cmap(1 - i / (n_segments - 1)) if n_segments > 1 else cmap(1)
-        ax.bar(x, segment_height, width=width, bottom=i*segment_height, 
+        ax.bar(x, segment_height, width=width, bottom=i*segment_height,
                color=color, edgecolor='none')
     # Add label to legend using a proxy artist (a visible patch)
     if label:
@@ -227,11 +227,11 @@ def plot_loss_history(
 # 🌠 2️⃣ Potential plot (true vs. learned)
 # ----------------------------------------------------------------------
 def plot_potential(
-    x: torch.Tensor,
-    V_true: torch.Tensor,
-    V_learned: torch.Tensor,
-    lambdas: Dict[str, float],
-    out_path: pathlib.Path | None = None,
+        x: torch.Tensor,
+        V_true: torch.Tensor,
+        V_learned: torch.Tensor,
+        lambdas: Dict[str, float],
+        out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """
     Plot the analytic potential and the network's prediction.
@@ -277,10 +277,10 @@ def plot_potential(
 # 🔱 3️⃣ Wave‑function comparison
 # ----------------------------------------------------------------------
 def plot_wavefunctions(
-    x: torch.Tensor,
-    psi_true: Sequence[torch.Tensor],
-    psi_learned: Sequence[torch.Tensor],
-    out_path: pathlib.Path | None = None,
+        x: torch.Tensor,
+        psi_true: Sequence[torch.Tensor],
+        psi_learned: Sequence[torch.Tensor],
+        out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """
     Side-by-side plot of each eigenmode (learned vs. ground truth)
@@ -316,7 +316,7 @@ def plot_wavefunctions(
     true_col, learn_col = "#E52B50", "#39FF14"
 
     for idx, (ax, pt, pl) in enumerate(
-        zip(axes, psi_true, psi_learned)
+            zip(axes, psi_true, psi_learned)
     ):
         ax.plot(
             x_np,
@@ -356,10 +356,10 @@ def plot_wavefunctions(
 from typing import Mapping
 
 def plot_energy_spectrum(
-    E_true: torch.Tensor,
-    E_learned: torch.Tensor,
-    *,
-    out_path: pathlib.Path | None = None,
+        E_true: torch.Tensor,
+        E_learned: torch.Tensor,
+        *,
+        out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """
     Bar-chart comparison of the first ``n_states`` energy levels.
@@ -408,22 +408,22 @@ def plot_energy_spectrum(
     # Create gradient colormaps with balanced colors
     true_cmap = mcolors.LinearSegmentedColormap.from_list("true_grad", [true_col_1, true_col_2])
     learn_cmap = mcolors.LinearSegmentedColormap.from_list("learn_grad", [learn_col_1, learn_col_2])
-    
+
     # Plot true energy bars with gradient
     for i, idx in enumerate(indices - 0.15):
-        _plot_gradient_bar(ax, idx, E_true_np[i], 0.3, true_cmap, 
-                          label="True" if i == 0 else None)
-    
+        _plot_gradient_bar(ax, idx, E_true_np[i], 0.3, true_cmap,
+                           label="True" if i == 0 else None)
+
     # Plot learned energy bars with gradient
     for i, idx in enumerate(indices + 0.15):
-        _plot_gradient_bar(ax, idx, E_learn_np[i], 0.3, learn_cmap, 
-                          label="Learned" if i == 0 else None)
+        _plot_gradient_bar(ax, idx, E_learn_np[i], 0.3, learn_cmap,
+                           label="Learned" if i == 0 else None)
 
     ax.set_xticks(indices)
     ax.set_xticklabels([rf"$n={i}$" for i in indices])
     ax.set_ylabel(rf"Energy ($\hbar \omega_n$ units)")
     ax.set_title("Exact vs. Learned Energy Eigenvalues")
-    
+
     # Create custom legend patches
     from matplotlib.patches import Patch
     legend_patches = [
@@ -445,7 +445,7 @@ def plot_energy_spectrum(
 # 🫟 5️⃣ Probability‑density comparison (|ps_theta_n|^2 vs. rho_obs_n)
 # ----------------------------------------------------------------------
 def plot_density_vs_observed(
-    x: torch.Tensor,
+        x: torch.Tensor,
         psi_learned: Sequence[torch.Tensor],
         rho_obs: Sequence[torch.Tensor],
         *,
@@ -499,7 +499,7 @@ def plot_density_vs_observed(
     psi_theta_col, rho_obs_col = "#3EB489", "#FF8200"
 
     for idx, (ax, psi, rho) in enumerate(
-        zip(axes, psi_learned, rho_obs),
+            zip(axes, psi_learned, rho_obs),
     ):
         # |psi|^2 -> detach, move to CPU, and square element-wise
         prob_density = (psi.squeeze().detach().cpu() ** 2).numpy()
@@ -551,13 +551,13 @@ def plot_density_vs_observed(
 # 🗺️6️⃣ Overlap matrix heatmap (POD diagnostic)
 # ----------------------------------------------------------------------
 def plot_overlap_heatmap(
-    psi_theta: Sequence[torch.Tensor],
-    *,
-    dx: float | None = None,
-    lambdas: Dict[str, float] | None = None,
-    cmap: str = "cool",
-    fmt: str = ".2f",
-    out_path: pathlib.Path | None = None,
+        psi_theta: Sequence[torch.Tensor],
+        *,
+        dx: float | None = None,
+        lambdas: Dict[str, float] | None = None,
+        cmap: str = "cool",
+        fmt: str = ".2f",
+        out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """
     Render a heat map of the overlap matrix <psi_theta_m | psi_theta_n>.
@@ -638,12 +638,12 @@ def plot_overlap_heatmap(
 # 📊7️⃣a) POD singular values (log plot, all values)
 # ----------------------------------------------------------------------
 def plot_pod_singular_values(
-    singular_values: torch.Tensor,
-    *,
-    title: str = "POD singular values",
-    ylabel: str = "Singular value (log scale)",
-    cmap: str = "cool",
-    out_path: pathlib.Path | None = None,
+        singular_values: torch.Tensor,
+        *,
+        title: str = "POD singular values",
+        ylabel: str = "Singular value (log scale)",
+        cmap: str = "cool",
+        out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """
     Plot the singular values obtained from a POD decomposition on a logarithmic y-axis.
@@ -719,13 +719,13 @@ def plot_pod_singular_values(
 # 📊7️⃣ b) First three spatial POD modes (should resemble the true eigenmodes)
 # ----------------------------------------------------------------------
 def plot_pod_first_three_spatial_modes(
-    x: torch.Tensor,
-    spatial_modes: torch.Tensor,
-    *,
-    ground_truth: Sequence[torch.Tensor] | None = None,
-    psi_learned: Sequence[torch.Tensor] | None = None,
-    lambdas: Dict[str, float] | None = None,
-    out_path: pathlib.Path | None = None,
+        x: torch.Tensor,
+        spatial_modes: torch.Tensor,
+        *,
+        ground_truth: Sequence[torch.Tensor] | None = None,
+        psi_learned: Sequence[torch.Tensor] | None = None,
+        lambdas: Dict[str, float] | None = None,
+        out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """
     Plot the first three columns of the POD spatial-mode matrix ``U``.
@@ -851,14 +851,14 @@ def plot_pod_first_three_spatial_modes(
 # 📊7️⃣c) Cross-overlap matrix heatmap
 # ----------------------------------------------------------------------
 def plot_cross_overlap_heatmap(
-    pod_modes_physical: Sequence[torch.Tensor] | torch.Tensor,
-    psi_matrix: Sequence[torch.Tensor] | torch.Tensor,
-    *,
-    dx: float | None = None,
-    cmap: str = "cool",
-    fmt: str = ".2f",
-    lambdas: Dict[str, float] | None = None,
-    out_path: pathlib.Path | None = None,
+        pod_modes_physical: Sequence[torch.Tensor] | torch.Tensor,
+        psi_matrix: Sequence[torch.Tensor] | torch.Tensor,
+        *,
+        dx: float | None = None,
+        cmap: str = "cool",
+        fmt: str = ".2f",
+        lambdas: Dict[str, float] | None = None,
+        out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """
     Create a heatmap of the *cross* overlap matrix <u_k | psi_n^theta> where ``u_k`` are the physical POD modes and ``psi_n^theta`` are learned wavefunctions.
@@ -905,7 +905,7 @@ def plot_cross_overlap_heatmap(
     ax.set_xticks(np.arange(n_modes))
     ax.set_yticks(np.arange(n_modes))
     ax.set_xticklabels([rf"$n={i}$" for i in range(n_modes)],
-                            rotation=45, ha="right")
+                       rotation=45, ha="right")
     ax.set_yticklabels([rf"$n={i}$" for i in range(n_modes)])
 
     # ------------------------------------------------------------------
