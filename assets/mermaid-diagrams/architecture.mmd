@@ -25,79 +25,115 @@ flowchart LR
     %% CORE PIPELINE (PIML Framework)
     %%--------------------------------------------------------------
     subgraph PIML["PIML Framework"]
-    direction LR
-
-
-        subgraph synthetic["1️⃣ Synthetic Data"]
-        direction TB
-
-            spatial_grid["$$x\in[-5,5]$$"]:::spatial
-            observed_data["$$\rho_n^\text{obs}, \, E_n^\text{obs} $$"]
-
-        end
-
-
-
-        subgraph PINN["2️⃣ MLP"]
         direction LR
 
+        subgraph synthetic["1️⃣ Synthetic Data"]
+            direction TB
+            spatial_grid["$$x\in[-5,5]$$"]:::spatial
+            observed_data["$$\rho_n^\text{obs}, \, E_n^\text{obs} $$"]
+        end
+
+        subgraph PINN[" "]
+            direction LR
             MLP1["MLP"]:::MLP
             MLP2["MLP"]:::MLP
             MLP3["MLP"]:::MLP
             MLP4["MLP"]:::MLP
 
             potential(("$$V_\theta(x)$$"))
+            wavefunction_0(("$$\psi_0^\theta(x)$$")):::eigenfunctions
+            wavefunctions_1(("$$\psi_1^\theta(x)$$")):::eigenfunctions
+            wavefunctions_2(("$$\psi_2^\theta(x)$$")):::eigenfunctions
 
-            MLP1 --> potential
-            subgraph wavefunctions["Learned Wavefunctions"]
-            direction TB
-                wavefunction_0(("$$\psi_0^\theta(x)$$")):::wavefunction
-                wavefunction_1(("$$\psi_1^\theta(x)$$")):::wavefunction
-                wavefunction_final(("$$\psi_{n-1}^\theta(x)$$")):::wavefunction
+
+            subgraph potential_network["Potential Network"]
+                direction LR
+
+                MLP1 --> potential
 
 
             end
 
-            MLP2 --> wavefunction_0
-            MLP3 --> wavefunction_1
-            MLP4 --> wavefunction_final
-
-
+            subgraph eigenfunction_networks["Eigenfunction Networks"]
+                direction LR
+                MLP2 --> wavefunction_0
+                MLP3 --> wavefunctions_1
+                MLP4 --> wavefunctions_2
+            end
 
         end
 
+        subgraph energy_eigenvalues["Energy Eigenvalues"]
+        direction LR
+            energy_0(("$$E_1^\theta$$")):::energy
+            energy_1(("$$E_1^\theta$$")):::energy
+            energy_2(("$$E_2^\theta$$")):::energy
+        end
+
+
+        spatial_grid --> MLP1
+        spatial_grid --> MLP2
+        spatial_grid --> MLP3
+        spatial_grid --> MLP4
+
+\
         subgraph loss["4️⃣ Loss Function"]
-        direction TB
+            direction TB
 
-            loss_physics["$$L_\text{physics}$$"]
+            loss_physics["$$\mathcal{L}_\text{physics}$$"]
+            loss_norm["$$\mathcal{L}_\text{norm}$$"]
+            loss_smooth["$$\mathcal{L}_\text{smooth}$$"]
+            loss_data["$$\mathcal{L}_\text{data}$$"]
+
         end
 
-    spatial_grid --> MLP1
-    spatial_grid --> MLP2
-    spatial_grid --> MLP3
-    spatial_grid --> MLP4
+        observed_data --> loss_data
+        potential --> loss_physics
+        potential --> loss_smooth
+        eigenfunction_networks --> loss_physics
+        eigenfunction_networks --> loss_norm
 
-    energy(("$$E_n^\theta$$"))
+        energy_eigenvalues --> loss_data
+
+        subgraph placeholder
+            direction TB
+            residual
+            finite_difference
+            optimization
+        end
 
 
     end
+
+
+
     %%-----------------------------------------------------------
     %%  External connections
     %%-----------------------------------------------------------
     step0 --> PIML
 
+
     %%-----------------------------------------------------------
     %%  STYLE DEFINITIONS (inline, no external CSS)
     %%-----------------------------------------------------------
-    style step0 fill:#0A061D,stroke:#5D3FD3,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    style PIML fill:#0B1C2D,stroke:#14b5ff,stroke-width:1px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
-    style synthetic fill:#11112ECE,stroke:#5D3FD3,stroke-dasharray:6 6,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    style spatial_grid fill:#1E0026,stroke:#750071,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    style observed_data fill:#190E48,stroke:#5280ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef wavefunction fill:#005E99,stroke:#14B5FF,stroke-width:2px,color:#adc8ff,rx:12,ry:12;
-    style wavefunctions fill:#224261,stroke:#14B5FF,stroke-width:2px,stroke-dasharray:6 6,color:#C7F3FF,rx:12,ry:12;
-    style PINN fill:#103b4f,stroke:#00E8FF,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
-    classDef MLP fill:#350099,stroke:#5E17EB,stroke-width:4px,color:#ffffff,rx:12,ry:12;
-    style potential fill:#0062FF,stroke:#14B5FF,stroke-width:3px,color:#ffffff,rx:12,ry:12;
-    style energy width:480px,height:240px,fill:#004cff,stroke:#3e9eff,stroke-width:3px,color:#ffffff,rx:12,ry:12;
-
+    style step0 fill:#0f092b,stroke:#5D3FD3,stroke-width:4px,color:#ffffff,rx:12,ry:12;
+    style PIML fill:#050c1a,stroke:#006aff,stroke-width:1px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+    style synthetic fill:#11112E,stroke:#330099,stroke-dasharray:6 6,stroke-width:3px,color:#ffffff,rx:12,ry:12;
+    style spatial_grid fill:#1E0026,stroke:#ff3e69,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+    style observed_data fill:#231567,stroke:#5280ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+    classDef eigenfunctions fill:#030c0e,stroke:#0e99ff,stroke-width:4px,color:#ffffff,rx:12,ry:12;
+    style eigenfunction_networks fill:#103b4f,stroke:#00f5db,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+    style PINN fill:#0e1d3b,stroke:#006aff,stroke-width:3px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+    classDef MLP fill:#2d105c,stroke:#6f00ff,stroke-width:4px,color:#ffffff,rx:12,ry:12;
+    style potential width:480px,height:240px,fill:#0e104b,stroke:#006AFF,stroke-width:4px,color:#ffffff,rx:12,ry:12;
+    style potential_network fill:#153f6e,stroke:#409CFF,stroke-width:4px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+    classDef energy fill:#00060d,stroke:#006eeb,stroke-width:4px,color:#ffffff,rx:12,ry:12;
+    style loss fill:#150021,stroke:#541bda,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+    style loss_physics fill:#040920,stroke:#0070EB,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+    style loss_norm fill:#030422,stroke:#14B5FF,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+    style loss_smooth fill:#002000,stroke:#05a131,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+    style loss_data fill:#2a0636,stroke:#df24ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+    style residual fill:#134d05,stroke:#aaff9e,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+    style finite_difference fill:#103b4f,stroke:#00f5db,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+    style optimization fill:#3a2f2a,stroke:#f78166,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+    style energy_eigenvalues fill:#0b1c2d,stroke:#14b5ff,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
