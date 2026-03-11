@@ -42,8 +42,8 @@ flowchart LR
 
             potential(("$$V_\theta(x)$$"))
             wavefunction_0(("$$\psi_0^\theta(x)$$")):::eigenfunctions
-            wavefunctions_1(("$$\psi_1^\theta(x)$$")):::eigenfunctions
-            wavefunctions_2(("$$\psi_2^\theta(x)$$")):::eigenfunctions
+            wavefunction_1(("$$\psi_1^\theta(x)$$")):::eigenfunctions
+            wavefunction_2(("$$\psi_2^\theta(x)$$")):::eigenfunctions
 
 
             subgraph potential_network["Potential Network"]
@@ -57,8 +57,8 @@ flowchart LR
             subgraph eigenfunction_networks["Eigenfunction Networks"]
                 direction LR
                 MLP2 --> wavefunction_0
-                MLP3 --> wavefunctions_1
-                MLP4 --> wavefunctions_2
+                MLP3 --> wavefunction_1
+                MLP4 --> wavefunction_2
             end
 
         end
@@ -76,24 +76,36 @@ flowchart LR
         spatial_grid --> MLP3
         spatial_grid --> MLP4
 
-\
+
         subgraph loss["4️⃣ Loss Function"]
             direction TB
 
-            loss_physics["$$\mathcal{L}_\text{physics}$$"]
-            loss_norm["$$\mathcal{L}_\text{norm}$$"]
-            loss_smooth["$$\mathcal{L}_\text{smooth}$$"]
-            loss_data["$$\mathcal{L}_\text{data}$$"]
+            loss_physics["$$\mathcal{L}_\text{TISE}=\sum_n^N{\left|\left| -\frac{1}{2}\frac{\partial^2}{\partial x^2}\psi_n^\theta+V_\theta\psi_n^\theta-E_n\psi_n^\theta \right|\right|^2}$$"]
+            loss_data["$$\mathcal{L}_\text{data} = \frac{1}N\sum_n^N{\big(E_n^\theta-E_n^\text{obs}\big)^2} + \frac{1}N\sum_n^{N}\frac{1}{M}\sum_j^M{\Big(\left|\psi_n^\theta(x_j)\right|^2-\rho_n^\text{obs}(x_j)\Big)^2}$$"]
+            loss_smooth["$$\mathcal{L}_\text{smooth} = \langle \frac{\left|\left| V_\theta''(x)  \right|\right|^2}{\epsilon+\left|\left| V_\theta(x) \right|\right|^2}\rangle$$"]
+            loss_norm["$$\mathcal{L}_\text{norm} = \frac{1}{N}\sum_n^N{\bigg( \int{\left|\psi_n^\theta(x) \right|^2dx} - 1 \bigg)^2 }$$"]
 
         end
 
         observed_data --> loss_data
         potential --> loss_physics
         potential --> loss_smooth
-        eigenfunction_networks --> loss_physics
-        eigenfunction_networks --> loss_norm
 
-        energy_eigenvalues --> loss_data
+        wavefunction_0 --> loss_physics
+        wavefunction_1 --> loss_physics
+        wavefunction_2 --> loss_physics
+
+        wavefunction_0 --> loss_norm
+        wavefunction_1 --> loss_norm
+        wavefunction_2 --> loss_norm
+
+        energy_0 --> loss_data
+        energy_1 --> loss_data
+        energy_2 --> loss_data
+
+        energy_0 --> loss_physics
+        energy_1 --> loss_physics
+        energy_2 --> loss_physics
 
         subgraph placeholder
             direction TB
@@ -122,6 +134,7 @@ flowchart LR
     style spatial_grid fill:#1E0026,stroke:#ff3e69,stroke-width:2px,color:#ffffff,rx:12,ry:12;
     style observed_data fill:#231567,stroke:#5280ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
     classDef eigenfunctions fill:#030c0e,stroke:#0e99ff,stroke-width:4px,color:#ffffff,rx:12,ry:12;
+    classDef eigenfunctions fill:#224261,stroke:#14B5FF,stroke-width:2px,color:#ffffff,rx:12,ry:12;
     style eigenfunction_networks fill:#103b4f,stroke:#00f5db,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
     style PINN fill:#0e1d3b,stroke:#006aff,stroke-width:3px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
     classDef MLP fill:#2d105c,stroke:#6f00ff,stroke-width:4px,color:#ffffff,rx:12,ry:12;
@@ -130,10 +143,15 @@ flowchart LR
     classDef energy fill:#00060d,stroke:#006eeb,stroke-width:4px,color:#ffffff,rx:12,ry:12;
     style loss fill:#150021,stroke:#541bda,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
     style loss_physics fill:#040920,stroke:#0070EB,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    style loss_norm fill:#030422,stroke:#14B5FF,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    style loss_smooth fill:#002000,stroke:#05a131,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+    style loss_norm fill:#0e447a,stroke:#14B5FF,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+    style loss_smooth fill:#082011,stroke:#05a131,stroke-width:2px,color:#ffffff,rx:12,ry:12;
     style loss_data fill:#2a0636,stroke:#df24ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
     style residual fill:#134d05,stroke:#aaff9e,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
-    style finite_difference fill:#103b4f,stroke:#00f5db,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+    style finite_difference fill:#094873,stroke:#00f5db,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
     style optimization fill:#3a2f2a,stroke:#f78166,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
     style energy_eigenvalues fill:#0b1c2d,stroke:#14b5ff,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+
+    %%-----------------------------------------------------------
+    %%  LIGHT‑GRAY ARROW STYLE (so arrows stay subtle)
+    %%------------------------------------------------------------
+    linkStyle default stroke:#89878d,stroke-width:2px
