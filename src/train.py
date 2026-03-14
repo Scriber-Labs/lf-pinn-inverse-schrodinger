@@ -40,11 +40,11 @@ def train_step(
     ----------
     model :
         Instance of :class:`~model.InverseSchrodingerModel`.
-    x: torch.Tensor, shape ``(N, 1)``
+    x: torch.Tensor, shape ``(n_points, 1)``
         Collocation points on which the PDE is enforced.
     dx : float
         Uniform grid spacing.
-    rho_obs : List[torch.Tensor], each shape ``(❓, ❓)``
+    rho_obs : List[torch.Tensor], each shape ``(n_states, n_points)``
         List of observed probability density tensors, one per eigenstate.
     E_obs : torch.Tensor, shape ``(n_states,)``
         Tensor of observed energies.
