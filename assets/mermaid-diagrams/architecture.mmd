@@ -14,13 +14,11 @@
 }%%
 %%====================================================================
 flowchart TB
+
     %%-----------------------------------------------------------
     %%  NODE DEFINITIONS
     %%-----------------------------------------------------------
     step0["0️⃣ Define TISE dynamics"]
-
-    spatial_grid["$$x\in[-5,5]$$"]:::spatial
-    observed_data["$$\rho_n^\text{obs}, \, E_n^\text{obs} $$"]
 
     MLP1["MLP"]:::MLP
     MLP2["MLP"]:::MLP
@@ -36,17 +34,18 @@ flowchart TB
     %% CORE PIPELINE (PIML Framework)
     %%--------------------------------------------------------------
     subgraph PIML["PIML Framework"]
-        direction LR
+    direction LR
 
         subgraph synthetic["1️⃣ Synthetic Data"]
-            direction TB
-            spatial_grid
-            observed_data
+        direction TB
+            spatial_grid["$$x\in[-5,5]$$"]:::spatial
+            observed_data["$$\rho_n^\text{obs}, \, E_n^\text{obs} $$"]
         end
 
         subgraph learned_parameters["2️⃣ Learned Parameters"]
+        direction TB
             subgraph PINN[" "]
-                direction TB
+            direction TB
 
                 subgraph potential_network["Potential Network"]
                 direction LR
@@ -54,7 +53,7 @@ flowchart TB
                 end
 
                 subgraph eigenfunction_networks["Eigenfunction Networks"]
-                    direction TB
+                direction TB
                     MLP2 --> wavefunction_0
                     MLP3 --> wavefunction_1
                     MLP4 --> wavefunction_2
@@ -63,13 +62,13 @@ flowchart TB
             end
 
             subgraph energy_eigenvalues["Energy Eigenvalues"]
-                direction LR
+            direction LR
                 energy_0(("$$E_1^\theta$$")):::energy
                 energy_1(("$$E_1^\theta$$")):::energy
                 energy_2(("$$E_2^\theta$$")):::energy
             end
-
         end
+
         learned_parameters:::PINN
 
         spatial_grid --> MLP1
@@ -78,7 +77,7 @@ flowchart TB
         spatial_grid --> MLP4
 
         subgraph finite_difference["3️⃣ Finite Difference"]
-            direction LR
+        direction LR
             potential_stencil["$$V_\theta''(x)\,$$ via stencil"]
             eigenfunction_stencil["$$\frac{\partial^2}{\partial x^2}\psi_n^\theta(x) \,$$via stencil"]
         end
@@ -87,16 +86,16 @@ flowchart TB
            A["$$R_n(x)=-\frac{1}{2}\frac{\partial^2}{\partial x^2}\psi_n^\theta + V_\theta\psi_n^\theta - E^\theta_n \psi$$"]
         end
 
+        optimization["6️⃣ Optimizer (Adam)"]
+
         subgraph loss_terms["5️⃣ Loss Function"]
-            direction LR
+        direction LR
             loss_physics["$$\mathcal{L}_\text{TISE}$$"]
             loss_data["$$\mathcal{L}_\text{data}$$"]
             loss_smooth["$$\mathcal{L}_\text{smooth}$$"]
             loss_norm["$$\mathcal{L}_\text{norm}$$"]
         end
         loss_terms:::loss
-
-        optimization["6️⃣ Optimizer (Adam)"]
 
         observed_data --> loss_data
 
@@ -123,14 +122,13 @@ flowchart TB
 
         loss_terms --> optimization
 
-
-        optimization -- "training loop" --> MLP1
-        optimization -- "training loop" --> MLP2
-        optimization -- "training loop" --> MLP3
-        optimization -- "training loop" --> MLP4
-        optimization -- "training loop" --> energy_0
-        optimization -- "training loop" --> energy_1
-        optimization -- "training loop" --> energy_2
+        optimization --> MLP1
+        optimization --> MLP2
+        optimization --> MLP3
+        optimization --> MLP4
+        optimization --> energy_0
+        optimization --> energy_1
+        optimization --> energy_2
 
     end
 
@@ -160,7 +158,7 @@ flowchart TB
     PIML --> sanity_checks
     PIML --> POD
 
-    %%-----------------------------------------------------------
+%%-----------------------------------------------------------
 %% CORE STAGES (pseudo gradient)
 %%-----------------------------------------------------------
 
