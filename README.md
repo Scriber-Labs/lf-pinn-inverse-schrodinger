@@ -83,171 +83,150 @@ inverse-piml-schrodinger/
 ## 🧜‍♀️ PIML Architecture
 ```mermaid
 %%====================================================================
-%%  🏗️ PIML Architecture
+%%  2️⃣ Project 2 Architecture
 %%====================================================================
 %%{ init: {
         "theme": "base",
         "themeVariables": {
-            "background": "#0d1117",
-            "lineColor": "#14b5ff",
-            "textColor": "#ffffff",
+            "background": "`#0D1117`",
+            "lineColor": "`#14B5FF`",
             "fontFamily": "'Aclonica', sans-serif",
             "borderRadius": "16",
         },
-        "handDrawn": true
-    } }%%
+        "handDrawn": true,
+    }
+}%%
 %%====================================================================
+flowchart TB
+    %%-----------------------------------------------------------
+    %%  NODE DEFINITIONS
+    %%-----------------------------------------------------------
+    step0["0️⃣ Define TISE dynamics"]
 
-flowchart LR
+    spatial_grid["$$x\in[-5,5]$$"]:::spatial
+    observed_data["$$\rho_n^\text{obs}, \, E_n^\text{obs} $$"]
+
+    MLP1["MLP"]:::MLP
+    MLP2["MLP"]:::MLP
+    MLP3["MLP"]:::MLP
+    MLP4["MLP"]:::MLP
+
+    potential(("$$V_\theta(x)$$"))
+    wavefunction_0(("$$\psi_0^\theta(x)$$")):::eigenfunctions
+    wavefunction_1(("$$\psi_1^\theta(x)$$")):::eigenfunctions
+    wavefunction_2(("$$\psi_2^\theta(x)$$")):::eigenfunctions
+
+    %%-----------------------------------------------------------
+    %% CORE PIPELINE (PIML Framework)
     %%--------------------------------------------------------------
-    classDef grad1 fill:#301934,stroke:#5D3FD3,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-    classDef grad2 fill:#45275a,stroke:#5D3FD3,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-    classDef grad3 fill:#5c3b80,stroke:#5D3FD3,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-    classDef grad4 fill:#7495b5,stroke:#5D3FD3,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-    classDef grad5 fill:#8ac9d9,stroke:#5D3FD3,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-    classDef grad6 fill:#a0f0ff,stroke:#5D3FD3,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
+    subgraph PIML["PIML Framework"]
+        direction LR
+
+        subgraph synthetic["1️⃣ Synthetic Data"]
+            direction TB
+            spatial_grid
+            observed_data
+        end
+
+        subgraph learned_parameters["2️⃣ Learned Parameters"]
+            subgraph PINN[" "]
+                direction TB
+
+                subgraph potential_network["Potential Network"]
+                direction LR
+                    MLP1 --> potential
+                end
+
+                subgraph eigenfunction_networks["Eigenfunction Networks"]
+                    direction TB
+                    MLP2 --> wavefunction_0
+                    MLP3 --> wavefunction_1
+                    MLP4 --> wavefunction_2
+                end
+
+            end
+
+            subgraph energy_eigenvalues["Energy Eigenvalues"]
+                direction LR
+                energy_0(("$$E_1^\theta$$")):::energy
+                energy_1(("$$E_1^\theta$$")):::energy
+                energy_2(("$$E_2^\theta$$")):::energy
+            end
+
+        end
+        learned_parameters:::PINN
+
+        spatial_grid --> MLP1
+        spatial_grid --> MLP2
+        spatial_grid --> MLP3
+        spatial_grid --> MLP4
+
+        subgraph finite_difference["3️⃣ Finite Difference"]
+            direction LR
+            potential_stencil["$$V_\theta''(x)\,$$ via stencil"]
+            eigenfunction_stencil["$$\frac{\partial^2}{\partial x^2}\psi_n^\theta(x) \,$$via stencil"]
+        end
+
+        subgraph residual["4️⃣ Physics Residual"]
+           A["$$R_n(x)=-\frac{1}{2}\frac{\partial^2}{\partial x^2}\psi_n^\theta + V_\theta\psi_n^\theta - E^\theta_n \psi$$"]
+        end
+
+        subgraph loss_terms["5️⃣ Loss Function"]
+            direction LR
+            loss_physics["$$\mathcal{L}_\text{TISE}$$"]
+            loss_data["$$\mathcal{L}_\text{data}$$"]
+            loss_smooth["$$\mathcal{L}_\text{smooth}$$"]
+            loss_norm["$$\mathcal{L}_\text{norm}$$"]
+        end
+        loss_terms:::loss
+        
+        optimization["6️⃣ Optimizer (Adam)"]
+
+        observed_data --> loss_data
+
+        wavefunction_0 --> eigenfunction_stencil
+        wavefunction_1 --> eigenfunction_stencil
+        wavefunction_2 --> eigenfunction_stencil
+
+        eigenfunction_stencil --> residual --> loss_physics
+
+        wavefunction_0 --> loss_norm
+        wavefunction_1 --> loss_norm
+        wavefunction_2 --> loss_norm
+
+        energy_0 --> loss_data
+        energy_1 --> loss_data
+        energy_2 --> loss_data
+
+        energy_0 --> residual
+        energy_1 --> residual
+        energy_2 --> residual
+
+        potential --> residual
+        potential --> potential_stencil --> loss_smooth
+
+        loss_terms --> optimization
+
+
+        optimization -- "training loop" --> MLP1
+        optimization -- "training loop" --> MLP2
+        optimization -- "training loop" --> MLP3
+        optimization -- "training loop" --> MLP4
+        optimization -- "training loop" --> energy_0
+        optimization -- "training loop" --> energy_1
+        optimization -- "training loop" --> energy_2
+
+    end
+
+    %%-----------------------------------------------------------
+    %%  External connections
+    %%-----------------------------------------------------------
+    step0 --> PIML
     
-    classDef Observed_data stroke:#b045e0,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-    classDef Total_loss stroke:#767cea,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-    classDef stage0 fill:#301934,stroke:#5D3FD3,stroke-dasharray: 6 6,color:#ffffff,rx:12,ry:12;   %% deep purple for physics
-    classDef PIML_framework fill:#161b22,stroke:#14b5ff,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-    classDef stage1 fill:#0f2a3d,stroke:#14b5ff,stroke-dasharray: 6 6,color:#ffffff,rx:12,ry:12;   %% original dark indigo
-    classDef stage2 fill:#103b4f,stroke:#00e8ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;   %% original teal blue
-    classDef stage3 fill:#124f55,stroke:#00f5db,stroke-width:2px,color:#ffffff,rx:12,ry:12;   %% original cyan/green
-    classDef stage4 fill:#1a6b63,stroke:#00f5db,stroke-width:2px,color:#ffffff,rx:12,ry:12;   %% original orangeish teal
-    classDef dashed_green fill:#555555,stroke:#3EB489,stroke-width:3px,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-    classDef stage5 fill:#1f4e5f,stroke:#00FF7F,stroke-width:2px,color:#ffffff,rx:12,ry:12;   %% optimizer
-    classDef POD_diagnostics stroke:#f78166,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-    classDef stage6 fill:#3a2f2a,stroke:#f78166,stroke-width:2px,color:#ffffff,rx:12,ry:12;   %% diagnostics
-    classDef stage7 fill:#3a2f2a,stroke:#f68080,stroke-width:2px,color:#ffffff,rx:12,ry:12;   %% diagnostics
-    classDef dashed_orange_1 fill:#161b22,stroke:#f68080,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-    classDef pink_dotted fill:#420C29,stroke:#f72585,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-
-    classDef blue_dotted_2 fill:#0f2a3d,stroke:#14b5ff,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;   %% notes / tiny bubbles
-
-
-    classDef stage5 fill:#0f2a3d,stroke:#00FF7G,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef blue_purple fill:#3bb2f5,stroke:#767cea,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef periwinkle_purple fill:#767cea,stroke:#b045e0,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef MLP fill:#3a0ca3,stroke:#767cea,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef light_dark_purple fill:#4361ee,stroke:#b045e0,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef blue_pink fill:#4cc9f0,stroke:#eb0fd5,stroke-width:2 2,color:#ffffff,rx:12,ry:12;
-
-    classDef purple_blue fill:#7209b7,stroke:#3bb2f5,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-
-
-
-    %%--------------------------------------------------------------
-    %%  LIGHT‑GRAY ARROW STYLE (so arrows stay subtle)
-    %%--------------------------------------------------------------
-    linkStyle default stroke:#888,stroke-width:2px
-
-    %%--------------------------------------------------------------
-    %% CORE PINN PIPELINE
-    %%--------------------------------------------------------------
-
-    subgraph PINN["Physics-Informed Neural Network"]
-    direction LR
-
-        subgraph synthetic_data["1️⃣ Synthetic Data"]
-            A["Spatial grid x"]:::pink_dotted
-            obs["Observed density ρ(x) & energies E"]:::pink_dotted
-        end
-        synthetic_data:::stage1
-
-        %% Neural parameterizations
-        subgraph NN["2️⃣ Neural parameterizations"]
-        direction TB
-            subgraph potential["Potential network"]
-              Vnet["MLP"] --> V["Vθ(x)"]
-            end
-            potential:::blue_dotted_2
-
-            subgraph states["Eigenfunction networks"]
-                psi0net["MLP"] --> psi0["ψ₀(x)"]
-                psinet["MLP"] --> psii["ψᵢ(x)"]
-                psin["MLP"] --> psif["ψ_{N−1}(x)"]
-            end
-            states:::dashed_green
-
-            Eparam["Trainable parameters"] --> Etheta["Eθₙ"]
-        end
-        NN:::stage3
-
-        %% Derivatives
-        subgraph derivatives["3️⃣ Finite difference operators"]
-        direction TB
-            psiDD["ψ''(x) via stencil"]
-            VDD["V''(x) via stencil"]
-        end
-        derivatives:::dashed_orange_1
-
-        %% Physics residual
-        subgraph physics["Physics residual"]
-            R["Rₙ(x) = −½ψ'' + Vψ − Eψ"]
-        end
-        physics:::stage5
-
-        %% Loss terms
-        subgraph loss["Total Loss"]
-        direction TB
-            Lphys["Physics loss\n‖R(x)‖²"]
-            Lnorm["Normalization loss\n(∫ψ²dx −1)²"]
-            Lsmooth["Smoothness\n‖V''‖²"]
-            Ldata["Data mismatch\nρ(x), E"]
-        end
-        loss:::stage4
-
-        opt["5️⃣ Optimizer (Adam)"]:::stage5
-
-        end
-    PINN:::PIML_framework
-
-    %%--------------------------------------------------------------
-    %% Connections
-    %%--------------------------------------------------------------
-
-    A --> Vnet:::purple_blue
-    A --> psi0net:::purple_blue
-    A --> psinet:::purple_blue
-    A --> psin:::purple_blue
-
-    psi0 --> psiDD
-    psii --> psiDD
-    psif --> psiDD
-
-    V --> VDD
-
-    psiDD --> R
-    V --> R
-    Etheta --> R
-
-    R --> Lphys
-
-    psi0 --> Lnorm
-    psii --> Lnorm
-    psif --> Lnorm
-
-    VDD --> Lsmooth
-
-    psi0 --> Ldata
-    psii --> Ldata
-    psif --> Ldata
-    Etheta --> Ldata
-    obs --> Ldata
-
-    Lphys --> opt
-    Lnorm --> opt
-    Lsmooth --> opt
-    Ldata --> opt
-
-    opt --> NN
-
-
     %%--------------------------------------------------------------
     %%  POST‑TRAINING DIAGNOSTICS
     %%--------------------------------------------------------------
-    H["6️⃣ Sanity Checks"]:::stage6
+    sanity_checks["6️⃣ Sanity Checks"]:::stage6
 
     subgraph POD["7️⃣ POD Diagnostics"]
         direction TB
@@ -262,10 +241,81 @@ flowchart LR
     end
     POD:::dashed_orange_1
 
-    step0["0️⃣ Define TISE Dynamics"]:::stage0 --> PINN:::dashed_blue
-    synthetic_data:::dashed_blue
-    PINN --> H
-    PINN --> POD:::dashed_orange
+    PIML --> sanity_checks
+    PIML --> POD
+
+    %%-----------------------------------------------------------
+%% CORE STAGES (pseudo gradient)
+%%-----------------------------------------------------------
+
+style step0 fill:#0f0a25,stroke:#7c5cff,stroke-width:4px,color:#ffffff,rx:12px, ry:12px;
+
+style PIML fill:#0b1020,stroke:#5a6cff,stroke-width:4px,color:#ffffff,stroke-dasharray:6 6,rx:12px, ry:12px;
+
+style synthetic fill:#14153a,stroke:#6b4cff,stroke-width:3px,color:#ffffff,stroke-dasharray:6 6,rx:12px, ry:12px;
+style spatial_grid fill:#1b133d,stroke:#9a66ff,stroke-width:2px,color:#ffffff,rx:12px, ry:12px;
+style observed_data fill:#181c3f,stroke:#5f88ff,stroke-width:2px,color:#ffffff,rx:12px, ry:12px;
+
+%%-----------------------------------------------------------
+%% NETWORKS
+%%-----------------------------------------------------------
+
+classDef MLP fill:#2a185c,stroke:#9a66ff,stroke-width:4px,color:#ffffff,rx:12px, ry:12px;
+style eigenfunction_networks fill:#11253f,stroke:#38c6ff,stroke-width:2px,color:#ffffff,stroke-dasharray:6 6,rx:12px, ry:12px;
+style learned_parameters fill:#0d1a30,stroke:#3b82ff,stroke-width:3px,color:#ffffff,stroke-dasharray:6 6,rx:12px, ry:12px;
+style PINN fill:#131130,stroke:#7259ff,stroke-width:3px,color:#ffffff,stroke-dasharray:6 6,rx:12px, ry:12px;
+
+classDef eigenfunctions fill:#153a55,stroke:#4ec9ff,stroke-width:2px,color:#ffffff,rx:12px, ry:12px;
+
+style potential fill:#11163a,stroke:#5f88ff,stroke-width:4px,color:#ffffff,rx:12px, ry:12px;
+style potential_network fill:#0d1630,stroke:#3072f5,stroke-width:4px,color:#ffffff,stroke-dasharray:6 6,rx:12px, ry:12px;
+
+classDef energy fill:#0d2238,stroke:#3b9eff,stroke-width:4px,color:#ffffff,rx:12px, ry:12px;
+style energy_eigenvalues fill:#071320,stroke:#3b9eff,stroke-width:4px,color:#ffffff,stroke-dasharray: 6 6, rx:12px, ry:12px;
+
+%%-----------------------------------------------------------
+%% PHYSICS OPERATORS
+%%-----------------------------------------------------------
+
+style finite_difference fill:#0a2330,stroke:#63e2ff,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12px, ry:12px;
+style potential_stencil fill:#112042,stroke:#5f88ff,stroke-width:3px,color:#ffffff,rx:12px, ry:12px;
+style eigenfunction_stencil fill:#132a3a,stroke:#4ec9ff,stroke-width:2px,color:#ffffff,rx:12px, ry:12px;
+
+style residual fill:#0a1329,stroke:#5f88ff,stroke-width:2px,color:#ffffff,stroke-dasharray:6 6,rx:12px, ry:12px;
+style A fill:#0e1c3f,stroke:#4ec9ff,stroke-width:2px,color:#ffffff,stroke-dasharray:6 6,rx:12px, ry:12px;
+
+%%-----------------------------------------------------------
+%% LOSS (cyan end of gradient)
+%%-----------------------------------------------------------
+
+classDef loss fill:#0a0f1a,stroke:#22d3ee,stroke-width:2px,color:#ffffff,stroke-dasharray:6 6,rx:12px, ry:12px;
+style loss_terms fill:#0b1326,stroke:#22d3ee,stroke-width:2px,color:#ffffff,stroke-dasharray:6 6,rx:12px, ry:12px;
+
+style loss_physics fill:#0d1e3b,stroke:#38c6ff,stroke-width:2px,color:#ffffff,rx:12px, ry:12px;
+style loss_norm fill:#0e2a3b,stroke:#4ec9ff,stroke-width:2px,color:#ffffff,rx:12px, ry:12px;
+style loss_smooth fill:#0b2f2a,stroke:#34d399,stroke-width:2px,color:#ffffff,rx:12px, ry:12px;
+style loss_data fill:#1e153a,stroke:#c084fc,stroke-width:2px,color:#ffffff,rx:12px, ry:12px;
+
+%%-----------------------------------------------------------
+%% OPTIMIZER (accent color)
+%%-----------------------------------------------------------
+
+style optimization fill:#2a1c16,stroke:#f59e0b,stroke-width:2px,color:#ffffff,rx:12px, ry:12px;
+
+%%-----------------------------------------------------------
+%% POST-TRAINING DIAGNOSTICS
+%%-----------------------------------------------------------
+
+classDef stage6 fill:#2a1a1a,stroke:#f87171,stroke-width:2px,color:#ffffff,rx:12px, ry:12px;
+classDef stage7 fill:#2a1a1a,stroke:#fb7185,stroke-width:2px,color:#ffffff,rx:12px, ry:12px;
+
+classDef dashed_orange_1 fill:#161b22,stroke:#fb7185,stroke-dasharray:6 6,color:#ffffff,rx:12px, ry:12px;
+
+%%-----------------------------------------------------------
+%% LINKS
+%%-----------------------------------------------------------
+
+linkStyle default stroke:#8b949e,stroke-width:2px;
 ```
 
 
