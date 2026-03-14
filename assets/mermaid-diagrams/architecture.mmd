@@ -14,7 +14,7 @@
 }%%
 %%====================================================================
 
-flowchart LR
+flowchart TB
 
     %%-----------------------------------------------------------
     %%  NODE DEFINITIONS
@@ -28,13 +28,13 @@ flowchart LR
         direction LR
 
         subgraph synthetic["1️⃣ Synthetic Data"]
-            direction TB
+            direction LR
             spatial_grid["$$x\in[-5,5]$$"]:::spatial
             observed_data["$$\rho_n^\text{obs}, \, E_n^\text{obs} $$"]
         end
 
         subgraph PINN[" "]
-            direction LR
+            direction TB
             MLP1["MLP"]:::MLP
             MLP2["MLP"]:::MLP
             MLP3["MLP"]:::MLP
@@ -47,7 +47,7 @@ flowchart LR
 
 
             subgraph potential_network["Potential Network"]
-                direction LR
+                direction TB
 
                 MLP1 --> potential
 
@@ -55,7 +55,7 @@ flowchart LR
             end
 
             subgraph eigenfunction_networks["Eigenfunction Networks"]
-                direction LR
+                direction TB
                 MLP2 --> wavefunction_0
                 MLP3 --> wavefunction_1
                 MLP4 --> wavefunction_2
@@ -64,7 +64,7 @@ flowchart LR
         end
 
         subgraph energy_eigenvalues["Energy Eigenvalues"]
-        direction LR
+        direction TB
             energy_0(("$$E_1^\theta$$")):::energy
             energy_1(("$$E_1^\theta$$")):::energy
             energy_2(("$$E_2^\theta$$")):::energy
@@ -79,21 +79,39 @@ flowchart LR
 
         subgraph loss["4️⃣ Loss Function"]
             direction TB
+            loss_tot["$$\mathcal{L}_\text{tot}=\lambda_\text{TISE}\mathcal{L}_\text{TISE}+\lambda_\text{data}\mathcal{L}_\text{data}+\lambda_\text{norm}\mathcal{L}_\text{norm}+\lambda_\text{smooth}\mathcal{L}_\text{smooth}$$"]
 
-            loss_physics["$$\mathcal{L}_\text{TISE}=\sum_n^N{\left|\left| -\frac{1}{2}\frac{\partial^2}{\partial x^2}\psi_n^\theta+V_\theta\psi_n^\theta-E_n\psi_n^\theta \right|\right|^2}$$"]
-            loss_data["$$\mathcal{L}_\text{data} = \frac{1}N\sum_n^N{\big(E_n^\theta-E_n^\text{obs}\big)^2} + \frac{1}N\sum_n^{N}\frac{1}{M}\sum_j^M{\Big(\left|\psi_n^\theta(x_j)\right|^2-\rho_n^\text{obs}(x_j)\Big)^2}$$"]
-            loss_smooth["$$\mathcal{L}_\text{smooth} = \langle \frac{\left|\left| V_\theta''(x)  \right|\right|^2}{\epsilon+\left|\left| V_\theta(x) \right|\right|^2}\rangle$$"]
-            loss_norm["$$\mathcal{L}_\text{norm} = \frac{1}{N}\sum_n^N{\bigg( \int{\left|\psi_n^\theta(x) \right|^2dx} - 1 \bigg)^2 }$$"]
+            subgraph loss_terms["Loss Terms"]
+                direction LR
+
+                loss_physics["$$\mathcal{L}_\text{TISE}=\sum_n^N{\left|\left| -\frac{1}{2}\frac{\partial^2}{\partial x^2}\psi_n^\theta+V_\theta\psi_n^\theta-E_n\psi_n^\theta \right|\right|^2}$$"]
+                loss_data["$$\mathcal{L}_\text{data} = \frac{1}N\sum_n^N{\big(E_n^\theta-E_n^\text{obs}\big)^2} + \frac{1}N\sum_n^{N}\frac{1}{M}\sum_j^M{\Big(\left|\psi_n^\theta(x_j)\right|^2-\rho_n^\text{obs}(x_j)\Big)^2}$$"]
+                loss_smooth["$$\mathcal{L}_\text{smooth} = \langle \frac{\left|\left| V_\theta''(x)  \right|\right|^2}{\epsilon+\left|\left| V_\theta(x) \right|\right|^2}\rangle$$"]
+                loss_norm["$$\mathcal{L}_\text{norm} = \frac{1}{N}\sum_n^N{\bigg( \int{\left|\psi_n^\theta(x) \right|^2dx} - 1 \bigg)^2 }$$"]
+            end
+            loss_terms:::loss
+
 
         end
 
-        observed_data --> loss_data
-        potential --> loss_physics
-        potential --> loss_smooth
+        subgraph finite_difference["5️⃣ Finite Difference"]
+            direction LR
+            potential_stencil["$$V_\theta''(x)\,$$ via stencil"]
+            eigenfunction_stencil["$$\frac{\partial^2}{\partial x^2}\psi_n^\theta(x) \,$$via stencil"]
+        end
 
-        wavefunction_0 --> loss_physics
-        wavefunction_1 --> loss_physics
-        wavefunction_2 --> loss_physics
+        subgraph residual["Physics Residual"]
+           A["Physics Residual $$R_n(x)=-\frac{1}{2}\frac{\partial^2}{\partial x^2}\psi^\theta + V_\theta\psi^\theta - E^\theta \psi$$"]
+        end
+        optimization["Optimizer (Adam)"]
+
+        observed_data --> loss_data
+
+        wavefunction_0 --> eigenfunction_stencil
+        wavefunction_1 --> eigenfunction_stencil
+        wavefunction_2 --> eigenfunction_stencil
+
+        eigenfunction_stencil --> residual --> loss_physics
 
         wavefunction_0 --> loss_norm
         wavefunction_1 --> loss_norm
@@ -103,17 +121,26 @@ flowchart LR
         energy_1 --> loss_data
         energy_2 --> loss_data
 
-        energy_0 --> loss_physics
-        energy_1 --> loss_physics
-        energy_2 --> loss_physics
+        energy_0 --> residual
+        energy_1 --> residual
+        energy_2 --> residual
 
-        subgraph placeholder
-            direction TB
-            residual
-            finite_difference
-            optimization
-        end
+        potential --> residual
+        potential --> potential_stencil --> loss_smooth
 
+        loss_physics --> loss_tot
+        loss_data --> loss_tot
+        loss_smooth --> loss_tot
+        loss_norm --> loss_tot
+
+        loss_tot --> optimization
+        optimization --> MLP1
+        optimization --> MLP2
+        optimization --> MLP3
+        optimization --> MLP4
+        optimization --> energy_0
+        optimization --> energy_1
+        optimization --> energy_2
 
     end
 
@@ -125,15 +152,35 @@ flowchart LR
     step0 --> PIML
 
 
+    %%--------------------------------------------------------------
+    %%  POST‑TRAINING DIAGNOSTICS
+    %%--------------------------------------------------------------
+    sanity_checks["6️⃣ Sanity Checks"]:::stage6
+
+    subgraph POD["7️⃣ POD Diagnostics"]
+        direction TB
+        SVD["SVD of snapshot matrix"]:::stage6
+        sigma["POD spectrum (i.e., singular values)"]:::stage6
+        U["POD eigenmodes (columns of U)"]:::stage6
+        %% noteW["Wᵀ holds temporal coefficients – not needed for static eigenmode analysis"]:::stage7
+        %% noteSpec["‘Spectrum’ = the set of singular values; gaps signal low‑rank structure"]:::stage7
+
+        SVD --> sigma
+        SVD --> U
+    end
+    POD:::dashed_orange_1
+
+    PIML --> sanity_checks
+    PIML --> POD
+
     %%-----------------------------------------------------------
     %%  STYLE DEFINITIONS (inline, no external CSS)
     %%-----------------------------------------------------------
     style step0 fill:#0f092b,stroke:#5D3FD3,stroke-width:4px,color:#ffffff,rx:12,ry:12;
-    style PIML fill:#050c1a,stroke:#006aff,stroke-width:1px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+    style PIML fill:#050c1a,stroke:#006aff,stroke-width:4px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
     style synthetic fill:#11112E,stroke:#330099,stroke-dasharray:6 6,stroke-width:3px,color:#ffffff,rx:12,ry:12;
     style spatial_grid fill:#1E0026,stroke:#ff3e69,stroke-width:2px,color:#ffffff,rx:12,ry:12;
     style observed_data fill:#231567,stroke:#5280ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    classDef eigenfunctions fill:#030c0e,stroke:#0e99ff,stroke-width:4px,color:#ffffff,rx:12,ry:12;
     classDef eigenfunctions fill:#224261,stroke:#14B5FF,stroke-width:2px,color:#ffffff,rx:12,ry:12;
     style eigenfunction_networks fill:#103b4f,stroke:#00f5db,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
     style PINN fill:#0e1d3b,stroke:#006aff,stroke-width:3px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
@@ -141,16 +188,24 @@ flowchart LR
     style potential width:480px,height:240px,fill:#0e104b,stroke:#006AFF,stroke-width:4px,color:#ffffff,rx:12,ry:12;
     style potential_network fill:#153f6e,stroke:#409CFF,stroke-width:4px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
     classDef energy fill:#00060d,stroke:#006eeb,stroke-width:4px,color:#ffffff,rx:12,ry:12;
-    style loss fill:#150021,stroke:#541bda,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
-    style loss_physics fill:#040920,stroke:#0070EB,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-    style loss_norm fill:#0e447a,stroke:#14B5FF,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+    style loss fill:#070707,stroke:#541bda,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+    style loss_tot fill:#150021,stroke:#541bda,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+    style loss_terms fill:#070320,stroke:#541bda,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+    style loss_physics fill:#010927,stroke:#0070EB,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+    style loss_norm fill:#052a44,stroke:#14B5FF,stroke-width:2px,color:#ffffff,rx:12,ry:12;
     style loss_smooth fill:#082011,stroke:#05a131,stroke-width:2px,color:#ffffff,rx:12,ry:12;
     style loss_data fill:#2a0636,stroke:#df24ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
     style residual fill:#134d05,stroke:#aaff9e,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
-    style finite_difference fill:#094873,stroke:#00f5db,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+    style A fill:#324d2e,stroke:#aaff9e,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+    style finite_difference fill:#05273f,stroke:#00f5db,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
     style optimization fill:#3a2f2a,stroke:#f78166,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
     style energy_eigenvalues fill:#0b1c2d,stroke:#14b5ff,stroke-width:2px,color:#ffffff,stroke-dasharray: 6 6,rx:12,ry:12;
+    style potential_stencil fill:#0e104b,stroke:#006AFF,stroke-width:4px,color:#ffffff,rx:12,ry:12;
+    style eigenfunction_stencil fill:#112131,stroke:#14B5FF,stroke-width:2px,color:#ffffff,rx:12,ry:12;
 
+    classDef stage6 fill:#3a2f2a,stroke:#f78166,stroke-width:2px,color:#ffffff,rx:12,ry:12;   %% diagnostics
+    classDef stage7 fill:#3a2f2a,stroke:#f68080,stroke-width:2px,color:#ffffff,rx:12,ry:12;   %% diagnostics
+    classDef dashed_orange_1 fill:#161b22,stroke:#f68080,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
     %%-----------------------------------------------------------
     %%  LIGHT‑GRAY ARROW STYLE (so arrows stay subtle)
     %%------------------------------------------------------------
