@@ -74,16 +74,6 @@ def _build_problem(args: argparse.Namespace):
     """
     device: Final = torch.device(args.device)
 
-    # Model
-    model = InverseSchrodingerModel(
-        n_states=args.n_modes,
-        hidden_dims=[args.hidden, args.hidden],
-        device=device,
-    ).to(device)
-
-    # Optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-
     # Spatial grid
     x = make_grid(-5.0, 5.0, args.n_points, device=device)
     dx = float(x[1] - x[0])
@@ -111,6 +101,16 @@ def _build_problem(args: argparse.Namespace):
         "smooth": 5e-4,
         "norm": 1.0,
     }
+
+    # Model
+    model = InverseSchrodingerModel(
+        n_states=args.n_modes,
+        hidden_dims=[args.hidden, args.hidden],
+        device=device,
+    ).to(device)
+
+    # Optimizer
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     return model, optimizer, x, dx, rho_obs, E_obs, lambdas
 

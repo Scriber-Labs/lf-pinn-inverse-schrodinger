@@ -57,6 +57,7 @@ def train_step(
     torch.Tensor
         The total weighted loss (scalar) -> ready for ``backward()``.
     """
+
     # ----- Forward pass -------------------------------------------------
     V_theta = model.V_theta(x)      # potential V(theta, x)
     psi_list = model.psi_theta(x)   # list[psi_n(theta, x)]
