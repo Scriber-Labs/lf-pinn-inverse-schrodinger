@@ -16,6 +16,8 @@ from __future__ import annotations
 from typing import List
 
 import torch
+from torch import Tensor
+
 from model import InverseSchrodingerModel
 from physics import tise_loss, potential_smoothness_loss, wavefunction_normalization_loss
 from inverse import data_mismatch_loss
@@ -32,7 +34,7 @@ def train_step(
     rho_obs: List[torch.Tensor],
     E_obs: torch.Tensor,
     lambdas: dict[str, float],
-) -> torch.Tensor:
+) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
     """
     Execute a single gradient descent step.
 
@@ -54,29 +56,55 @@ def train_step(
 
     Returns
     -------
-    torch.Tensor
-        The total weighted loss (scalar) -> ready for ``backward()``.
+    tuple[Tensor, Tensor, Tensor, Tensor, Tensor]
+        (total_loss, physics_loss, data_loss, smooth_loss, norm_loss)
+        -> ready for ``backward()``.
     """
 
     # ----- Forward pass -------------------------------------------------
-    V_theta = model.V_theta(x)      # potential V(theta, x)
-    psi_list = model.psi_theta(x)   # list[psi_n(theta, x)]
+    V_theta = model.V_theta(x)  # potential V(theta, x)
+    psi_list = model.psi_theta(x)  # list[psi_n(theta, x)]
+    E_theta = model.E_theta()
 
-    # ----- Individual loss terms ----------------------------------------
-    L_physics = tise_loss(psi_list, V_theta, model.E_theta(), dx)
-    L_norm = wavefunction_normalization_loss(psi_list,dx)
-    L_smooth = potential_smoothness_loss(V_theta, dx)
-    L_data = data_mismatch_loss(psi_list, model.E_theta(), rho_obs, E_obs)
+    # Sort eigenstates by energy
+    idx = torch.argsort(E_theta)
+    E_theta = E_theta[idx]
+    psi_list = [psi_list[i] for i in idx]
 
-    # ----- Weighted sum --------------------------------------------------
-    total = (
-        lambdas["data"] * L_data
-        + lambdas["physics"] * L_physics
-        + lambdas["smooth"] * L_smooth
-        + lambdas["norm"] * L_norm
+    # ------------------- Physics‑informed loss -------------------
+    loss_physics = tise_loss(
+        psi_list,  # list[psi_n(theta, x)]
+        V_theta,  # V(theta, x)
+        E_theta,  # E(theta)
+        dx,
     )
 
-    return total
+    # ------------------- Smoothness regularizer -------------------
+    loss_smooth = potential_smoothness_loss(V_theta, dx)
+
+    # ------------------- Data‑fit loss ----------------------------
+    loss_data = data_mismatch_loss(
+        psi_list,  # learned psi_n(theta, x)
+        E_theta,         # learned energies
+        rho_obs,   # observed probability densities
+        E_obs,     # observed energies
+    )
+
+    # ------------------- Normalization penalty -------------------
+    loss_norm = wavefunction_normalization_loss(
+        psi_list,
+        dx
+    )
+
+    # ------------------- Weighted sum ----------------------------
+    total_loss = (
+            lambdas["data"] * loss_data
+            + lambdas["physics"] * loss_physics
+            + lambdas["smooth"] * loss_smooth
+            + lambdas["norm"] * loss_norm
+    )
+
+    return total_loss, loss_physics, loss_data, loss_smooth, loss_norm
 
 # ----------------------------------------------------------------------
 # 2️⃣ Smoke‑test entry point
@@ -108,11 +136,11 @@ def _run_train_smoke_test() -> None:
     lambdas = {"data": 1.0, "physics": 1.0, "smooth": 1e-2, "norm": 1e-2}
 
     optimizer.zero_grad()
-    loss = train_step(model, x, dx, rho_obs, E_obs, lambdas)
-    loss.backward()
+    total_loss, loss_physics, loss_data, loss_smooth, loss_norm = train_step(model, x, dx, rho_obs, E_obs, lambdas)
+    total_loss.backward()
     optimizer.step()
 
-    print("✔️ train.py smoke test - loss after one step:", float(loss.detach()))
+    print("✔️ train.py smoke test - loss after one step:", float(total_loss.detach()))
 
 def main() -> None:
     """Entry point for ``python -m src.train`` -> runs the smoke test."""
