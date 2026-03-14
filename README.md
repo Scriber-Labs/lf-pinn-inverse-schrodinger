@@ -5,16 +5,16 @@
 
 This project extends the `lf-pinn-harmonic-oscillator` framework to an inverse 1D Schrödinger problem.
 
-While project 1 investigated the robustness  of Physics-Informed Neural Networks (PINNs) under low fidelity discretization for a *known Hamiltonian*, this project investigates what information about an *unknown potential* that can be recovered from partial, noisy observations of quantum states.
+While [project 1](https://github.com/Scriber-Labs/lf-pinn-harmonic-oscillator) investigated the robustness of Physics-Informed Neural Networks (PINNs) under low fidelity discretization for a *known Hamiltonian*, this project investigates what information about an *unknown potential* that can be recovered from partial, noisy observations of quantum states.
 
 Using the time-independent Schrödinger equation (TISE) as a physics constraint, we treat:
-- The potential $V(x)$ as a learnable function 
-- The wavefunctions act as auxiliary fields (❓❓what do we mean by auxiliary fields in this context?❓❓) constrained by the PDE 
+- The potential $V(x)$ as a learnable function. 
+- The wavefunctions $\psi_n(x)$ as auxiliary fields constrained by the PDE.
 - The eigenvalues $E_n$ as trainable scalars.
 
 The model is trained using noisy spectral data and probability densities, mimicking low-fidelity experimental measurements.
 
-> ✨  As with project 1, the goal is not high-precision reconstruction, but interpretability and identifability.
+> 🎗️ As with project 1, the goal is not high-precision reconstruction, but interpretability and identifability.
 
 ---
 ## 🔰 Quick Start
@@ -45,9 +45,6 @@ python -m cli_train --n_modes 3 --hidden 64 --epochs 6000 --lr 5e-3 --n_points 2
 
 ```
 inverse-piml-schrodinger/
-├── README.md
-├── requirements.txt
-├── pyproject.toml
 ├── cli_train.py            # CLI support for generating training data
 ├── src/
 │   ├── model.py            # neural network ansatz for V_theta(x)
@@ -58,26 +55,47 @@ inverse-piml-schrodinger/
 │   ├── visualizations.py   # visualization utilities (e.g., seeding and grids)
 │   └── utils.py            # helper functions (e.g., seeding and grids)
 ├── notebooks/
-│   └── demo.ipynb        # visual + narrative
-├── references/
-│   ├── README.md         # a blank README.md (✅ need to decide if I want to keep all this ✅)
-│   └── references.bib    # sources 
+│   └── demo.ipynb          # generate visuaalzations
 ├── assets/
 │   ├── images/
-│   │   └── interpratibility_axis.png    
-└── artifacts/
-    ├── project_1_followup.md            # conceptual notes and reflection
-    ├── figures.md                       # structure-based analysis of demo visuals
-    └── demo_visuals/    
-        ├── density.png
-        ├── learned_energies.png
-        ├── learned_potential.png
-        ├── learned_wavefunctions.png
-        ├── overlap_heatmap.png
-        ├── pod_modes.png
-        ├── pod_singular_values.png
-        └── training_curves.png                       
+│   │   ├── project_2_architecture.png
+│   │   └── loss_table.png
+│   └── mermaid-diagrams/
+│   │   └── architecture.mmd    
+├── artifacts/
+│   ├── project_1_followup.md            # conceptual notes and reflection
+│   ├── figures.md                       # structure-based analysis of demo visuals
+│   └── demo_visuals/    
+│       ├── density.png
+│       ├── learned_energies.png
+│       ├── learned_potential.png
+│       ├── learned_wavefunctions.png
+│       ├── overlap_heatmap.png
+│       ├── pod_modes.png
+│       ├── pod_singular_values.png
+│       └── training_curves.png         
+├── references.md                       # sources 
+├── requirements.txt
+├── pyproject.toml
+├── CITATION.cff
+└── README.md                         
 ```
+---
+## 🌍 Global Design Choices
+### Assumptions
+- Atomic units: $\hbar = 1$
+- Normalized parameters: $m = 1$ electron rest mass
+- Wavefunction/eigenmode normalization is handled either implicitly or by the PDE
+- probability density observations are on an absolute scale
+
+### What is being learned
+- The potential function $V_\theta(x) := V(\theta; x)$ via the MLP.
+- Eigenmodes $\psi_n^\theta(x) := \psi_n(\theta;x)$ via the MLP. 
+- Associated energy eigenvalues $E_n^\theta := E_n(\theta)$ as learnable scalars. 
+
+### Orthogonality 
+- For this low fidelity implementation, we are not _enforcing_ orthogonality directly.
+- However, our POD function (`src/pod.py`) allows us to _diagnose_ orthogonality.
 
 ---
 ## 🧜‍♀️ PIML Architecture
@@ -160,22 +178,6 @@ where
 > 📝 The spectrum reveals learned structure where large gaps in consecutive singular values indicate low-rank structure is learned correctly. 
 
 > ✨ Importantly, POD does not enforce physics. It reveals structure. This is important for interpretability!
----
-## 🌍 Global Design Choices
-Assumptions:
-- Atomic units: $\hbar = 1$
-- Normalized parameters: $m = 1$ electron rest mass
-- Wavefunction/eigenmode normalization is handled either implicitly or by the PDE
-- probability density observations are on an absolute scale
-
-What is being learned:
-- The potential function $V_\theta(x) := V(\theta, x)$ via the MLP.
-- Eigenmodes $\psi_n^\theta(x) := \psi_n(\theta,x)$ via the MLP. 
-- Associated energy eigenvalues $E_n^\theta := E_n(\theta)$ as learnable scalars. 
-
-Orthogonality
-- For our low fidelity design, we are not _enforcing_ orthogonality directly.
-- However, our POD function (`src/pod.py`) allows us to _diagnose_ orthogonality.
 
 ---
 ## 🔮 Future possible implementations

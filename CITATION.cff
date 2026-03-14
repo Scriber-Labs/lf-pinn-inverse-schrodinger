@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+title: lf-pinn-inverse-schrodinger
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - name: Scriber Labs
+    location: USA
+    email: eigenscribe@protonmail.com
+    website: 'https://github.com/Scriber-Labs'
+    alias: Eigenscribe
+repository-code: >-
+  https://github.com/Scriber-Labs/lf-pinn-inverse-schrodingerr
+abstract: >-
+  A minimal and interpretable PINN-inspired simulator that
+  demonstrates how physics can be implemented in machine
+  learning via variational principles (without chasing
+  accuracy).
+keywords:
+  - pinn
+  - low-fidelity
+  - inverse TISE
+  - POD diagnostics
+license: MIT
+date-released: '2026-03-29'
