@@ -167,7 +167,7 @@ def plot_loss_history(
         epochs: Sequence[int],
         total: Sequence[float],
         physics: Sequence[float],
-        norm: Sequence[float],
+        ortho: Sequence[float],
         smooth: Sequence[float],
         data: Sequence[float],
         lambdas: Dict[str, float],
@@ -180,10 +180,10 @@ def plot_loss_history(
     ----------
     epochs : Sequence[int]
         Epoch numbers (usually ``range(1, N+1)``).
-    total, physics, data, smooth, norm : Sequence[float]
+    total, physics, data, smooth, ortho : Sequence[float]
         Per-epoch scalar losses.
     lambdas : dict[str, float]
-        Mapping ``{'data':..., `physics`:..., `smooth`:..., `norm`:...}``.
+        Mapping ``{'data':..., `physics`:..., `smooth`:..., `ortho`:...}``.
     out_path : Path or None (optional)
         If provided, the figure is saved to this path location (PNG).
 
@@ -198,7 +198,7 @@ def plot_loss_history(
     comps: List[Tuple[str, str, Sequence[float]]] = [
         ("Total", "#8000FF", total),
         ("Physics", "#007FFF", physics),
-        ("Norm", "#0FFFFF", norm),
+        ("Ortho", "#0FFFFF", ortho),
         ("Smoothness", "#39FF14", smooth),
         ("Data-fit", "#E52B50", data),
     ]
@@ -976,11 +976,11 @@ def _smoke_test() -> None:
     epochs = list(range(1, 101))
     total = np.exp(-0.03 * np.arange(100)) + 0.02 * np.random.rand(100)
     physics = np.exp(-0.025 * np.arange(100)) + 0.015 * np.random.rand(100)
-    norm = np.exp(-0.04 * np.arange(100)) + 0.008 * np.random.rand(100)
+    ortho = np.exp(-0.04 * np.arange(100)) + 0.008 * np.random.rand(100)
     smooth = np.exp(-0.02 * np.arange(100)) + 0.005 * np.random.rand(100)
     data = np.exp(-0.035 * np.arange(100)) + 0.01 * np.random.rand(100)
 
-    lambdas = {"data": 1.0, "physics": 1.0, "smooth": 1e-2, "norm": 10}
+    lambdas = {"data": 1.0, "physics": 1.0, "smooth": 1e-2, "ortho": 10}
 
     # Produce figures in a temporary folder
     out_dir = pathlib.Path("./_smoke_outputs")
@@ -993,7 +993,7 @@ def _smoke_test() -> None:
         epochs,
         total,
         physics,
-        norm,
+        ortho,
         smooth,
         data,
         lambdas,

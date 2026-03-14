@@ -78,6 +78,29 @@ class MLP(nn.Module):
         """Forward pass -> forwards ``x`` through the stacked MLP."""
         return self.net(x)
 
+class NormalizedWavefunctionNet(nn.Module):
+    """
+    Wraps an MLP to enforce L2 normalization by construction.
+    Eliminates the need for a separate normalization loss term.
+    """
+    def __init__(self, base_net: nn.Module, dx: float) -> None:
+        super().__init__()
+        self.base_net = base_net
+        self.dx = dx
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # Raw prediction
+        psi_raw: torch.Tensor = self.base_net(x)
+
+        # Numerical integration for L2 norm:
+        # Add epsilon to prevent division by zero during early training
+        norm_sq: torch.Tensor = torch.sum(psi_raw ** 2) * self.dx
+        norm: torch.Tensor = torch.sqrt(norm_sq + 1e-8)
+
+        # Enforce normalization
+        return psi_raw / norm
+
+
 class InverseSchrodingerModel(nn.Module):
     """
     Joint model that bundles together:
@@ -115,6 +138,7 @@ class InverseSchrodingerModel(nn.Module):
         *,
         device: torch.device | str | None = None,
         dtype: torch.dtype | None = None,
+        dx: float,
     ) -> None:
         super().__init__()
 
@@ -132,12 +156,15 @@ class InverseSchrodingerModel(nn.Module):
         # One wavefunction network per eigenstate
         self.psi_nets = nn.ModuleList(
             [
-                MLP(
-                    input_dim=1,
-                    output_dim=1,
-                    hidden_dims=hidden_dims,
-                    device=device,
-                    dtype=dtype,
+                NormalizedWavefunctionNet(
+                    MLP(
+                        input_dim=1,
+                        output_dim=1,
+                        hidden_dims=hidden_dims,
+                        device=device,
+                        dtype=dtype,
+                    ),
+                    dx=dx,
                 )
                 for _ in range(n_states)
             ]
@@ -186,9 +213,10 @@ def _run_smoke_test() -> None:
     set_global_seed(27)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    dx: float = 0.01
 
     # Instantiate a model with three eigenstates and a modest hidden size.
-    model = InverseSchrodingerModel(n_states=3, hidden_dims=[64, 64], device=device)
+    model = InverseSchrodingerModel(n_states=3, hidden_dims=[64, 64], device=device,dx=dx)
 
     # Sample a spatial grid
     x = torch.linspace(-1.0, 1.0, 100, device=device).unsqueeze(1)

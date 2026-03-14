@@ -158,6 +158,36 @@ def wavefunction_normalization_loss(
     ]
     return torch.mean((torch.stack(norms) - 1.0) ** 2)
 
+def energy_ordering_loss(energies: torch.Tensor) -> torch.Tensor:
+    """
+    Enforces the physical requirement that energy eigenvalues are strictly ordered: E_0 < E_1 < ...
+
+    This prevents the "state swapping" issue where networks lose their identity during training because the optimizer identifies gradients flowing through different indices that depend on the current iteration energy ordering.
+
+    Parameters
+    ----------
+    energies : torch.Tensor, shape ``(n_states,)``
+        Tensor of learned energy eigenvalues.
+
+    Returns
+    -------
+    torch.Tensor (scalar)
+        Penalty loss. Zero if strictly ordered, positive if otherwise.
+    """
+    if len(energies) < 2:
+        return torch.tensor(0.0, device=energies.device, dtype=energies.dtype)
+
+    # Calculate differences between adjacent sorted energies
+    # We want E[i] < E[i+1] => E[i] - E[i+1] < 0
+    # We penalize positive violations using ReLU: max(0, E[i] - E[i+1])
+    diffs = energies[:-1] - energies[1:]
+
+    # Apply ReLU to penalize only violations (where diff > 0)
+    violations = torch.relu(diffs)
+
+    # Return mean squared violation
+    return torch.mean(violations ** 2)
+
 # ----------------------------------------------------------------------
 # 2️⃣ Smoke‑test entry point
 # ----------------------------------------------------------------------
@@ -188,11 +218,27 @@ def _run_physics_smoke_test() -> None:
     loss_smooth = potential_smoothness_loss(V, dx)
     loss_norm = wavefunction_normalization_loss([psi0, psi1], dx)
 
+
+    # Test energy ordering loss
+    # Case 1: Correctly ordered
+    E_ordered = torch.tensor([0.5, 1.5, 2.5])
+    loss_ordered = energy_ordering_loss(E_ordered)
+
+    # Case 2: Violated ordering
+    E_violated = torch.tensor([2.5, 0.5, 1.5])
+    loss_violated = energy_ordering_loss(E_violated)
+
     print("✔️ physics.py smoke test:")
     print(f"  residual shape     : {res0.shape}")
     print(f"  tise loss          : {loss_tise.item():.6f}")
     print(f"  smoothness loss    : {loss_smooth.item():.6f}")
-    print(f"  normalization loss : {loss_norm.item():.6f}")
+    print(f"  loss (ordered)     : {loss_ordered.item():.6f}")
+    print(f"  loss (violated)    : {loss_violated.item():.6f}")
+
+    # Verification
+    assert loss_ordered.item() < 1e-6, "Ordered energies should have near-zero loss."
+    assert loss_violated.item() > 0.0, "Violated ordering should have positive loss"
+    print("   ✅ Energy ordering logic passed.")
 
 def main() -> None:
     """

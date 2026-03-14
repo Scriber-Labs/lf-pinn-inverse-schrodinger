@@ -4,7 +4,7 @@ Training loop for the inverse Schrödinger problem.
 
 The loss is a weighted sum of three physically motivated terms:
 - **Physics loss**: enforces the TISE on the learned wavefunctions.
-- **Wavefunction normalization loss**: enforces normalization of the learned wavefunctions.
+- **Wavefunction orthogonality loss**: enforces orthogonality of the learned wavefunctions.
 - **Smoothness loss**: regularizes the potential to avoid spurious wiggles.
 - **Data-fit loss**: matches learned quantities to observed densities/energies.
 
@@ -20,6 +20,7 @@ from torch import Tensor
 
 from model import InverseSchrodingerModel
 from physics import tise_loss, potential_smoothness_loss, wavefunction_normalization_loss
+from orthogonality_loss import compute_orthogonality_loss
 from inverse import data_mismatch_loss
 from utils import make_grid, set_global_seed
 
@@ -52,12 +53,12 @@ def train_step(
         Tensor of observed energies.
     lambdas : dict[str, float]
         Dictionary mapping loss identifies to scalar weights, e.g.
-        ``{'data': 1.0, 'physics': 1.0, 'smooth': 1e-2, 'norm': 10.0}``.
+        ``{'data': 1.0, 'physics': 1.0, 'smooth': 1e-2, 'ortho': 10.0}``.
 
     Returns
     -------
     tuple[Tensor, Tensor, Tensor, Tensor, Tensor]
-        (total_loss, physics_loss, data_loss, smooth_loss, norm_loss)
+        (total_loss, physics_loss, data_loss, smooth_loss, ortho_loss)
         -> ready for ``backward()``.
     """
 
@@ -90,10 +91,10 @@ def train_step(
         E_obs,     # observed energies
     )
 
-    # ------------------- Normalization penalty -------------------
-    loss_norm = wavefunction_normalization_loss(
+    # ------------------- Orthogonalization penalty -------------------
+    loss_ortho = compute_orthogonality_loss(
         psi_list,
-        dx
+        dx,
     )
 
     # ------------------- Weighted sum ----------------------------
@@ -101,10 +102,10 @@ def train_step(
             lambdas["data"] * loss_data
             + lambdas["physics"] * loss_physics
             + lambdas["smooth"] * loss_smooth
-            + lambdas["norm"] * loss_norm
+            + lambdas["ortho"] * loss_ortho
     )
 
-    return total_loss, loss_physics, loss_data, loss_smooth, loss_norm
+    return total_loss, loss_physics, loss_data, loss_smooth, loss_ortho
 
 # ----------------------------------------------------------------------
 # 2️⃣ Smoke‑test entry point
@@ -121,6 +122,7 @@ def _run_train_smoke_test() -> None:
         n_states=3,
         hidden_dims=[64, 64],
         device=device,
+        dx=0.01,
     ).to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
@@ -133,10 +135,10 @@ def _run_train_smoke_test() -> None:
     rho_obs = [torch.exp(-x**2).squeeze() for _ in range(3)]
     E_obs = torch.tensor([0.5, 1.5, 2.5], device=device)
 
-    lambdas = {"data": 1.0, "physics": 1.0, "smooth": 1e-2, "norm": 1e-2}
+    lambdas = {"data": 1.0, "physics": 1.0, "smooth": 1e-2, "ortho": 1e-2}
 
     optimizer.zero_grad()
-    total_loss, loss_physics, loss_data, loss_smooth, loss_norm = train_step(model, x, dx, rho_obs, E_obs, lambdas)
+    total_loss, loss_physics, loss_data, loss_smooth, loss_ortho = train_step(model, x, dx, rho_obs, E_obs, lambdas)
     total_loss.backward()
     optimizer.step()
 
