@@ -112,11 +112,9 @@ $$V_\theta(x)=\text{MLP}_V(\theta_V;x)$$
 $$\psi_n^\theta=\text{MLP}_\psi(\theta_\psi;x)$$
 $$E_n^\theta=\text{learnable scalar}$$
 
-#### 3️⃣ Automatic Differentiation - Recover the first and second partial deriviatives of the learned wavefunctions with respect to $x$
-##### 🧩 Mathematical Formulation
+#### 3️⃣ Finite Difference
 
-$$\frac{\partial}{\partial x}\psi_n^\theta$$
-$$\frac{\partial^2}{\partial x^2}\psi_n^\theta$$
+
 
 #### 4️⃣ Loss Function- Low fidelity PINN objective function with four loss terms
 ##### 🧩 Mathematical Formulation

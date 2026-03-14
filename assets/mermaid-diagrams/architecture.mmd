@@ -4,12 +4,13 @@
 %%{ init: {
         "theme": "base",
         "themeVariables": {
-            "background": "`#0D1117`",
+            "background": "`#060817`",
             "lineColor": "`#14B5FF`",
             "fontFamily": "'Aclonica', sans-serif",
             "borderRadius": "16",
         },
-        "handDrawn": true,
+        "handDrawn": "false",
+        "displayMode": "compact",
     }
 }%%
 %%====================================================================
@@ -42,7 +43,7 @@ flowchart TB
             observed_data["$$\rho_n^\text{obs}, \, E_n^\text{obs} $$"]
         end
 
-        subgraph learned_parameters["2️⃣ Learned Parameters"]
+        subgraph learned_parameters["2️⃣ Neural Ansatz"]
         direction TB
             subgraph PINN[" "]
             direction TB
@@ -99,9 +100,17 @@ flowchart TB
 
         observed_data --> loss_data
 
+        wavefunction_0 --> loss_data
+        wavefunction_1 --> loss_data
+        wavefunction_2 --> loss_data
+
         wavefunction_0 --> eigenfunction_stencil
         wavefunction_1 --> eigenfunction_stencil
         wavefunction_2 --> eigenfunction_stencil
+
+        wavefunction_0 --> residual
+        wavefunction_1 --> residual
+        wavefunction_2 --> residual
 
         eigenfunction_stencil --> residual --> loss_physics
 
@@ -177,7 +186,7 @@ style observed_data fill:#181c3f,stroke:#5f88ff,stroke-width:2px,color:#ffffff,r
 classDef MLP fill:#2a185c,stroke:#9a66ff,stroke-width:4px,color:#ffffff,rx:12px, ry:12px;
 style eigenfunction_networks fill:#11253f,stroke:#38c6ff,stroke-width:2px,color:#ffffff,stroke-dasharray:6 6,rx:12px, ry:12px;
 style learned_parameters fill:#0d1a30,stroke:#3b82ff,stroke-width:3px,color:#ffffff,stroke-dasharray:6 6,rx:12px, ry:12px;
-style PINN fill:#131130,stroke:#7259ff,stroke-width:3px,color:#ffffff,stroke-dasharray:6 6,rx:12px, ry:12px;
+style PINN fill:#0c0c21,stroke:#7259ff,stroke-width:3px,color:#ffffff,stroke-dasharray:6 6,rx:12px, ry:12px;
 
 classDef eigenfunctions fill:#153a55,stroke:#4ec9ff,stroke-width:2px,color:#ffffff,rx:12px, ry:12px;
 
