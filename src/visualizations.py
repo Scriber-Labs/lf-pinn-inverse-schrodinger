@@ -32,7 +32,7 @@ def _apply_style() -> None:
     """Set global plotting style (Seaborn + custom rcParams)."""
 
     sns.set_theme(
-        style="dark",      # seaborn grid style
+        style="darkgrid",      # seaborn grid style
         context="notebook",    # good default size
         font_scale=0.8,
     )
