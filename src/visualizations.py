@@ -37,15 +37,18 @@ def _apply_style() -> None:
         font_scale=0.8,
     )
 
+    palette = ["#F72585", "#720987", "#3A0CA3", "#4361EE", "#4CC9F0"]
+    sns.set_palette(sns.color_palette(palette, desat=1.0))
+
     PROJECT_COLORS = {
         "purple": "#8000FF",
-        "red": "#E52B50",
+        "pink": "#E52B50",
         "green": "#39FF14",
         "cyan": "#0FFFFF",
         "blue": "#007FFF",
     }
 
-    sns.set_palette(sns.color_palette(PROJECT_COLORS, desat=1.0))
+
 
     plt.rcParams.update(
         {
@@ -58,7 +61,7 @@ def _apply_style() -> None:
         }
     )
 
-
+_apply_style()
 
 # ----------------------------------------------------------------------
 # ✨ Helper: gradient bar plotting
