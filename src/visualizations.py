@@ -29,18 +29,36 @@ from pod import pod_decomposition, cross_overlap_matrix
 # 🌍 Global style helper
 # ----------------------------------------------------------------------
 def _apply_style() -> None:
-    """Set the global rcParams used throughout the module."""
+    """Set global plotting style (Seaborn + custom rcParams)."""
+
+    sns.set_theme(
+        style="dark",      # seaborn grid style
+        context="notebook",    # good default size
+        font_scale=0.8,
+    )
+
+    PROJECT_COLORS = {
+        "purple": "#8000FF",
+        "red": "#E52B50",
+        "green": "#39FF14",
+        "cyan": "#0FFFFF",
+        "blue": "#007FFF",
+    }
+
+    sns.set_palette(sns.color_palette(PROJECT_COLORS, desat=1.0))
+
     plt.rcParams.update(
         {
             "figure.figsize": (9, 5),
             "figure.dpi": 120,
-            "font.size": 12,
             "axes.labelsize": 13,
             "axes.titlesize": 14,
             "legend.fontsize": 11,
             "lines.linewidth": 2,
         }
     )
+
+
 
 # ----------------------------------------------------------------------
 # ✨ Helper: gradient bar plotting
@@ -207,7 +225,13 @@ def plot_loss_history(
 
     fig, ax = plt.subplots()
     for label, color, series in comps:
-        ax.plot(epochs, series, label=label, color=color)
+        sns.lineplot(
+            x=epochs,
+            y=series,
+            ax=ax,
+            label=label,
+            color=color,
+        )
 
     ax.set_yscale("log")
     ax.set_xlabel("Epoch")
@@ -602,7 +626,16 @@ def plot_overlap_heatmap(
     # ------------------------------------------------------------------
     fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5))
 
-    im = ax.imshow(overlap, cmap=cmap, vmin=0.0, vmax=1.0)
+    sns.heatmap(
+        overlap,
+        ax=ax,
+        cmap=cmap,
+        vmin=0.0,
+        vmax=1.0,
+        annot=True,
+        fmt=fmt,
+        cbar_kws={"label": "Overlap matrix"},
+    )
 
     # Axis ticks - label each mode with its index
     ax.set_xticks(np.arange(n_modes))
@@ -611,15 +644,15 @@ def plot_overlap_heatmap(
     ax.set_yticklabels([rf"$n={i}$" for i in range(n_modes)])
 
     # Annotate each cell with the numeric value
-    for i in range(n_modes):
-        for j in range(n_modes):
-            txt = f"{overlap[i, j]:{fmt}}"
-            ax.text(j, i, txt,
-                    ha="center", va="center",
-                    color="black",
-                    fontsize=9)
+    #for i in range(n_modes):
+    #    for j in range(n_modes):
+    #       txt = f"{overlap[i, j]:{fmt}}"
+     #       ax.text(j, i, txt,
+     #               ha="center", va="center",
+     #               color="black",
+      #              fontsize=9)
     ax.set_title(r"Overlap Matrix $\langle \psi_m^\theta | \psi_n^\theta \rangle$ (POD Diagnostic)", fontsize=16)
-    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="Overlap matrix")
+    #fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="Overlap matrix")
 
     # ------------------------------------------------------------------
     # 3️⃣ Loss weights row
@@ -673,7 +706,6 @@ def plot_pod_singular_values(
     # ------------------------------------------------------------------
     # 1️⃣ Convert to NumPy (detach, CPU) -> no gradients needed
     # ------------------------------------------------------------------
-    sv = singular_values.detach().cpu().numpy()
     sv = singular_values.detach().cpu().numpy()
 
     # -------------------------------------------------
