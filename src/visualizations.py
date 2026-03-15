@@ -184,14 +184,14 @@ def _add_lambda_row(
 #🩵 1️⃣ Training Curves
 # ----------------------------------------------------------------------
 def plot_loss_history(
-        epochs: Sequence[int],
-        total: Sequence[float],
-        physics: Sequence[float],
-        ortho: Sequence[float],
-        smooth: Sequence[float],
-        data: Sequence[float],
-        lambdas: Dict[str, float],
-        out_path: pathlib.Path | None = None,
+    epochs: Sequence[int],
+    total: Sequence[float],
+    physics: Sequence[float],
+    data: Sequence[float],
+    smooth: Sequence[float],
+    ordered: Sequence[float],
+    lambdas: Dict[str, float],
+    out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """
     Render a log-scale line plot of all loss components.
@@ -203,7 +203,7 @@ def plot_loss_history(
     total, physics, data, smooth, ortho : Sequence[float]
         Per-epoch scalar losses.
     lambdas : dict[str, float]
-        Mapping ``{'data':..., `physics`:..., `smooth`:..., `ortho`:...}``.
+        Mapping ``{'data':..., `physics`:..., `smooth`:..., `ordered`:...}``.
     out_path : Path or None (optional)
         If provided, the figure is saved to this path location (PNG).
 
@@ -218,7 +218,7 @@ def plot_loss_history(
     comps: List[Tuple[str, str, Sequence[float]]] = [
         ("Total", "#8000FF", total),
         ("Physics", "#007FFF", physics),
-        ("Ortho", "#0FFFFF", ortho),
+        ("Ordered", "#0FFFFF", ordered),
         ("Smoothness", "#39FF14", smooth),
         ("Data-fit", "#E52B50", data),
     ]

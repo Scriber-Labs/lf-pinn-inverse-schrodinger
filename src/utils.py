@@ -8,7 +8,7 @@ These functions are deliberately designed to be lightweight. Specifically, they 
 from __future__ import annotations
 
 import random
-from typing import Optional, Literal
+from typing import Optional, Literal, List
 
 import numpy as np
 import torch
@@ -156,6 +156,51 @@ def grid_spacing(grid: torch.Tensor) -> float:
     if g.numel() < 2:
         raise ValueError("Grid must have at least 2 elements.")
     return ((g[-1] - g[0]) / ( g.numel() - 1)).item()
+
+
+def normalize_wavefunctions(
+    psi_list: List[torch.Tensor],
+    dx: float,
+) -> List[torch.Tensor]:
+    """
+    Normalize a list of wavefunction tensors to unit probability.
+
+    Assumes each wavefunction is represented as a 1-D tensor where the sum |psi|^2 * dx approximates the integral over space. A small epsilon is included to prevent division by zero.
+
+    Parameters
+    ----------
+    psi_list : List[torch.Tensor]
+        List of 1-D wavefunction tensors to be normalized.
+    dx : float
+        Uniform spatial spacing between grid points. Must be positive.
+
+    Returns
+    -------
+    List[torch.Tensor]
+        List of normalized wavefunction tensors.
+
+    Raises
+    ------
+    ValueError
+        If psi_list is empty, dx is non-positive, or any tensor is not 1-D.
+    """
+    if not psi_list:
+        raise ValueError("✖️ psi_list must contain at least one wavefunction tensor.")
+
+    if dx <= 0:
+        raise ValueError(f"dx must be positive, got {dx}.")
+
+    normalized = []
+    eps = 1e-12
+
+    for i, psi in enumerate(psi_list):
+        if psi.dim() !=1:
+            raise ValueError(f"Wavefunciton at index {i} must be 1-D, got {psi.dim()}D.")
+
+        norm = torch.sqrt(torch.sum(psi**2) * dx + eps)
+        normalized.append(psi / norm)
+
+    return normalized
 
 # ----------------------------------------------------------------------
 # 2️⃣ Smoke test & entry point

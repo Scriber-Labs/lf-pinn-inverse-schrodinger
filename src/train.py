@@ -20,9 +20,8 @@ from torch import Tensor
 
 from model import InverseSchrodingerModel
 from physics import tise_loss, potential_smoothness_loss, energy_ordering_loss
-from orthogonality_loss import compute_orthogonality_loss
 from inverse import data_mismatch_loss
-from utils import make_grid, set_global_seed
+from utils import make_grid, set_global_seed, normalize_wavefunctions
 
 # ----------------------------------------------------------------------
 # 1️⃣ Public API
@@ -53,19 +52,25 @@ def train_step(
         Tensor of observed energies.
     lambdas : dict[str, float]
         Dictionary mapping loss identifies to scalar weights, e.g.
-        ``{'data': 1.0, 'physics': 1.0, 'smooth': 1e-2, 'ortho': 10.0, 'ordered': 1.0}``.
+        ``{'data': 1.0, 'physics': 1.0, 'smooth': 1e-2, 'ordered': 1.0}``.
 
     Returns
     -------
     tuple[Tensor, Tensor, Tensor, Tensor, Tensor]
-        (total_loss, physics_loss, data_loss, smooth_loss, ortho_loss)
+        (total_loss, physics_loss, data_loss, smooth_loss, ordered_loss)
         -> ready for ``backward()``.
     """
 
     # ----- Forward pass -------------------------------------------------
     V_theta = model.V_theta(x)  # potential V(theta, x)
-    psi_list = model.psi_theta(x)  # list[psi_n(theta, x)]
+    psi_list = model.psi_theta(x, dx)  # list[psi_n(theta, x)]
     E_theta = model.E_theta()
+
+    psi_list = normalize_wavefunctions(psi_list, dx)
+
+    idx = torch.argsort(E_theta)
+    E_theta = E_theta[idx]
+    psi_list = [psi_list[i] for i in idx]
 
     # ------------------- Physics‑informed loss -------------------
     loss_physics = tise_loss(
@@ -87,10 +92,10 @@ def train_step(
     )
 
     # ------------------- Orthogonalization penalty -------------------
-    loss_ortho = compute_orthogonality_loss(
-        psi_list,
-        dx,
-    )
+    #loss_ortho = compute_orthogonality_loss(
+    #    psi_list,
+    #    dx,
+    #)
 
     # ------------------- Energy ordering loss ----------------------------
     loss_ordered = energy_ordering_loss(E_theta)
@@ -100,11 +105,10 @@ def train_step(
             lambdas["data"] * loss_data
             + lambdas["physics"] * loss_physics
             + lambdas["smooth"] * loss_smooth
-            + lambdas["ortho"] * loss_ortho
             + lambdas["ordered"] * loss_ordered
     )
 
-    return total_loss, loss_physics, loss_data, loss_smooth, loss_ortho, loss_ordered
+    return total_loss, loss_physics, loss_data, loss_smooth, loss_ordered
 
 # ----------------------------------------------------------------------
 # 2️⃣ Smoke‑test entry point

@@ -133,31 +133,6 @@ def potential_smoothness_loss(
     V_xx = second_derivative(V_theta, dx)
     return torch.mean((V_xx**2) / (eps + V_theta**2))
 
-def wavefunction_normalization_loss(
-    multi_psi_theta: List[torch.Tensor],
-    dx: float,
-) -> torch.Tensor:
-    """
-    Enforces quantum mechanical normalization for each learned eigenstate.
-
-    Parameters
-    ----------
-    multi_psi_theta : List[torch.Tensor], each has shape ``(N,1)``
-        List of  wavefunction tensors ``[psi_theta_0, psi_theta_1, ... ]``.
-    dx :float
-        Grid spacing.
-
-    Returns
-    -------
-    torch.Tensor (scalar)
-        Normalization penalty
-    """
-    norms = [
-        torch.sum(psi**2) * dx
-        for psi in multi_psi_theta
-    ]
-    return torch.mean((torch.stack(norms) - 1.0) ** 2)
-
 def energy_ordering_loss(energies: torch.Tensor) -> torch.Tensor:
     """
     Enforces the physical requirement that energy eigenvalues are strictly ordered: E_0 < E_1 < ...
@@ -216,8 +191,6 @@ def _run_physics_smoke_test() -> None:
     res0 = tise_residual(psi0, V, energies[0], dx)
     loss_tise = tise_loss([psi0, psi1], V, energies, dx)
     loss_smooth = potential_smoothness_loss(V, dx)
-    loss_norm = wavefunction_normalization_loss([psi0, psi1], dx)
-
 
     # Test energy ordering loss
     # Case 1: Correctly ordered

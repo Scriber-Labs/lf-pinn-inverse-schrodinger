@@ -18,7 +18,7 @@ from typing import List
 import torch
 import torch.nn as nn
 
-from utils import set_global_seed
+from utils import set_global_seed, normalize_wavefunctions
 
 # ----------------------------------------------------------------------
 # 1️⃣ Neural network model
@@ -43,7 +43,7 @@ class MLP(nn.Module):
     device : torch.device or ``str``, optional
         Target device for the parameters. If ``None`` the model inherits the default device of the surrounding context.
     dtype : torch.dtype, optional
-        Desired floating-point precision (``torch.float32`` or ``torch.float64``).
+        Desired floating-point precision (``torch.float64`` or ``torch.float64``).
 
     Notes
     -----
@@ -119,7 +119,7 @@ class InverseSchrodingerModel(nn.Module):
     device : torch.device or ``str``, optional
         Device on which to place all sub-modules. If ``None`` the model inherits the default device of the surrounding context.
     dtype : torch.dtype, optional
-        Precision for the parameters (defaults to ``torch.float32``).
+        Precision for the parameters (defaults to ``torch.float64``).
 
     Attributes
     ----------
@@ -171,7 +171,7 @@ class InverseSchrodingerModel(nn.Module):
         )
 
         # Energy parameters -> learnable scalars (no need for bias term)
-        self.energies = nn.Parameter(torch.randn(n_states, dtype=dtype or torch.float32))
+        self.energies = nn.Parameter(torch.randn(n_states, dtype=dtype or torch.float64))
 
     # ------------------------------------------------------------------
     # 2️⃣ Helper methods – expose the learned fields with the desired names
@@ -181,11 +181,25 @@ class InverseSchrodingerModel(nn.Module):
         """Return the learned potential ``V_theta(x)``."""
         return self.potential_net(x)
 
-    def psi_theta(self, x: torch.Tensor) -> List[torch.Tensor]:
+    def psi_theta(self, x: torch.Tensor, dx: float) -> List[torch.Tensor]:
         """
-        Return a list of wavefunctions ``[psi_theta_0(x), ..., psi_theta_{n-1}(x)]''.
+        Return a list of orthonormal wavefunctions via Gram-Schmidt.
         """
-        return [net(x) for net in self.psi_nets]
+        psi_list = [net(x).squeeze() for net in self.psi_nets]
+        ortho_list = []
+
+        dx = self.psi_nets[0].dx
+
+        for psi in psi_list:
+            for prev in ortho_list:
+                overlap = torch.sum(psi * prev) * dx
+                psi = psi - overlap * prev
+
+            norm = torch.sqrt(torch.sum(psi**2) * dx + 1e-8)
+            psi = psi / norm
+            ortho_list.append(psi)
+
+        return ortho_list
 
     def E_theta(self) -> torch.Tensor:
         """
