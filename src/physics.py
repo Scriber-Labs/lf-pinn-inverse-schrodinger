@@ -9,7 +9,7 @@ Learned functions:
 - A wavefunction for state *n*: ``psi_theta_n(x)``
 - Energy eigenvalues for state *n*: ``E_theta_n``
 
-These helpers are deliberately coded to be thin wrappers (❓) around the generic utilities in ``utils.py`` (e.g., ``second_derivative``) so that the physics stays explict and can be easily audited.
+These helpers are deliberately coded to be thin wrappers around the generic utilities in ``utils.py`` (e.g., ``second_derivative``) so that the physics stays explict and can be easily audited.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ __all__: list[str] = [
     "tise_residual",
     "tise_loss",
     "potential_smoothness_loss",
-    "wavefunction_normalization_loss",
+    "energy_ordering_loss",
 ]
 
 # ----------------------------------------------------------------------

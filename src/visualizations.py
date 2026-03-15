@@ -18,6 +18,8 @@ from typing import Dict, List, Sequence, Tuple
 
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import seaborn as sns
+
 import numpy as np
 import torch
 
@@ -78,10 +80,10 @@ def _plot_gradient_bar(ax, x, height, width, cmap, label=None):
 # ✨ Helper: horizontal lambdas‑row (figure‑level)
 # ----------------------------------------------------------------------
 def _add_lambda_row(
-        fig: plt.Figure,
-        lambdas: Dict[str, float],
-        *,
-        ax: plt.Axes | None = None,
+    fig: plt.Figure,
+    lambdas: Dict[str, float],
+    *,
+    ax: plt.Axes | None = None,
 ) -> None:
     """
     Render the loss-weight dictionary as a single horizontal row.

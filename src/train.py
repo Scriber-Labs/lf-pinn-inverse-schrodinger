@@ -19,7 +19,7 @@ import torch
 from torch import Tensor
 
 from model import InverseSchrodingerModel
-from physics import tise_loss, potential_smoothness_loss, wavefunction_normalization_loss
+from physics import tise_loss, potential_smoothness_loss, energy_ordering_loss
 from orthogonality_loss import compute_orthogonality_loss
 from inverse import data_mismatch_loss
 from utils import make_grid, set_global_seed
@@ -35,7 +35,7 @@ def train_step(
     rho_obs: List[torch.Tensor],
     E_obs: torch.Tensor,
     lambdas: dict[str, float],
-) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
+) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor]:
     """
     Execute a single gradient descent step.
 
@@ -53,7 +53,7 @@ def train_step(
         Tensor of observed energies.
     lambdas : dict[str, float]
         Dictionary mapping loss identifies to scalar weights, e.g.
-        ``{'data': 1.0, 'physics': 1.0, 'smooth': 1e-2, 'ortho': 10.0}``.
+        ``{'data': 1.0, 'physics': 1.0, 'smooth': 1e-2, 'ortho': 10.0, 'ordered': 1.0}``.
 
     Returns
     -------
@@ -66,11 +66,6 @@ def train_step(
     V_theta = model.V_theta(x)  # potential V(theta, x)
     psi_list = model.psi_theta(x)  # list[psi_n(theta, x)]
     E_theta = model.E_theta()
-
-    # Sort eigenstates by energy
-    idx = torch.argsort(E_theta)
-    E_theta = E_theta[idx]
-    psi_list = [psi_list[i] for i in idx]
 
     # ------------------- Physics‑informed loss -------------------
     loss_physics = tise_loss(
@@ -97,15 +92,19 @@ def train_step(
         dx,
     )
 
+    # ------------------- Energy ordering loss ----------------------------
+    loss_ordered = energy_ordering_loss(E_theta)
+
     # ------------------- Weighted sum ----------------------------
     total_loss = (
             lambdas["data"] * loss_data
             + lambdas["physics"] * loss_physics
             + lambdas["smooth"] * loss_smooth
             + lambdas["ortho"] * loss_ortho
+            + lambdas["ordered"] * loss_ordered
     )
 
-    return total_loss, loss_physics, loss_data, loss_smooth, loss_ortho
+    return total_loss, loss_physics, loss_data, loss_smooth, loss_ortho, loss_ordered
 
 # ----------------------------------------------------------------------
 # 2️⃣ Smoke‑test entry point
