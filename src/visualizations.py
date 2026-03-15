@@ -31,24 +31,37 @@ from pod import pod_decomposition, cross_overlap_matrix
 def _apply_style() -> None:
     """Set global plotting style (Seaborn + custom rcParams)."""
 
-    sns.set_theme(
-        style="darkgrid",      # seaborn grid style
-        context="notebook",    # good default size
-        font_scale=0.8,
-    )
+    palette = ["#F72585", "#7209B7", "#3A0CA3", "#4361EE", "#4CC9F0"]
 
-    palette = ["#F72585", "#720987", "#3A0CA3", "#4361EE", "#4CC9F0"]
+    sns.set_theme(
+        style="darkgrid",
+        context="notebook",
+        palette=palette,
+        font_scale=0.8,
+        rc={
+            "axes.facecolor": "#0d1117",
+            "figure.facecolor": "#0d1117",
+            "savefig.facecolor": "#0d1117",
+            "grid.color": "#444444",
+            "text.color": "#E6E6E6",
+            "axes.labelcolor": "#E6E6E6",
+            "xtick.color": "#DDDDDD",
+            "ytick.color": "#DDDDDD",
+            "axes.edgecolor": "#DDDDDD",
+        }
+    )
     sns.set_palette(sns.color_palette(palette, desat=1.0))
 
-    PROJECT_COLORS = {
-        "purple": "#8000FF",
-        "pink": "#E52B50",
-        "green": "#39FF14",
-        "cyan": "#0FFFFF",
-        "blue": "#007FFF",
-    }
-
-
+    #plt.rcParams.update(
+    #    {
+    #        "figure.figsize": (9, 5),
+    #        "figure.dpi": 120,
+    #        "axes.labelsize": 13,
+    #        "axes.titlesize": 14,
+    #        "legend.fontsize": 11,
+    #        "lines.linewidth": 2,
+    #    }
+    #)
 
     plt.rcParams.update(
         {
@@ -60,8 +73,15 @@ def _apply_style() -> None:
             "lines.linewidth": 2,
         }
     )
-
 _apply_style()
+
+PROJECT_COLORS = {
+    "purple": "#8000FF",
+    "pink": "#E52B50",
+    "green": "#39FF14",
+    "cyan": "#0FFFFF",
+    "blue": "#007FFF",
+}
 
 # ----------------------------------------------------------------------
 # ✨ Helper: gradient bar plotting
@@ -203,7 +223,7 @@ def plot_loss_history(
     ----------
     epochs : Sequence[int]
         Epoch numbers (usually ``range(1, N+1)``).
-    total, physics, data, smooth, ortho : Sequence[float]
+    total, physics, data, smooth, ordered : Sequence[float]
         Per-epoch scalar losses.
     lambdas : dict[str, float]
         Mapping ``{'data':..., `physics`:..., `smooth`:..., `ordered`:...}``.
@@ -215,15 +235,14 @@ def plot_loss_history(
     matplotlib.figure.Figure
         A 2x2 figure containing the log-scale training curves for each individual loss term.
     """
-    _apply_style()
 
     # 🎨 color / label mapping (list comprehension keeps it tidy)
     comps: List[Tuple[str, str, Sequence[float]]] = [
-        ("Total", "#8000FF", total),
-        ("Physics", "#007FFF", physics),
-        ("Ordered", "#0FFFFF", ordered),
-        ("Smoothness", "#39FF14", smooth),
-        ("Data-fit", "#E52B50", data),
+        ("Total", PROJECT_COLORS["purple"], total),
+        ("Physics", PROJECT_COLORS["blue"], physics),
+        ("Ordered", PROJECT_COLORS["cyan"], ordered),
+        ("Smoothness", PROJECT_COLORS["green"], smooth),
+        ("Data-fit", PROJECT_COLORS["pink"], data),
     ]
 
     fig, ax = plt.subplots()
@@ -256,18 +275,17 @@ def plot_loss_history(
 # 🌠 2️⃣ Potential plot (true vs. learned)
 # ----------------------------------------------------------------------
 def plot_potential(
-        x: torch.Tensor,
-        V_true: torch.Tensor,
-        V_learned: torch.Tensor,
-        lambdas: Dict[str, float],
-        out_path: pathlib.Path | None = None,
+    x: torch.Tensor,
+    V_true: torch.Tensor,
+    V_learned: torch.Tensor,
+    lambdas: Dict[str, float],
+    out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """
     Plot the analytic potential and the network's prediction.
 
     All tensors are expected to be a 1-D (shape ``(N,)``) and on CPU
     """
-    _apply_style()
 
     # Ensure everything is on the CPU and NumPy for Matplotlib
     x_np = x.squeeze().cpu().numpy()
@@ -275,6 +293,7 @@ def plot_potential(
     Vl_np = V_learned.squeeze().cpu().numpy()
 
     fig, ax = plt.subplots()
+
     ax.plot(x_np, Vt_np, label=r"True $V(x)$", color="#E52B50", linewidth=4)
     ax.plot(
         x_np,
@@ -580,13 +599,13 @@ def plot_density_vs_observed(
 # 🗺️6️⃣ Overlap matrix heatmap (POD diagnostic)
 # ----------------------------------------------------------------------
 def plot_overlap_heatmap(
-        psi_theta: Sequence[torch.Tensor],
-        *,
-        dx: float | None = None,
-        lambdas: Dict[str, float] | None = None,
-        cmap: str = "cool",
-        fmt: str = ".2f",
-        out_path: pathlib.Path | None = None,
+    psi_theta: Sequence[torch.Tensor],
+    *,
+    dx: float | None = None,
+    lambdas: Dict[str, float] | None = None,
+    cmap: str = "cool",
+    fmt: str = ".2f",
+    out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """
     Render a heat map of the overlap matrix <psi_theta_m | psi_theta_n>.
@@ -609,7 +628,6 @@ def plot_overlap_heatmap(
     matplotlib.figure.Figure
         Overlap matrix heatmap -> POD diagnostic.
     """
-    _apply_style()
 
     n_modes = len(psi_theta)
     # ------------------------------------------------------------------
@@ -640,21 +658,13 @@ def plot_overlap_heatmap(
         cbar_kws={"label": "Overlap matrix"},
     )
 
-    # Axis ticks - label each mode with its index
     ax.set_xticks(np.arange(n_modes))
     ax.set_yticks(np.arange(n_modes))
     ax.set_xticklabels([rf"$n={i}$" for i in range(n_modes)], rotation=45, ha="right")
     ax.set_yticklabels([rf"$n={i}$" for i in range(n_modes)])
 
-    # Annotate each cell with the numeric value
-    #for i in range(n_modes):
-    #    for j in range(n_modes):
-    #       txt = f"{overlap[i, j]:{fmt}}"
-     #       ax.text(j, i, txt,
-     #               ha="center", va="center",
-     #               color="black",
-      #              fontsize=9)
-    ax.set_title(r"Overlap Matrix $\langle \psi_m^\theta | \psi_n^\theta \rangle$ (POD Diagnostic)", fontsize=16)
+
+    ax.set_title(r"Overlap Matrix $\langle \psi_m^\theta | \psi_n^\theta \rangle$")
     #fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="Overlap matrix")
 
     # ------------------------------------------------------------------
@@ -827,7 +837,7 @@ def plot_pod_first_three_spatial_modes(
     if n_plot == 1:
         axs = [axs]
 
-    pod_mode_color = "#8000FF"
+    pod_mode_color = PROJECT_COLORS["purple"]
     true_color = "#E52B50"
     learned_color = "#39FF14"
 
@@ -888,14 +898,14 @@ def plot_pod_first_three_spatial_modes(
 # 📊7️⃣c) Cross-overlap matrix heatmap
 # ----------------------------------------------------------------------
 def plot_cross_overlap_heatmap(
-        pod_modes_physical: Sequence[torch.Tensor] | torch.Tensor,
-        psi_matrix: Sequence[torch.Tensor] | torch.Tensor,
-        *,
-        dx: float | None = None,
-        cmap: str = "cool",
-        fmt: str = ".2f",
-        lambdas: Dict[str, float] | None = None,
-        out_path: pathlib.Path | None = None,
+    pod_modes_physical: Sequence[torch.Tensor] | torch.Tensor,
+    psi_matrix: Sequence[torch.Tensor] | torch.Tensor,
+    *,
+    dx: float | None = None,
+    cmap: str = "cool",
+    fmt: str = ".2f",
+    lambdas: Dict[str, float] | None = None,
+    out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """
     Create a heatmap of the *cross* overlap matrix <u_k | psi_n^theta> where ``u_k`` are the physical POD modes and ``psi_n^theta`` are learned wavefunctions.
@@ -930,6 +940,7 @@ def plot_cross_overlap_heatmap(
     n_modes = cross_overlap.shape[0]
 
     fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5))
+
 
     im = ax.imshow(
         cross_overlap,
