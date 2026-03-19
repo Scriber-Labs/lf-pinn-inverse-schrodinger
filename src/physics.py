@@ -10,6 +10,9 @@ Learned functions:
 - Energy eigenvalues for state *n*: ``E_theta_n``
 
 These helpers are deliberately coded to be thin wrappers around the generic utilities in ``utils.py`` (e.g., ``second_derivative``) so that the physics stays explict and can be easily audited.
+
+Author: Eigenscribe
+Date: 02-2026
 """
 
 from __future__ import annotations

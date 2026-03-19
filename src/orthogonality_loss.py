@@ -8,6 +8,9 @@ Functions expect pre-computed tensors and do not call the model itself.
 
 - ``psi_list``: List of learned wavefunction tensors
 - ``dx``: Discretization step size for integration
+
+Author: Eigenscribe
+Date: 02-2026
 """
 
 from __future__ import annotations

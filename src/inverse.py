@@ -6,6 +6,9 @@ These losses compare the *learned* quantum objects (wavefunctions and energy eig
 
 - ``psi_theta_n``: learned wavefunctions/eigenmodes
 - ``E_theta_n``: learned energies
+
+Author: Eigenscribe
+Date: 02-2026
 """
 
 from __future__ import annotations

@@ -9,6 +9,9 @@ All functions accept plain NumPy / PyTorch objects are return the matplotlib Fig
     - emoji section dividers for readability
     - list-comprehensions wherever relevant
     - a minimal smoke-test
+
+Author: Eigenscribe
+Data: 02-2026
 """
 
 from __future__ import annotations
