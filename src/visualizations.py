@@ -1003,6 +1003,120 @@ def plot_cross_overlap_heatmap(
     return fig
 
 # ----------------------------------------------------------------------
+# 🫟 8️⃣ POD–Eigenbasis Alignment Heatmap
+# ----------------------------------------------------------------------
+def plot_pod_eigen_alignment(
+    psi_learned_matrix: torch.Tensor | np.ndarray,
+    psi_true_matrix: torch.Tensor | np.ndarray,
+    x: torch.Tensor | np.ndarray,
+    *,
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """
+    Plot alignment heatmap between POD modes of learned wavefunctions and true eigenstates.
+
+    Parameters
+    ----------
+    psi_learned_matrix: torch.Tensor | np.ndarray
+        Array of shape (n_samples, n_grid_points) containing learned wavefunction approximations.
+    psi_true_matrix : torch.Tensor | np.ndarray
+        Array of shape (n_eigenstates, n_grid_points) containing exact eigenstates of the system.
+    x : torch.Tensor | np.ndarray
+        Array of shape (n_grid_points,) containing the spatial grid points for integration.
+    out_path : pathlib.Path | None, optional
+        Destination path (saved as a PNG). If ``None``, the figure is only returned)
+    Returns
+    -------
+    matplotlib.figure.FIgure
+        POD-eigenbasis alignment heatmap.
+
+    Notes
+    -----
+    The alignment metrix is computed as:
+        |integral(psi_POD_i(x) * psi_ture_j(x) dx)|
+
+    Values close to 1 indicate strong alignment; values near 0 indicate orthogonality.
+    """
+    _apply_style()
+
+    # ------------------------------------------------------------------
+    # 1️⃣ Convert to NumPy and validate shapes
+    # ------------------------------------------------------------------
+    if isinstance(psi_learned_matrix, torch.Tensor):
+        psi_learned_matrix = psi_learned_matrix.detach().cpu().numpy()
+    if isinstance(psi_true_matrix, torch.Tensor):
+        psi_true_matrix = psi_true_matrix.detach().cpu().numpy()
+    if isinstance(x, torch.Tensor):
+        x = x.detach().cpu().numpy()
+
+
+    if psi_learned_matrix.ndim != 2:
+        raise ValueError(
+            f"psi_learned_matrix must be 2D, got {psi_learned_matrix.ndim}D instead."
+        )
+    if psi_true_matrix.ndim != 2:
+        raise ValueError(
+            f"psi_true_matrix must be 2D, got {psi_true_matrix.ndim}D instead."
+        )
+
+    n_grid = psi_learned_matrix.shape[1]
+    if psi_true_matrix.shape[1] != n_grid:
+        raise ValueError(
+            f"Grid mismatch: learned has {n_grid} points, "
+            f"true has {psi_true_matrix.shape[1]} points."
+        )
+    if x.shape[0] != n_grid:
+        raise ValueError(
+            f"Grid mismatch: x has {x.shape[0]} points, "
+            f"learned has {n_grid} points."
+        )
+
+    # ------------------------------------------------------------------
+    # 2️⃣ POD decomposition
+    # ------------------------------------------------------------------
+    spatial_modes, singular_values, _ = pod_decomposition(psi_learned_matrix)
+    n_modes = min(spatial_modes.shape[1], psi_true_matrix.shape[1])
+
+    # ------------------------------------------------------------------
+    # 3️⃣ Compute alignment matrix
+    # ------------------------------------------------------------------
+    alignment = np.zeros((n_modes, n_modes), dtype=np.float64)
+
+    for i in range(n_modes):
+        for j in range(n_modes):
+            integrand = spatial_modes[:, i] * psi_true_matrix[:, j]
+            alignment[i, j] = np.abs(np.trapz(integrand, x))
+
+    # ------------------------------------------------------------------
+    # 4️⃣ Plot
+    # ------------------------------------------------------------------
+    fig, ax = plt.subplots(figsize(6, 5))
+
+    sns.heatmap(
+        alignment,
+        ax=ax,
+        cmap="coolwarm",
+        vmin=0.0,
+        vmax=1.0,
+        cbar_kws={"label:" "Alignment"},
+        fmt=".2f",
+        square=True,
+    )
+
+    ax.set_xlabel(r"True Eigenstate", fontsize=11)
+    ax.set_ylabel(r"POD Mode", fontsize=11)
+    ax.set_title("POD-Eigenbasis Alignment", fontsize=12, pad=10)
+
+    # ------------------------------------------------------------------
+    # 5️⃣ Optional save
+    # ------------------------------------------------------------------
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200,  bbox_inches="tight")
+
+    return fig
+
+# ----------------------------------------------------------------------
 # 🧪 Smoke test – runs when the module is executed directly
 # ----------------------------------------------------------------------
 def _smoke_test() -> None:
@@ -1144,6 +1258,17 @@ def _smoke_test() -> None:
 
     print(
         f"\n✅ Smoke test complete. All {len(list(out_dir.iterdir()))} figures written to {out_dir.resolve()}\n"
+    )
+
+    # --------------------------------------------------------------
+    # 8️⃣ POD–eigenbasis alignment heatmap
+    # --------------------------------------------------------------
+    alignment_path = out_dir / "pod_eigen_alignment.png"
+    plot_pod_eigen_alignment(
+        psi_learned_matrix=torch.stack(psi_learned, dim-0),
+        psi_true_matrix=torch.stack(psi_true,dim=0),
+        x=x,
+        out_path=alignment_path,
     )
 
 def main() -> None:
