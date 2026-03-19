@@ -1261,11 +1261,11 @@ def _smoke_test() -> None:
     )
 
     # --------------------------------------------------------------
-    # 8️⃣ POD–eigenbasis alignment heatmap
+    # 7️⃣d) POD–eigenbasis alignment heatmap
     # --------------------------------------------------------------
     alignment_path = out_dir / "pod_eigen_alignment.png"
     plot_pod_eigen_alignment(
-        psi_learned_matrix=torch.stack(psi_learned, dim-0),
+        psi_learned_matrix=torch.stack(psi_learned, dim=0),
         psi_true_matrix=torch.stack(psi_true,dim=0),
         x=x,
         out_path=alignment_path,
