@@ -1003,7 +1003,7 @@ def plot_cross_overlap_heatmap(
     return fig
 
 # ----------------------------------------------------------------------
-# 🫟 8️⃣ POD–Eigenbasis Alignment Heatmap
+# 📊7️⃣d) POD–Eigenbasis Alignment Heatmap
 # ----------------------------------------------------------------------
 def plot_pod_eigen_alignment(
     psi_learned_matrix: torch.Tensor | np.ndarray,
