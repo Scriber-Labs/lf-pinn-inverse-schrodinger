@@ -921,7 +921,8 @@ def plot_cross_overlap_heatmap(
         Physical POD modes (each 1-D, same length). If a single tensor is passed it is interpreted as a stacked matrix of shape ``(n_modes, N)``.
     psi_matrix : Sequence[torch.Tensor]
         Learned wavefunctions Psi^theta = [psi_1^theta psi_2^theta ...]
-    dx : float | None, optional
+    dx : float
+        Spatial grid spacing.
     cmap, fmt : str, optional
         Colormap and numeric formatting for the cell.
     lambdas : Dict[str, float], optional
@@ -1006,113 +1007,102 @@ def plot_cross_overlap_heatmap(
 # 📊7️⃣d) POD–Eigenbasis Alignment Heatmap
 # ----------------------------------------------------------------------
 def plot_pod_eigen_alignment(
-    psi_learned_matrix: torch.Tensor | np.ndarray,
-    psi_true_matrix: torch.Tensor | np.ndarray,
-    x: torch.Tensor | np.ndarray,
-    *,
-    out_path: pathlib.Path | None = None,
+        pod_modes_physical: Sequence[torch.Tensor] | torch.Tensor,
+        psi_true_matrix: Sequence[torch.Tensor] | torch.Tensor,
+        *,
+        dx: float | None = None,
+        cmap: str = "cool",
+        fmt: str = ".2f",
+        lambdas: Dict[str, float] | None = None,
+        out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """
-    Plot alignment heatmap between POD modes of learned wavefunctions and true eigenstates.
+    Create a heat map of the overlap matrix <u_k | psi_n> where ``u_k`` are the physical POD modes and ``psi_n`` are the ground truth wavefunctions.
+
+    This function uses the `cross_overlap_matrix`` routine defined in `src.pod.py`.
 
     Parameters
     ----------
-    psi_learned_matrix: torch.Tensor | np.ndarray
-        Array of shape (n_samples, n_grid_points) containing learned wavefunction approximations.
-    psi_true_matrix : torch.Tensor | np.ndarray
-        Array of shape (n_eigenstates, n_grid_points) containing exact eigenstates of the system.
-    x : torch.Tensor | np.ndarray
-        Array of shape (n_grid_points,) containing the spatial grid points for integration.
+    pod_modes_physical : Sequence[torch.Tensor]
+        Physical POD modes (each 1-D, same length). If a single tensor is passed, it is interpreted as a stacked matrix of shape ``(n_modes, N)``.
+    psi_true_matrix : Sequence[torch.Tensor]
+        Ground truth wavefunctions Psi = [psi_1 psi_2 ...]
+    dx : float | None, optional
+    cmap, fmt : str, optional
+        Colormap and numeric formatting for the cell
+    lambdas : Dict[str, float], optional
+        Optional loss-weight dictionary.
     out_path : pathlib.Path | None, optional
-        Destination path (saved as a PNG). If ``None``, the figure is only returned)
+        Optional output path to save the image (PNG).
+
     Returns
     -------
-    matplotlib.figure.FIgure
-        POD-eigenbasis alignment heatmap.
-
-    Notes
-    -----
-    The alignment metrix is computed as:
-        |integral(psi_POD_i(x) * psi_ture_j(x) dx)|
-
-    Values close to 1 indicate strong alignment; values near 0 indicate orthogonality.
+    fig : matplotlib.figure.Figure
+        Overlap matrix <u_k | psi_n> heatmap.
     """
-    _apply_style()
+    overlap = cross_overlap_matrix(
+        pod_modes_physical,
+        psi_true_matrix,
+        dx=dx,
+    )           # Expected shape: (n_modes, n_modes)
 
-    # ------------------------------------------------------------------
-    # 1️⃣ Convert to NumPy and validate shapes
-    # ------------------------------------------------------------------
-    if isinstance(psi_learned_matrix, torch.Tensor):
-        psi_learned_matrix = psi_learned_matrix.detach().cpu().numpy()
-    if isinstance(psi_true_matrix, torch.Tensor):
-        psi_true_matrix = psi_true_matrix.detach().cpu().numpy()
-    if isinstance(x, torch.Tensor):
-        x = x.detach().cpu().numpy()
+    n_modes = overlap.shape[0]
 
+    fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5))
 
-    if psi_learned_matrix.ndim != 2:
-        raise ValueError(
-            f"psi_learned_matrix must be 2D, got {psi_learned_matrix.ndim}D instead."
-        )
-    if psi_true_matrix.ndim != 2:
-        raise ValueError(
-            f"psi_true_matrix must be 2D, got {psi_true_matrix.ndim}D instead."
-        )
-
-    n_grid = psi_learned_matrix.shape[1]
-    if psi_true_matrix.shape[1] != n_grid:
-        raise ValueError(
-            f"Grid mismatch: learned has {n_grid} points, "
-            f"true has {psi_true_matrix.shape[1]} points."
-        )
-    if x.shape[0] != n_grid:
-        raise ValueError(
-            f"Grid mismatch: x has {x.shape[0]} points, "
-            f"learned has {n_grid} points."
-        )
-
-    # ------------------------------------------------------------------
-    # 2️⃣ POD decomposition
-    # ------------------------------------------------------------------
-    spatial_modes, singular_values, _ = pod_decomposition(psi_learned_matrix)
-    n_modes = min(spatial_modes.shape[1], psi_true_matrix.shape[1])
-
-    # ------------------------------------------------------------------
-    # 3️⃣ Compute alignment matrix
-    # ------------------------------------------------------------------
-    alignment = np.zeros((n_modes, n_modes), dtype=np.float64)
-
-    for i in range(n_modes):
-        for j in range(n_modes):
-            integrand = spatial_modes[:, i] * psi_true_matrix[:, j]
-            alignment[i, j] = np.abs(np.trapz(integrand, x))
-
-    # ------------------------------------------------------------------
-    # 4️⃣ Plot
-    # ------------------------------------------------------------------
-    fig, ax = plt.subplots(figsize(6, 5))
-
-    sns.heatmap(
-        alignment,
-        ax=ax,
-        cmap="coolwarm",
-        vmin=0.0,
-        vmax=1.0,
-        cbar_kws={"label:" "Alignment"},
-        fmt=".2f",
-        square=True,
+    im = ax.imshow(
+        overlap,
+        cmap=cmap,
+        vmin=-1.0,
+        vmax=1.0
     )
 
-    ax.set_xlabel(r"True Eigenstate", fontsize=11)
-    ax.set_ylabel(r"POD Mode", fontsize=11)
-    ax.set_title("POD-Eigenbasis Alignment", fontsize=12, pad=10)
+    # Axis ticks
+    ax.set_xticks(np.arange(n_modes))
+    ax.set_yticks(np.arange(n_modes))
+    ax.set_xticklabels([rf"$n={i}$" for i in range(n_modes)],
+                       rotation=45, ha="right")
+    ax.set_yticklabels([rf"$n={i}$" for i in range(n_modes)])
 
     # ------------------------------------------------------------------
-    # 5️⃣ Optional save
+    # #️⃣ Annotate every cell with its numeric value
+    # ------------------------------------------------------------------
+    for i in range(n_modes):
+        for j in range(n_modes):
+            txt = f"{overlap[i, j]:{fmt}}"
+            ax.text(
+                j,
+                i,
+                txt,
+                ha="center",
+                va="center",
+                color="black",
+                fontsize=9,
+            )
+    # ------------------------------------------------------------------
+    # 🔖 Titles, color‑bar and optional λ‑row
+    # ------------------------------------------------------------------
+    ax.set_title(r"Overlap Matrix $\langle u_k | \psi_n \rangle$",
+                 fontsize=16,
+                 )
+
+    fig.colorbar(
+        im,
+        ax=ax,
+        fraction=0.046,
+        pad=0.04,
+        label="Overlap matrix",
+    )
+
+    if lambdas is not None:
+        _add_lambda_row(fig, lambdas, ax=ax)
+
+    # ------------------------------------------------------------------
+    # 3️⃣ Optional save
     # ------------------------------------------------------------------
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(out_path, dpi=200,  bbox_inches="tight")
+        fig.savefig(out_path, dpi=200, bbox_inches="tight")
 
     return fig
 
@@ -1256,19 +1246,21 @@ def _smoke_test() -> None:
         out_path=pod_modes_path,
     )
 
-    print(
-        f"\n✅ Smoke test complete. All {len(list(out_dir.iterdir()))} figures written to {out_dir.resolve()}\n"
-    )
-
     # --------------------------------------------------------------
     # 7️⃣d) POD–eigenbasis alignment heatmap
     # --------------------------------------------------------------
     alignment_path = out_dir / "pod_eigen_alignment.png"
+
     plot_pod_eigen_alignment(
-        psi_learned_matrix=torch.stack(psi_learned, dim=0),
-        psi_true_matrix=torch.stack(psi_true,dim=0),
-        x=x,
-        out_path=alignment_path,
+        U,
+        torch.stack(psi_true, dim=0).T,
+        dx=x[1] - x[0],
+        lambdas=lambdas,
+        out_path=alignment_path
+    )
+
+    print(
+        f"\n✅ Smoke test complete. All {len(list(out_dir.iterdir()))} figures written to {out_dir.resolve()}\n"
     )
 
 def main() -> None:
