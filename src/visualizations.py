@@ -598,95 +598,10 @@ def plot_density_vs_observed(
 
     return fig
 
-# ----------------------------------------------------------------------
-# 🗺️6️⃣ Overlap matrix heatmap (POD diagnostic)
-# ----------------------------------------------------------------------
-def plot_overlap_heatmap(
-    psi_theta: Sequence[torch.Tensor],
-    *,
-    dx: float | None = None,
-    lambdas: Dict[str, float] | None = None,
-    cmap: str = "cool",
-    fmt: str = ".2f",
-    out_path: pathlib.Path | None = None,
-) -> plt.Figure:
-    """
-    Render a heat map of the overlap matrix <psi_theta_m | psi_theta_n>.
 
-    Parameters
-    ----------
-    psi_theta : Sequence[torch.Tensor]
-        Learned wavefunctions, each 1-D with the same length. The function will stack them into a (n_modes, N) matrix.
-    dx : float | None, optional
-        Grid spacing. If ``None`` the function infers it from teh first wavefunction (assumes uniform grid). This hidden assumption is removed if `dx` is provided explicitly.
-    lambdas : Dict[str, float] | None, optional
-        Optional string with loss weights to be displayed on the figure.
-    cmap, fmt : str
-        Color map, print settings for inputs values, and output path.
-    out_path : pathlib.Path | None
-        Destination path (saved as a PNG). If ``None``, the figure is only returned.
-
-    Returns
-    -------
-    matplotlib.figure.Figure
-        Overlap matrix heatmap -> POD diagnostic.
-    """
-
-    n_modes = len(psi_theta)
-    # ------------------------------------------------------------------
-    # 1️⃣ Stack and normalize the wavefunctions
-    # ------------------------------------------------------------------
-    psi_theta_mat = torch.stack([p.squeeze().detach().cpu() for p in psi_theta])  # (n_modes, N)
-
-    # Normalize each wavefunction (important for a meaningful overlap)
-    norms = torch.norm(psi_theta_mat, dim=1, keepdim=True)
-    psi_theta_normed = psi_theta_mat / norms
-
-    # Overlap = psi_theta_normed @ psi_theta_normed.T (inner product over the spatial dimension)
-    overlap = torch.mm(psi_theta_normed, psi_theta_normed.t()).numpy()
-
-    # ------------------------------------------------------------------
-    # 2️⃣ Plot the heat map
-    # ------------------------------------------------------------------
-    fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5))
-
-    sns.heatmap(
-        overlap,
-        ax=ax,
-        cmap=cmap,
-        vmin=0.0,
-        vmax=1.0,
-        annot=True,
-        fmt=fmt,
-        cbar_kws={"label": "Overlap matrix"},
-    )
-
-    ax.set_xticks(np.arange(n_modes))
-    ax.set_yticks(np.arange(n_modes))
-    ax.set_xticklabels([rf"$n={i}$" for i in range(n_modes)], rotation=45, ha="right")
-    ax.set_yticklabels([rf"$n={i}$" for i in range(n_modes)])
-
-
-    ax.set_title(r"Overlap Matrix $\langle \psi_m^\theta | \psi_n^\theta \rangle$")
-    #fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="Overlap matrix")
-
-    # ------------------------------------------------------------------
-    # 3️⃣ Loss weights row
-    # ------------------------------------------------------------------
-    if lambdas is not None:
-        _add_lambda_row(fig, lambdas, ax=ax)
-
-    # ------------------------------------------------------------------
-    # 4️⃣ Save if requested
-    # ------------------------------------------------------------------
-    if out_path:
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(out_path, dpi=200, bbox_inches="tight")
-
-    return fig
 
 # ----------------------------------------------------------------------
-# 📊7️⃣a) POD singular values (log plot, all values)
+# 📊6️⃣a) POD singular values (log plot, all values)
 # ----------------------------------------------------------------------
 def plot_pod_singular_values(
         singular_values: torch.Tensor,
@@ -766,7 +681,7 @@ def plot_pod_singular_values(
     return fig
 
 # ----------------------------------------------------------------------
-# 📊7️⃣ b) First three spatial POD modes (should resemble the true eigenmodes)
+# 📊6️⃣ b) First three spatial POD modes (should resemble the true eigenmodes)
 # ----------------------------------------------------------------------
 def plot_pod_first_three_spatial_modes(
         x: torch.Tensor,
@@ -898,7 +813,94 @@ def plot_pod_first_three_spatial_modes(
     return fig
 
 # ----------------------------------------------------------------------
-# 📊7️⃣c) Cross-overlap matrix heatmap
+# 🗺️7️⃣a) -  Overlap matrix heatmap (POD diagnostic)
+# ----------------------------------------------------------------------
+def plot_overlap_heatmap(
+    psi_theta: Sequence[torch.Tensor],
+    *,
+    dx: float | None = None,
+    lambdas: Dict[str, float] | None = None,
+    cmap: str = "cool",
+    fmt: str = ".2f",
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """
+    Render a heat map of the overlap matrix <psi_theta_m | psi_theta_n>.
+
+    Parameters
+    ----------
+    psi_theta : Sequence[torch.Tensor]
+        Learned wavefunctions, each 1-D with the same length. The function will stack them into a (n_modes, N) matrix.
+    dx : float | None, optional
+        Grid spacing. If ``None`` the function infers it from teh first wavefunction (assumes uniform grid). This hidden assumption is removed if `dx` is provided explicitly.
+    lambdas : Dict[str, float] | None, optional
+        Optional string with loss weights to be displayed on the figure.
+    cmap, fmt : str
+        Color map, print settings for inputs values, and output path.
+    out_path : pathlib.Path | None
+        Destination path (saved as a PNG). If ``None``, the figure is only returned.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        Overlap matrix heatmap -> POD diagnostic.
+    """
+
+    n_modes = len(psi_theta)
+    # ------------------------------------------------------------------
+    # 1️⃣ Stack and normalize the wavefunctions
+    # ------------------------------------------------------------------
+    psi_theta_mat = torch.stack([p.squeeze().detach().cpu() for p in psi_theta])  # (n_modes, N)
+
+    # Normalize each wavefunction (important for a meaningful overlap)
+    norms = torch.norm(psi_theta_mat, dim=1, keepdim=True)
+    psi_theta_normed = psi_theta_mat / norms
+
+    # Overlap = psi_theta_normed @ psi_theta_normed.T (inner product over the spatial dimension)
+    overlap = torch.mm(psi_theta_normed, psi_theta_normed.t()).numpy()
+
+    # ------------------------------------------------------------------
+    # 2️⃣ Plot the heat map
+    # ------------------------------------------------------------------
+    fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5))
+
+    sns.heatmap(
+        overlap,
+        ax=ax,
+        cmap=cmap,
+        vmin=0.0,
+        vmax=1.0,
+        annot=True,
+        fmt=fmt,
+        cbar_kws={"label": "Overlap matrix"},
+    )
+
+    ax.set_xticks(np.arange(n_modes))
+    ax.set_yticks(np.arange(n_modes))
+    ax.set_xticklabels([rf"$n={i}$" for i in range(n_modes)], rotation=45, ha="right")
+    ax.set_yticklabels([rf"$n={i}$" for i in range(n_modes)])
+
+
+    ax.set_title(r"Overlap Matrix $\langle \psi_m^\theta | \psi_n^\theta \rangle$")
+    #fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="Overlap matrix")
+
+    # ------------------------------------------------------------------
+    # 3️⃣ Loss weights row
+    # ------------------------------------------------------------------
+    if lambdas is not None:
+        _add_lambda_row(fig, lambdas, ax=ax)
+
+    # ------------------------------------------------------------------
+    # 4️⃣ Save if requested
+    # ------------------------------------------------------------------
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+
+    return fig
+
+# ----------------------------------------------------------------------
+# 📊7️⃣b) Cross-overlap matrix heatmap
 # ----------------------------------------------------------------------
 def plot_cross_overlap_heatmap(
     pod_modes_physical: Sequence[torch.Tensor] | torch.Tensor,
@@ -1004,7 +1006,7 @@ def plot_cross_overlap_heatmap(
     return fig
 
 # ----------------------------------------------------------------------
-# 📊7️⃣d) POD–Eigenbasis Alignment Heatmap
+# 📊7️⃣c) POD–Eigenbasis Alignment Heatmap
 # ----------------------------------------------------------------------
 def plot_pod_eigen_alignment(
         pod_modes_physical: Sequence[torch.Tensor] | torch.Tensor,
@@ -1209,17 +1211,7 @@ def _smoke_test() -> None:
     )
 
     # --------------------------------------------------------------
-    # 6️⃣ Overlap‑matrix heatmap (dummy POD diagnostic)
-    # --------------------------------------------------------------
-    overlap_path = out_dir / "overlap_heatmap.png"
-    plot_overlap_heatmap(
-        psi_theta=psi_learned,        # use the same learned wavefunction from the dummy data
-        lambdas=lambdas,              # optional - show loss weights
-        out_path=overlap_path,
-    )
-
-    # --------------------------------------------------------------
-    # 7️⃣a) POD singular-value spectrum (dummy data)
+    # 6️⃣ a) POD singular-value spectrum (dummy data)
     # --------------------------------------------------------------
     # Use the same psi_theta matrix you already built for POD demo
     psi_matrix = torch.stack(psi_learned, dim=1)    # shape (N, n_modes)
@@ -1232,7 +1224,7 @@ def _smoke_test() -> None:
     )
 
     # --------------------------------------------------------------
-    # 7️⃣b) First three POD spatial modes
+    # 6️⃣b) First three POD spatial modes
     # -------------------------------------------------------------
     psi_matrix = torch.stack(psi_learned, dim=1)  # shape (N, n_modes)
     U, _, _ = pod_decomposition(psi_matrix)  # U is a 2-D tensor of spatial modes
@@ -1247,7 +1239,17 @@ def _smoke_test() -> None:
     )
 
     # --------------------------------------------------------------
-    # 7️⃣d) POD–eigenbasis alignment heatmap
+    # 7️⃣a) Overlap‑matrix heatmap (dummy POD diagnostic)
+    # --------------------------------------------------------------
+    overlap_path = out_dir / "overlap_heatmap.png"
+    plot_overlap_heatmap(
+        psi_theta=psi_learned,  # use the same learned wavefunction from the dummy data
+        lambdas=lambdas,  # optional - show loss weights
+        out_path=overlap_path,
+    )
+
+    # --------------------------------------------------------------
+    # 7️⃣b) POD–eigenbasis alignment heatmap
     # --------------------------------------------------------------
     alignment_path = out_dir / "pod_eigen_alignment.png"
 
