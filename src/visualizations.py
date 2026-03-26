@@ -974,7 +974,7 @@ def plot_cross_overlap_heatmap(
                 txt,
                 ha="center",
                 va="center",
-                color="black",
+                color="#4c5b82",
                 fontsize=9,
             )
 
@@ -1078,7 +1078,7 @@ def plot_pod_eigen_alignment(
                 txt,
                 ha="center",
                 va="center",
-                color="black",
+                color="#4c5b82",
                 fontsize=9,
             )
     # ------------------------------------------------------------------
@@ -1105,6 +1105,148 @@ def plot_pod_eigen_alignment(
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(out_path, dpi=200, bbox_inches="tight")
+
+    return fig
+
+# ----------------------------------------------------------------------
+# 8️⃣🫟 Hilbert Space Phase Portrait
+# ----------------------------------------------------------------------
+def plot_hilbert_phase_portrait(
+    learned_wavefunctions: np.ndarray | torch.Tensor,
+    true_wavefunctions: np.ndarray | torch.Tensor,
+    x: np.ndarray | torch.Tensor,
+    *,
+    out_path: Path | None = None,
+) -> plt.Figure:
+    """
+    Embed learned wavefunctions in eigenstate coefficient space (Hilbert portrait).
+
+    Projects high-dimensional wavefunctions onto the subspace spanned by the first few true eigenstates, visualizing the distribution of learned states in a 3D coefficient space.
+
+    Parameters
+    ----------
+    learned_wavefunctions : np.ndarray | torch.Tensor
+        Array of shape (n_grid_points, n_samples❓) containing learned wavefunction approximations.
+    true_wavefunctions : np.ndarray | torch.Tensor
+        Array of shape (n_grid_points, n_eigenstates) containing exact eigenstates.
+    x : np.ndarray | torch.Tensor
+        Array of shape (n_grid_points,) containing the spatial grid points for integration.
+    out_path : pathlib.Path | None, optional
+        Destination path (saved as a PNG). If ``None``, the figure is only returned.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        3D scatter plot of wavefunction coefficients.
+
+    Notes
+    -----
+    The coefficients are computed as the overlap integral:
+        c_j = int(psi_learned(x) * psi_true_j(x) dx)
+
+    Using the trapezoidal rule for integration
+    """
+    _apply_style()
+
+    # ------------------------------------------------------------------
+    # 1️⃣ Convert to NumPy and validate shapes
+    # ------------------------------------------------------------------
+    if isinstance(learned_wavefunctions, torch.Tensor):
+        learned_wavefunctions = learned_wavefunctions.detach().cpu().numpy()
+    if isinstance(true_wavefunctions, torch.Tensor):
+        true_wavefunctions = true_wavefunctions.detach().cpu().numpy()
+    if isinstance(x, torch.Tensor):
+        x = x.detach().cpu().numpy()
+
+    # Ensure x is 1D
+    x = np.atleast_1d(x).squeeze()
+
+    if learned_wavefunctions.ndim != 2:
+        raise ValueError(
+            f"❌ learned_wavefunctions must be 2D, got {learned_wavefunctions.ndim}D"
+        )
+    if true_wavefunctions.ndim != 2:
+        raise ValueError(
+            f"❌ true_wavefunctions must be 2D, got {true_wavefunctions.ndim}D"
+        )
+
+    n_grid = learned_wavefunctions.shape[0]
+    if true_wavefunctions.shape[0] != n_grid:
+        raise ValueError(
+            f"❌ Grid mismatch: learned has {n_grid} points, "
+            f"true has {true_wavefunctions.shape[0]} points"
+        )
+    if x.shape[0] != n_grid:
+        raise ValueError(
+            f"❌ Grid mismatch: x has {x.shape[0]} points, "
+            f"wavefunctions have {n_grid} points"
+        )
+
+    # ------------------------------------------------------------------
+    # 2️⃣ Compute coefficients (Overlap Integrals)
+    # ------------------------------------------------------------------
+    # Limit to first 3 eigenstates for 3D visualization
+    n_states = min(3, true_wavefunctions.shape[1])
+    n_modes = min(3, learned_wavefunctions.shape[1])    # ⚠️ added minimum number myself
+
+    coeffs =  np.zeros((n_modes, n_states), dtype=np.float64)
+
+    for i in range(n_modes):
+        psi_learned = learned_wavefunctions[:, i]
+        for j in range(n_states):
+            true_psi = true_wavefunctions[:, j]
+
+            integrand = psi_learned * true_psi
+            coeffs[i, j] = np.trapezoid(integrand, x)
+
+    # ------------------------------------------------------------------
+    # 3️⃣ Plot 3D Stem Plot
+    # ------------------------------------------------------------------
+    fig = plt.figure(figsize=(6, 6))
+    ax = fig.add_subplot(111, projection="3d")
+
+    # Draw stems from z=0 to each point
+    for i in range(n_modes):
+        ax.plot(
+            [coeffs[i, 0], coeffs[i, 0]],   # x: constant
+            [coeffs[i, 1], coeffs[i, 1]],   # y: constant
+            [0, coeffs[i, 2]],
+            color=PROJECT_COLORS["blue"],
+            linewidth=2,
+            alpha=0.7,
+        )
+
+        ax.scatter(
+            coeffs[i, 0],
+            coeffs[i, 1],
+            coeffs[i, 2],
+            c=PROJECT_COLORS["blue"],
+            alpha=0.7,
+            s=80,
+            edgecolor="white",
+            linewidth=0.5,
+            zorder=5,
+        )
+
+    ax.set_xlabel(r"$\langle \psi_i^\theta | \psi_0 \rangle$", fontsize=11)
+    ax.set_ylabel(r"$\langle \psi_i^\theta | \psi_1 \rangle$", fontsize=11)
+    ax.set_zlabel(r"$\langle \psi_i^\theta | \psi_2 \rangle$", fontsize=11)
+
+    ax.set_title("Hilbert Space Phase Portrait", fontsize=12, pad=10)
+
+    ax.view_init(elev=20, azim=60)
+
+    # ------------------------------------------------------------------
+    # 4️⃣ Optional save
+    # ------------------------------------------------------------------
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(
+            out_path,
+            dpi=200,
+            bbox_inches="tight",
+            facecolor=fig.get_facecolor(),
+        )
 
     return fig
 
@@ -1252,13 +1394,27 @@ def _smoke_test() -> None:
     # 7️⃣b) POD–eigenbasis alignment heatmap
     # --------------------------------------------------------------
     alignment_path = out_dir / "pod_eigen_alignment.png"
-
     plot_pod_eigen_alignment(
         U,
         torch.stack(psi_true, dim=0).T,
         dx=x[1] - x[0],
         lambdas=lambdas,
         out_path=alignment_path
+    )
+
+    # --------------------------------------------------------------
+    # 8️⃣ Hilbert Space Phase Portrait
+    # --------------------------------------------------------------
+    # Stack the list of wavefunctions into a 2D tensor (n_modes, n_grid)
+    psi_learned_stacked = torch.stack(psi_learned, dim=1)   # Shape: (N, n_modes)
+    psi_true_stacked = torch.stack(psi_true, dim=1)         # Shape: (N, n_eigenmodes)
+
+    hilbert_path = out_dir / "hilbert_portrait.png"
+    plot_hilbert_phase_portrait(
+        learned_wavefunctions=psi_learned_stacked,
+        true_wavefunctions=psi_true_stacked,
+        x=x,
+        out_path=hilbert_path,
     )
 
     print(
