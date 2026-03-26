@@ -1202,18 +1202,39 @@ def plot_hilbert_phase_portrait(
     # ------------------------------------------------------------------
     # 3️⃣ Plot 3D Stem Plot
     # ------------------------------------------------------------------
-    fig = plt.figure(figsize=(6, 6))
+    fig = plt.figure(figsize=(7, 7))
     ax = fig.add_subplot(111, projection="3d")
+
+    # Calculate data ranges for setting limits
+    x_vals = coeffs[:, 0]
+    y_vals = coeffs[:, 1]
+    z_vals = coeffs[:, 2]
+
+    # Add padding to limits to prevent clipping
+    margin_x = (x_vals.max() - x_vals.min()) * 0.2 if x_vals.max() != x_vals.min() else 0.5
+    margin_y = (y_vals.max() - y_vals.min()) * 0.2 if y_vals.max() != y_vals.min() else 0.5
+    margin_z = (z_vals.max() - z_vals.min()) * 0.2 if z_vals.max() != z_vals.min() else 0.5
+
+    ax.set_xlim(x_vals.min() - margin_x, x_vals.max() + margin_x)
+    ax.set_ylim(y_vals.min() - margin_y, y_vals.max() + margin_y)
+    ax.set_zlim(0, max(z_vals.max() + margin_z, 0.1))   # Ensure z starts at zero and has some room
 
     # Draw stems from z=0 to each point
     for i in range(n_modes):
+        x0, y0, z0 = coeffs[i, 0], coeffs[i, 1], coeffs[i, 2]
+
+        # Draw stems from z=0.0 to z=z0
+        z_start = 0.0
+        z_end = max(z0, 0.001)
+
         ax.plot(
             [coeffs[i, 0], coeffs[i, 0]],   # x: constant
             [coeffs[i, 1], coeffs[i, 1]],   # y: constant
             [0, coeffs[i, 2]],
             color=PROJECT_COLORS["blue"],
-            linewidth=2,
-            alpha=0.7,
+            linewidth=2.5,
+            alpha=0.8,
+            zorder=2,
         )
 
         ax.scatter(
@@ -1222,10 +1243,23 @@ def plot_hilbert_phase_portrait(
             coeffs[i, 2],
             c=PROJECT_COLORS["blue"],
             alpha=0.7,
-            s=80,
+            s=100,
             edgecolor="white",
-            linewidth=0.5,
+            linewidth=1.5,
             zorder=5,
+        )
+
+        # Add text annotations
+        text_z = z0 + margin_z * 0.5 if z0 > 0 else 0.05
+        ax.text(
+            x0, y0, text_z,
+            f"({x0:.2f}, {y0:.2f}, {z0:.2f})",
+            fontsize=9,
+            color="white",
+            ha="center",
+            va="bottom",
+            bbox=dict(facecolor="black", alpha=0.6, edgecolor="none", pad=2),
+            zorder=6,
         )
 
     ax.set_xlabel(r"$\langle \psi_i^\theta | \psi_0 \rangle$", fontsize=11)
@@ -1234,7 +1268,7 @@ def plot_hilbert_phase_portrait(
 
     ax.set_title("Hilbert Space Phase Portrait", fontsize=12, pad=10)
 
-    ax.view_init(elev=20, azim=60)
+    ax.view_init(elev=25, azim=55)
 
     # ------------------------------------------------------------------
     # 4️⃣ Optional save
