@@ -6,6 +6,9 @@ Proper Orthogonal Decomposition (POD) utilities.
 - ``mode_overlap_matrix``: builds the inner product matrix < psi_m | psi_n > on a uniform grid. Note that the factor ``dx`` accounts for the integration measure.
 
 Both functions are pure NumPy-style Torch ops -> no side effects, no hidden state. Moreover, the module includes a minimal smoke test that can be called from the command line (``python -m src.pod``) or from any notebook.
+
+Author: Eigenscribe
+Date: 02-2026
 """
 
 from __future__ import annotations

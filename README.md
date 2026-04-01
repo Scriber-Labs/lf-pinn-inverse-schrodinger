@@ -42,44 +42,59 @@ python -m cli_train --n_modes 3 --hidden 64 --epochs 6000 --lr 5e-3 --n_points 2
 ---
 
 ## Repo Structure
-
-```
-inverse-piml-schrodinger/
-├── cli_train.py            # CLI support for generating training data
-├── src/
-│   ├── model.py            # neural network ansatz for V_theta(x)
-│   ├── physics.py          # TISE residual, data mismatch, scale-aware smoothness
-│   ├── inverse.py          # inverse-specific losses
-│   ├── pod.py              # POD decomposition + reconstruction
-│   ├── train.py            # training loop and CLI
-│   ├── visualizations.py   # visualization utilities (e.g., seeding and grids)
-│   └── utils.py            # helper functions (e.g., seeding and grids)
-├── notebooks/
-│   └── demo.ipynb          # generate visuaalzations
+```text
+lf-pinn-inverse-schrodinger/
+├── artifacts/
+│   ├── demo_visuals/
+│   │   ├── cross_overlap_heatmap.png
+│   │   ├── density.png
+│   │   ├── learned_energies.png
+│   │   ├── learned_potential.png
+│   │   ├── learned_wavefunctions.png
+│   │   ├── overlap_heatmap.png
+│   │   ├── pod_modes.png
+│   │   ├── pod_singular_values.png
+│   │   └── training_curves.png
+│   ├── figures.md
+│   ├── interpretability.md
+│   └── project_1_followup.md
 ├── assets/
 │   ├── images/
-│   │   ├── project_2_architecture.png
-│   │   └── loss_table.png
-│   └── mermaid-diagrams/
-│   │   └── architecture.mmd    
-├── artifacts/
-│   ├── project_1_followup.md            # conceptual notes and reflection
-│   ├── figures.md                       # structure-based analysis of demo visuals
-│   └── demo_visuals/    
-│       ├── density.png
-│       ├── learned_energies.png
-│       ├── learned_potential.png
-│       ├── learned_wavefunctions.png
-│       ├── overlap_heatmap.png
-│       ├── pod_modes.png
-│       ├── pod_singular_values.png
-│       └── training_curves.png         
-├── references.md                       # sources 
-├── requirements.txt
-├── pyproject.toml
+│   │   ├── loss_table.png
+│   │   ├── loss_table_extended.png
+│   │   ├── loss_table_numbered.png
+│   │   └── project_2_architecture.png
+│   ├── mermaid-diagrams/
+│       ├── architecture.mmd
+│       ├── blue_to_orange_gradient.mmd
+│       ├── eigenscribe-theme_gradient.mmd
+│       ├── purple_gradient.mmd
+│       └── vanilla_architecture.mmd
+├── docs/
+│   ├── architecture.pdf
+│   └── loss function table (extended).pdf
+├── notebooks/
+│   └── demo.ipynb
+├── src/
+│   ├── __init__.py
+│   ├── inverse.py
+│   ├── model.py
+│   ├── physics.py
+│   ├── pod.py
+│   ├── train.py
+│   ├── utils.py
+│   └── visualizations.py
 ├── CITATION.cff
-└── README.md                         
+├── LICENSE
+├── README.md
+├── cli_train.py
+├── pyproject.toml
+├── references.bib
+├── repo_summary.py
+└── requirements.txt
+
 ```
+
 ---
 ## 🌍 Global Design Choices
 ### Assumptions

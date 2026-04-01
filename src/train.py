@@ -9,6 +9,9 @@ The loss is a weighted sum of three physically motivated terms:
 - **Data-fit loss**: matches learned quantities to observed densities/energies.
 
 All three components live in separate modules (`physics`, `inverse`, `utils`). This file wires them together, handles the optimizer, and provides a minimal smoke-test that runs a single optimization step.
+
+Author: Eigenscribe
+Date: 02-2026
 """
 
 from __future__ import annotations
@@ -138,10 +141,10 @@ def _run_train_smoke_test() -> None:
     rho_obs = [torch.exp(-x**2).squeeze() for _ in range(3)]
     E_obs = torch.tensor([0.5, 1.5, 2.5], device=device)
 
-    lambdas = {"data": 1.0, "physics": 1.0, "smooth": 1e-2, "ortho": 1e-2}
+    lambdas = {"data": 1.0, "physics": 1.0, "smooth": 1e-2, "ordered": 1e-2}
 
     optimizer.zero_grad()
-    total_loss, loss_physics, loss_data, loss_smooth, loss_ortho = train_step(model, x, dx, rho_obs, E_obs, lambdas)
+    total_loss, loss_physics, loss_data, loss_smooth, loss_ordered = train_step(model, x, dx, rho_obs, E_obs, lambdas)
     total_loss.backward()
     optimizer.step()
 

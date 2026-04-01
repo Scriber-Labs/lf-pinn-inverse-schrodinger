@@ -11,7 +11,7 @@ All functions accept plain NumPy / PyTorch objects are return the matplotlib Fig
     - a minimal smoke-test
 
 Author: Eigenscribe
-Data: 02-2026
+Date: 02-2026
 """
 
 from __future__ import annotations
