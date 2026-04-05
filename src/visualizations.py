@@ -665,6 +665,18 @@ def plot_pod_singular_values(
         label="Singular values",
     )
 
+    # Annotate each point with its numerical value
+    for i, val in enumerate(sv, start=1):
+        ax.annotate(
+            f"{val:.9e}",
+            (i, val),
+            textcoords="offset points",
+            xytext=(0, 6),
+            ha="center",
+            fontsize=8,
+            alpha=0.8,
+        )
+
     ax.set_xlabel(r"Mode index $k$", fontsize=13)
     ax.set_ylabel(ylabel, fontsize=13)
     ax.set_title(title, fontsize=16, pad=12)
