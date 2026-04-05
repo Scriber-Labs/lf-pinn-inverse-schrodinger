@@ -1,38 +1,46 @@
 # Figure Analysis
+## 🧙‍♂️ Questions That Need Answering
+### 🔷 Identifiability
+- [ ] Which features of $V(x)$ are uniquely recoverable?
+- [ ] Does smoothness regularization bias the recovered potential family?
+### 🔷 Mode Structure
+- [ ] Does orthogonality emerge without reinforcement?
+- [ ] Does POD reveal effective low-rank eigenspaces?
+### 🔷 Inverse Stability
+- [ ] Does noise induce mode mixing?
+- [ ] Are certain eigenstates more stable under low-fidelity observation?
+### 🔷 Structural Recovery
+- [ ] Is curvature recoverable before amplitude?
+- [ ] Are nodal locations more identifiable than potential amplitude?
+
+
+---
 ## Figure 1 - Training Curves
 ![Training Curves](demo_visuals/training_curves.png)
-
-> 🏡 The inverse problem converges to a stable multi-objective equilibrium. Physics residual and data mismatch are minimized concurrently, while normalization and smoothness constraint terms regulate solution geometry.
-> 
-> Training dynamics exhibit staged constraint resolution:
->   - Early objective competition
->   - Mid-stage geometry stabilization
->   - Late-stage oscillatory constraint enforcement as normalization corrections stabilize the solution manifold.
->     - 📝 Similar staged dynamics were observed in [Project 1 (Figure 1)](https://github.com/Scriber-Labs/lf-pinn-harmonic-oscillator/blob/main/artifacts/figures.md), suggesting consistent constraint geometry behavior across problem classes.
+> 🏡 ENTER FIGURE 1 TAKE-HOME MESSAGE HERE
 
 <p align="center">
   <img src="../assets/images/loss_table_extended.png"
        alt="Loss table."
-       height="350">
+       height="150">
 </p>
 
 ---
 
 ## Figure 2 - Learned Potential $V_\theta(x)$ vs. Ground Truth Potential $V(x)$ (Harmonic Oscillator)
 ![Potential Functions](demo_visuals/learned_potential.png)
+> 🏡 ENTER FIGURE 2 TAKE-HOME MESSAGE HERE
 
 ### 🔑 Key Take-Aways
 - **Smoothness prior effect:**  Regularization of $\mathcal{L}_\text{smooth}$ encourages low-curvature solutions, guiding $V_\theta(x)$ toward a geometrically stable solution state.
 - **Inverse problem non-uniqueness:** The inverse Schrödinger problem is fundamentally ill-posed. Specifically, the same finite set of eigenfunctions and associated eigenvalues can be produced by multiple potentials.
   - $\mathcal{L}_\text{smooth}$ helps guide the model to a physically plausible solution (e.g., no sharp curvature artifacts).
-  - However, $\mathcal{L}_\text{smooth}$ does not guarantee uniqueness!!
+  - However, $\mathcal{L}_\text{smooth}$ does not guarantee uniqueness!
 - **Domain-dependent identifiability:** Divergence near boundaries arise due to the wavefunctions having negligible amplitude in those regions. 
   - This results in:
     - Numerical weakening of the physics residual.
     - Data set provides minimal constraint in these regions.
     - The smoothness term biases the solution toward flattening.
-  > 🏡 Thus, the potential is identifiable primarily within the spectral support of the trained eigenstates.
-
 ### ✖️ Failure Modes
 - **Bias vs. variance tradeoff:** 
   - If $\lambda_\text{smooth}$ is too large, **over-smoothing** (bias) occurs. In the extreme case, **flattening** occurs and $V_\theta \rightarrow \text{const}$.
@@ -42,14 +50,13 @@
 
 ---
 
-> 🏡 Together, Figure 1 and Figure 2 suggest the low-fidelity PINN formulation aligns operator spectrum, solution support, and constraint geometry into a stable, interpretable equilibrium.
+> 🏡 ❓Together, Figure 1 and Figure 2 suggest the low-fidelity PINN formulation aligns operator spectrum, solution support, and constraint geometry into a stable, interpretable equilibrium.❓ DOUBLE CHECK
 ---
 
 ## Figure 3 - Learned Wavefunctions $\psi_n^\theta(x)$ vs. Ground Truth Wavefunctions $\psi_n(x)$ (Quantum Harmonic Oscillator)
 ![Learned Wavefunctions](demo_visuals/learned_wavefunctions.png)
 
-> 🏡 The learned operator demonstrates spectral alignment across multiple eigenmodes, recovering correct parity, node structure, and envelope geometry.
-
+> 🏡 ENTER FIGURE 3 TAKE-HOME MESSAGE HERE
 
 ### 🔑 Key Take-Aways
 - **Phase ambiguity:** Overall sign flips are physically irrelevant due to global phase invariance.
@@ -60,27 +67,20 @@
 
 ## Figure 4 - Learned vs. Ground Truth Energy Eigenvalues 
 ![Learned Energies](demo_visuals/learned_energies.png)
-> 🏡 The learned operator preserves spectral spacing and ordering across the first three wavefunctions.
+> 🏡 The learned operator preserves spectral spacing and ordering across the first three wavefunctions. This indicates no mode swapping or spectral collapse occurred during training.
 
-### 🔑 Key Take-Aways
-- **Energy ordering preserved:** No mode swapping or spectral collapse.
-- **Approximate linear spacing retained:** Indicates correct quadratic curvature in $V_\theta(x)$.
-- **Small systematic bias:** Slight underestimation of extreme modes suggests mild curvature underfitting. This is consistent with smoothness regularization.
+🎗️ Recall proper energy ordering is softly enforced by the ordering loss term $\mathcal{L}_\text{order}$.
+
 ---
 
 ## Figure 5 - Learned vs. Noisy Observed Probability Densities
 ![Probability Densities](demo_visuals/density.png)
-> 🏡 Inferred probability densities $|\psi_n^\theta(x)|^2$ vs. fake observed probability densities $\rho_n^\text{obs}(x)$ for the first three eigenmodes. Despite observational noise, the learned operator preserves node structure, parity, and multi-lobe geometry across modes $n=0,1,2$.
+> 🏡 ENTER TAKE-HOME MESSAGE HERE
 
 ### 🔑 Key Take-Aways:
-- **Node alignment:** Zero crossings are accurately recovered despite noisy (indirect) supervision.
-- **Spectral geometry preservation:** Lobe count and parity structure match analytical solutions.
-- **Controlled amplitude bias:** Slight peak underestimation and mild broadening are consistent with regularization under noisy data.
-- **Observable robustness:** Agreement in $|\psi|^2$ indicates stable operator recovery from corrupted measurements.
 - **Data anchoring:** The observational density loss term prevents arbitrary drift in function space by constraining the learned states to match measurable structure. Note this is a *partial* anchor; not a full identification constraint.
 - **Indirect supervision:** The model must $\psi$ such that its squared magnitude matches data, while also satisfying the PDE constraint. 
 - **Phase remains unconstrained:** Loss is invariant under $\psi \rightarrow -\psi$.
-
 
 ---
 # POD Diagnostics
@@ -89,11 +89,11 @@
 
 ---
 
-## Figure 7a - POD Singular Values
+## Figure 6a - POD Singular Values
 ![POD Singular Values](demo_visuals/pod_singular_values.png)
 > 🏡 The POD singular values of the learned eigenmode matrix $\mathbf{\Psi^\theta}$ have values close to unity. This indicates that the learned eigenfunctions form a well-conditioned and nearly orthonormal basis. These results independently confirm the spectral consistency observed in the overlap matrix (Figure 6).
 
-## Figure 7b - POD Spatial Modes vs. Learned Wavefunctions vs. Ground Truth Wavefunctions
+## Figure 6b - POD Spatial Modes vs. Learned Wavefunctions vs. Ground Truth Wavefunctions
 ![POD Spatial Modes](demo_visuals/pod_modes.png)
 > 🏡 The POD spatial modes extracted from the learned eigenfunction matrix reveal that the dominant spatial patterns closely align with linear combinations of the learned eigenfunctions.
 
@@ -108,7 +108,7 @@
 - No single spatial mode dominates the SVD representation.
 - This indicates that the learned eigenfunctions form a well-conditioned basis with minimal redundancy.
 
-#### Learned basis differs from teh physical eigenbasis but still captures the system.
+#### Learned basis differs from THE physical eigenbasis but still captures the system.
 - The POD spatial modes do not align with individual eigenfunctions.
 - Instead, they emerge as mixtures that optimally represent the spatial variance in the learned dataset.
 - Despite this rotation of the learned eigenbasis, the learned eigenfunctions still accurately reproduce the observed probability densities (Figure 5).
@@ -117,10 +117,10 @@
 - Similarity between POD spatial modes and learned eigenfunctions suggests that the learned eigenbasis sufficiently captures the dominant spatial structures generated by $\hat{H_\theta}$.
 - Together with the conclusion from Figure 7a (well-conditioned spectrum), this suggests that the learned operator is geometrically consistent.
 
----
+
 
 ## Overlap Heatmaps
-### Figure 7a
+### Figure 6c
 <p align="center">
   <img src="demo_visuals/overlap_heatmap.png"
        alt="Loss table."
@@ -153,7 +153,7 @@
 
 
 
-## Figure 7b - $\langle u_k | \psi_n^\theta\rangle$ Overlap Matrix
+## Figure 6C - $\langle u_k | \psi_n^\theta\rangle$ Overlap Matrix
 <p align="center">
   <img src="demo_visuals/cross_overlap_heatmap.png"
        alt="Loss table."
