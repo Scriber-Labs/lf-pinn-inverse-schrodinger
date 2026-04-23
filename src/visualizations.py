@@ -34,7 +34,7 @@ from pod import pod_decomposition, cross_overlap_matrix
 def _apply_style() -> None:
     """Set global plotting style (Seaborn + custom rcParams)."""
 
-    palette = ["#F72585", "#7209B7", "#3A0CA3", "#4361EE", "#4CC9F0"]
+    palette = ["#FE28A2", "#845CCC", "#4361EE", "#2CA9E6", "#309592"]
 
     sns.set_theme(
         style="darkgrid",

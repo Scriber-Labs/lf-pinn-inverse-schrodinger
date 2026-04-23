@@ -9,14 +9,13 @@ authors:
     location: USA
     email: eigenscribe@protonmail.com
     website: 'https://github.com/Scriber-Labs'
-    alias: Eigenscribe
+    alias: Eigenscribe, S. Scriber
 repository-code: >-
   https://github.com/Scriber-Labs/lf-pinn-inverse-schrodingerr
 abstract: >-
   A minimal and interpretable PINN-inspired simulator that
   demonstrates how physics can be implemented in machine
-  learning via variational principles (without chasing
-  accuracy).
+  learning to solve inverse problems.
 keywords:
   - pinn
   - low-fidelity
