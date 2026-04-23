@@ -1,18 +1,29 @@
 # Symplectic Structures and the Inverse Schrödinger Problem
 ## Setting the Geometric Stage with Classical Mechanics
-> 💡 The inverse Schrödinger problem can be cleanly mapped to learning a scalar Hamiltonian whose associated bivector flow preserves the canonical symplectic form $dq \wedge dp$. 
+> 💡 The inverse Schrödinger problem can be cleanly mapped to learning a scalar Hamiltonian whose associated bivector flow preserves the canonical symplectic form $dq \wedge dp$. Importantly, this symplectic strucutre is is prior to both dynamics and quantization.
 
-Let phase space be defined mathematically as $(q,p)\in T^*Q$. 
-- ❓❓❓what are matrices T and Q supposed to be?
+Let **phase space** be defined mathematically as $(q,p)\in T^*Q$ where,
+- $Q$: **configuration space**
+- $TQ$: **'tangent bundle'** (velocities) (⚠️double check⚠️)
+- $T^*Q$: **'cotangent bundle'** (momenta) (⚠️double check⚠️)
 
-This allows us to further define $\omega= dq \wedge dp$ as the canonical symplectic form. Importantly, this is a 2-form that:
+This allows us to further define $\omega= dq \wedge dp$ as the canonical symplectic form. 
+
+> 📝 Note that $dq$ and $dp$ are 1-forms that form a **co-vector basis** in phase space $T^*Q$. Linear combinations of $dq$ and $dp$ are symplectic forms (❓) and have antisymmetric structure.
+
+Importantly, $\omega$ is a 2-form that:
 - defines what dynamics are allowed
-- is *prior* to the Hamiltonian
-- is the structure quantization preserves
+- is *prior* to the Hamiltonian (❓what does this mean exactly? )
+- is the structure quantization preserves (❓what does this mean exactly? )
 
-## Quantization
+## Quantization as Structure Preservation
 1. $q \rightarrow \hat{x}$
 2. $p \rightarrow -i\hbar \partial_x$
+
+> 📝 Defining commutation relation $$[\hat{x},\hat{p}]=i\hbar$$ is the "operator-level reflection" of the classical symplectic structure $$\{q,p\}=1 \quad \Leftrightarrow \quad \omega=dq \wedge dw .$$
+
+>$\Rightarrow$ Interpretive statement:
+> Enforcing the Schrödinger equation as a soft constraint implicitly enforces a quantized symplectic structure.
 
 ## Schrödinger Operator as a Symplectic Structure
 Recall: $\hat{H}=-\frac{\hbar^2}{2m}\partial_x^2+V(x)$ is the Hamiltonian operator used in the TISE.
@@ -30,31 +41,36 @@ $$L_\text{SE} = \bigg|\bigg| \bigg(  -\frac{\hbar^2}{2m}\psi'' + V_\theta\psi - 
 > 🗝️ Since $\psi'' \approx p^2\psi$, the residual enforces the correct quadratic form induced by the symplectic metric. (❓)
 >  Specifically,
 >  - $dq$ acts on functions (❓)
->  - $dp$ acts asa differentiation (❓)
+>  - $dp$ acts as a differentiation (❓)
 >  - the wedge structure allows second-order operators (❓)
 
 ### Justification for extra structure
 Project 1: symplectic structure and Hamiltonian gave a well-posed problem.
 
-Project 2: the inverse Schrodinger problem is ill-posed due to the fact that many possible potential functions can give rise to the same eigenstates. (❓I NEED THIS STATEMENT TO BE FIXED AND EXPLAINED)
+Project 2: the inverse Schrödinger problem is ill-posed since many possible potential functions can give rise to the same eigenstates.
 - Regularization introduces geometric bias so that the hypothesis space is constrained.
-  - Introducing $$\int(V''(x))^2dx$$ penalizes curvature in the configuration-space projection of phase space (i.e., wild folding of Lagrangian submanifolds). (❓❓❓❓WHAT DOES THIS MEAN? IT SOUNDS IMPORTANT!)
+  - Introducing $$\int(V''(x))^2dx$$ penalizes curvature in the configuration-space projection of phase space (i.e., wild folding of Lagrangian submanifolds (❓❓❓❓WHAT DOES THIS MEAN? IT SOUNDS IMPORTANT!)).
 
 > 🏡 The smoothness term regularizes the inverse problem by discouraging rapid curvature of the effective Lagrangian submanifold induced by $V(x)$.
 
 ## Clifford algebra detour
-Importantly, Clifford algebra does not introduce additional parameters or structure. It is the linearlization of symplectic geometry (❓i would really like a source for this that i can look at for myself).
+Importantly, Clifford algebra does not introduce additional parameters or structure. It is the linearization of symplectic geometry (❓i would really like a source for this that i can look at for myself).
 
 For the sake of keeping it simple, we start with establishing 1D phase space:
-- basis: $\{ \mathbb{e}_q, \mathbb{e}_p \}$d
+- basis: $\{ \mathbb{e}_q, \mathbb{e}_p \}$
+  - Notes: 
+    - $\mathbb{e}_q$ and $\mathbb{e}_p$ for a **vector basis** in the 'tangent bundle' $TQ$. 
+    - This has a symmetric structure $\Rightarrow$ linear combinations are called **metrics**.
 - geometric product: $$\mathbb{e}_q \mathbb{e}_p = \mathbb{e}_q\cdot\mathbb{e}_p+\mathbb{e}_q\wedge\mathbb{e}_p$$
   - This is a good place to distinguish $dq$ and $dp$ from $\mathbb{e}_q$ and $\mathbb{e}_p$. If there is no real distinction, I need to decide how i want to define my basis for this sort of context from here on out. or at least have a game plan since this will come up a lot. 
+
+> 🏡 Clifford algebra linearizes metric structure.
 
 ## Symplectic Consistency Loss
 Let $$p_\psi(x) := -i\hbar \frac{\psi'(x)}{\psi(x)}$$ be the **quantum momentum field**. Then define $$\mathcal{L}_\text{symp}=\bigg|\bigg| \frac{dp_\psi}{dx} + V'(x) \bigg|\bigg|^2$$
 
 ---
-Project 1 questions that said i'd address in this project(at least conceptually review for myself).
+Project 1 questions that I said I would address in this project(at least conceptually review for myself).
  - [ ] Vectors vs. covectors (and why momenta live naturally as covectors)
  - [ ] Covectors in geometric/ Clifford algebra
  - [ ] Hamiltonian mechanics from geometry (kinetic + potential 
