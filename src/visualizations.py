@@ -79,10 +79,10 @@ def _apply_style() -> None:
 _apply_style()
 
 PROJECT_COLORS = {
-    "purple": "#8000FF",
-    "pink": "#E52B50",
+    "purple": "#845CCC",
+    "pink": "#FE28A2",
     "green": "#39FF14",
-    "cyan": "#0FFFFF",
+    "cyan": "#0FFFFE",
     "blue": "#007FFF",
 }
 
