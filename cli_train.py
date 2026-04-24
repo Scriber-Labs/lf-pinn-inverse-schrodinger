@@ -14,9 +14,11 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Final
+from typing import Final, List, Tuple
 
+import numpy as np
 import torch
+from torch import Tensor
 
 torch.set_default_dtype(torch.float64)
 
@@ -75,17 +77,40 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 # ----------------------------------------------------------------------
 # 3️⃣ Helper to build the model & synthetic data
 # ----------------------------------------------------------------------
-def _build_problem(args: argparse.Namespace):
+def _build_problem(args: argparse.Namespace) -> Tuple[
+    InverseSchrodingerModel,
+    torch.optim.Optimizer,
+    Tensor,
+    float,
+    List[Tensor],
+    Tensor,
+    dict[str, float],
+    List[Tensor],
+    Tensor,
+    Tensor,
+]:
     """
-    Build the model and synthetic data for the quantum harmonic oscillator (similar to a smoke test).
+    Build the model and synthetic data for the quantum harmonic oscillator.
 
     Parameters
     ----------
-    args: all arguments entered by the user
+    args : argparse.Namespace
+        Command-line arguments containing model and training configuration.
 
     Returns
     -------
-        model, optimizer, x (grid), dx, rho_obs, E_obs, lambdas
+    Tuple[...]
+        A tuple containing:
+        - model: The InverseSchrodingerModel instance.
+        - optimizer: The Adam optimizer.
+        - x: Spatial grid tensor.
+        - dx: Grid spacing.
+        - rho_obs: Observed densities.
+        - E_obs: Observed energies.
+        - lambdas: Loss weighting factors.
+        - psi_true: Ground truth wavefunctions.
+        - E_true: Ground truth energies.
+        - V_true: Ground truth potential.
     """
     device: Final = torch.device(args.device)
 
@@ -106,6 +131,7 @@ def _build_problem(args: argparse.Namespace):
     psi_true = [hermite_gauss(n, x.squeeze()) for n in range(args.n_modes)]
     E_true = torch.arange(args.n_modes,
                           dtype=torch.float64) + 0.5  # exact energies for the quantum harmonic oscillator (hbar = omega = 1)
+    V_true = 0.5 * x.squeeze() ** 2
 
     rho_obs = [psi ** 2 + 0.02 * torch.randn_like(psi) for psi in psi_true]
     E_obs = E_true + 0.05 * torch.randn_like(E_true)
@@ -129,7 +155,7 @@ def _build_problem(args: argparse.Namespace):
     # Optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
-    return model, optimizer, x, dx, rho_obs, E_obs, lambdas
+    return model, optimizer, x, dx, rho_obs, E_obs, lambdas, psi_true, E_true, V_true
 
 # ------------------------------------------------------------------------------
 # 3️⃣ Entry-point
@@ -147,7 +173,7 @@ def main(argv: list[str] | None = None) -> None:    # noqa: D401
     print(f"🖥️  Using device: {device}")
 
     # Build model, optimizer, data, etc.
-    model, optimizer, x, dx, rho_obs, E_obs, lambdas = _build_problem(args)
+    model, optimizer, x, dx, rho_obs, E_obs, lambdas, psi_true, E_true, V_true = _build_problem(args)
 
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -183,11 +209,24 @@ def main(argv: list[str] | None = None) -> None:    # noqa: D401
         # ------------------------------------------------------------------
         # Training loop (simple version – prints every `log_every` steps)
         # ------------------------------------------------------------------
+        history: list[dict[str, float]] = []
+
         for epoch in range(1, args.epochs + 1):
             optimizer.zero_grad()
             total_loss, loss_physics, loss_data, loss_smooth, loss_ordered = train_step(model, x, dx, rho_obs, E_obs, lambdas)
             total_loss.backward()
             optimizer.step()
+
+            # Detach and convert to float for history
+            losses_dict = {
+                "epoch": epoch,
+                "total_loss": float(total_loss.detach()),
+                "physics_loss": float(loss_physics.detach()),
+                "data_loss": float(loss_data.detach()),
+                "smooth_loss": float(loss_smooth.detach()),
+                "ordered_loss": float(loss_ordered.detach()),
+            }
+            history.append(losses_dict)
 
             logger.log_metric(
                 run_id=run_id,
@@ -204,9 +243,66 @@ def main(argv: list[str] | None = None) -> None:    # noqa: D401
             if epoch % args.log_every == 0 or epoch == args.epochs:
                 print(f"[{epoch:>5}/{args.epochs}] loss = {total_loss.item():.6e}")
 
+        # --- Save Ground Truth ---
+        torch.save({
+            "x": x.cpu(),
+            "V_true": V_true.cpu(),
+            "psi_true": [p.cpu() for p in psi_true],
+            "E_true": E_true.cpu(),
+        }, run_artifacts_dir / "ground_truth.pt")
+
+        # --- Compute Final Diagnostics ---
+        model.eval()
+        with torch.no_grad():
+            V_learned = model.V_theta(x).squeeze()
+            psi_learned = model.psi_theta(x, dx)
+            E_learned = model.E_theta()
+
+            # Sort by energy if not already (train_step does it but better be safe)
+            idx = torch.argsort(E_learned)
+            E_learned = E_learned[idx]
+            psi_learned = [psi_learned[i] for i in idx]
+
+            # POD Analysis (SVD on the learned wavefunctions)
+            # Stack wavefunctions as columns: (n_points, n_modes)
+            psi_matrix = torch.stack(psi_learned, dim=1)
+            # Perform SVD
+            U, S, V = torch.svd(psi_matrix)
+
+            # Overlap Matrix (learned vs learned)
+            n_modes = len(psi_learned)
+            overlap_learned = torch.zeros((n_modes, n_modes))
+            from utils import l2_inner_product
+            for i in range(n_modes):
+                for j in range(n_modes):
+                    overlap_learned[i, j] = l2_inner_product(psi_learned[i], psi_learned[j], dx)
+
+            # Overlap Matrix (learned vs true)
+            overlap_true = torch.zeros((n_modes, n_modes))
+            for i in range(n_modes):
+                for j in range(n_modes):
+                    overlap_true[i, j] = l2_inner_product(psi_learned[i], psi_true[j].to(device), dx)
+
+        # Prepare diagnostics dictionary for saving
+        diagnostics = {
+            "E_learned": E_learned.cpu().numpy(),
+            "V_learned": V_learned.cpu().numpy(),
+            "psi_learned": torch.stack(psi_learned).cpu().numpy(),
+            "pod_singular_values": S.cpu().numpy(),
+            "pod_modes": U.cpu().numpy(),
+            "overlap_learned": overlap_learned.cpu().numpy(),
+            "overlap_true": overlap_true.cpu().numpy(),
+        }
+
+        np.savez(run_artifacts_dir / "diagnostics.npz", **diagnostics)
+
         torch.save(model.state_dict(), run_artifacts_dir / "model.pt")
         (run_artifacts_dir / "config.json").write_text(
             json.dumps(hyperparams, indent=2, sort_keys=True),
+            encoding="utf-8",
+        )
+        (run_artifacts_dir / "history.json").write_text(
+            json.dumps(history, indent=2),
             encoding="utf-8",
         )
         (run_artifacts_dir / "run_id.txt").write_text(run_id, encoding="utf-8")
