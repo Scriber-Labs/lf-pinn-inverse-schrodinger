@@ -1,12 +1,12 @@
+# src/extract_metrics.py
 """
 extract_metrics.py
 
 Standalone script to extract POD and training analysis metrics from PIML artifact files.
 
-Usage as data view:
-    Automatically loads from default artifacts directory
+NO EXTERNAL DEPENDENCIES beyond: argparse, json, numpy, pandas, torch, pathlib
 
-Usage as CLI script:
+Usage:
     python extract_metrics.py --artifacts-dir /path/to/artifacts --output-dir /path/to/output
 
 This script reads:
@@ -32,9 +32,6 @@ import torch
 from pathlib import Path
 from typing import Tuple, Dict, Any
 import sys
-from logger import logger
-from utils.decorators.schedule import schedule
-
 
 # ============================================================================
 # POD UTILITIES (from src/pod.py)
@@ -66,13 +63,40 @@ def cross_overlap_matrix(psi_A: np.ndarray, psi_B: np.ndarray, dx: float) -> np.
 
 
 # ============================================================================
+# LOGGING UTILITIES (simple, no external deps)
+# ============================================================================
+
+class SimpleLogger:
+    """Minimal logger with emoji output."""
+
+    def __init__(self, verbose: bool = True):
+        self.verbose = verbose
+
+    def info(self, msg: str):
+        if self.verbose:
+            print(f"ℹ️  {msg}")
+
+    def success(self, msg: str):
+        if self.verbose:
+            print(f"✅ {msg}")
+
+    def warning(self, msg: str):
+        if self.verbose:
+            print(f"⚠️  {msg}")
+
+    def error(self, msg: str):
+        print(f"❌ {msg}", file=sys.stderr)
+
+
+# ============================================================================
 # METRIC EXTRACTION FUNCTIONS
 # ============================================================================
 
 def extract_pod_metrics(
-        config: Dict[str, Any],
-        diagnostics: Dict[str, np.ndarray],
-        ground_truth: Dict[str, torch.Tensor],
+    config: Dict[str, Any],
+    diagnostics: Dict[str, np.ndarray],
+    ground_truth: Dict[str, torch.Tensor],
+    logger: SimpleLogger,
 ) -> pd.DataFrame:
     """
     Extract POD analysis metrics and return as DataFrame.
@@ -97,85 +121,58 @@ def extract_pod_metrics(
     Vh_np = Vh.numpy()
 
     # POD shapes and statistics
-    data.append({"Category": "POD Decomposition", "Parameter": "Spatial Modes (U) Shape", "Value": str(U_np.shape),
-                 "Type": "array"})
-    data.append({"Category": "POD Decomposition", "Parameter": "Singular Values (S) Shape", "Value": str(S_np.shape),
-                 "Type": "array"})
-    data.append(
-        {"Category": "POD Decomposition", "Parameter": "Modal Coefficients (Vh) Shape", "Value": str(Vh_np.shape),
-         "Type": "array"})
+    data.append({"Category": "POD Decomposition", "Parameter": "Spatial Modes (U) Shape", "Value": str(U_np.shape), "Type": "array"})
+    data.append({"Category": "POD Decomposition", "Parameter": "Singular Values (S) Shape", "Value": str(S_np.shape), "Type": "array"})
+    data.append({"Category": "POD Decomposition", "Parameter": "Modal Coefficients (Vh) Shape", "Value": str(Vh_np.shape), "Type": "array"})
 
     # Singular value statistics
-    data.append(
-        {"Category": "POD Decomposition", "Parameter": "Total Energy (sum S²)", "Value": float(np.sum(S_np ** 2)),
-         "Type": "float"})
-    data.append({"Category": "POD Decomposition", "Parameter": "Max Singular Value", "Value": float(np.max(S_np)),
-                 "Type": "float"})
-    data.append({"Category": "POD Decomposition", "Parameter": "Min Singular Value", "Value": float(np.min(S_np)),
-                 "Type": "float"})
-    data.append({"Category": "POD Decomposition", "Parameter": "Mean Singular Value", "Value": float(np.mean(S_np)),
-                 "Type": "float"})
-    data.append({"Category": "POD Decomposition", "Parameter": "Std Singular Value", "Value": float(np.std(S_np)),
-                 "Type": "float"})
+    data.append({"Category": "POD Decomposition", "Parameter": "Total Energy (sum S²)", "Value": float(np.sum(S_np**2)), "Type": "float"})
+    data.append({"Category": "POD Decomposition", "Parameter": "Max Singular Value", "Value": float(np.max(S_np)), "Type": "float"})
+    data.append({"Category": "POD Decomposition", "Parameter": "Min Singular Value", "Value": float(np.min(S_np)), "Type": "float"})
+    data.append({"Category": "POD Decomposition", "Parameter": "Mean Singular Value", "Value": float(np.mean(S_np)), "Type": "float"})
+    data.append({"Category": "POD Decomposition", "Parameter": "Std Singular Value", "Value": float(np.std(S_np)), "Type": "float"})
 
     # Energy distribution
-    total_energy = np.sum(S_np ** 2)
+    total_energy = np.sum(S_np**2)
     for i in range(len(S_np)):
-        cumsum_energy = np.sum(S_np[:i + 1] ** 2) / total_energy * 100
-        data.append({"Category": "POD Decomposition", "Parameter": f"Cumulative Energy (First {i + 1} Mode(s))",
-                     "Value": f"{cumsum_energy:.2f}%", "Type": "percentage"})
-        data.append(
-            {"Category": "POD Decomposition", "Parameter": f"σ_{i + 1}", "Value": float(S_np[i]), "Type": "float"})
+        cumsum_energy = np.sum(S_np[:i+1]**2) / total_energy * 100
+        data.append({"Category": "POD Decomposition", "Parameter": f"Cumulative Energy (First {i+1} Mode(s))", "Value": f"{cumsum_energy:.2f}%", "Type": "percentage"})
+        data.append({"Category": "POD Decomposition", "Parameter": f"σ_{i+1}", "Value": float(S_np[i]), "Type": "float"})
 
     # ===== ORTHONORMALITY CHECK =====
     ortho_check = U_np.T @ U_np
     ortho_error = np.sum(np.abs(ortho_check - np.eye(U_np.shape[1])))
-    data.append(
-        {"Category": "POD Orthonormality", "Parameter": "U^T U Orthonormality Error", "Value": float(ortho_error),
-         "Type": "float"})
+    data.append({"Category": "POD Orthonormality", "Parameter": "U^T U Orthonormality Error", "Value": float(ortho_error), "Type": "float"})
 
     # ===== MODE OVERLAP MATRIX =====
     overlap_learned = mode_overlap_matrix(psi_learned, dx)
-    data.append(
-        {"Category": "Mode Overlap", "Parameter": "Learned Overlap Matrix Shape", "Value": str(overlap_learned.shape),
-         "Type": "array"})
+    data.append({"Category": "Mode Overlap", "Parameter": "Learned Overlap Matrix Shape", "Value": str(overlap_learned.shape), "Type": "array"})
 
     overlap_error = np.sum(np.abs(overlap_learned - np.eye(overlap_learned.shape[0])))
-    data.append({"Category": "Mode Overlap", "Parameter": "Learned Orthonormality Error (Overlap)",
-                 "Value": float(overlap_error), "Type": "float"})
+    data.append({"Category": "Mode Overlap", "Parameter": "Learned Orthonormality Error (Overlap)", "Value": float(overlap_error), "Type": "float"})
 
     # Diagonal and off-diagonal statistics
     diag_vals = np.diag(overlap_learned)
     off_diag_vals = overlap_learned[np.triu_indices_from(overlap_learned, k=1)]
 
-    data.append(
-        {"Category": "Mode Overlap", "Parameter": "Diagonal Mean (should be ~1)", "Value": float(np.mean(diag_vals)),
-         "Type": "float"})
-    data.append(
-        {"Category": "Mode Overlap", "Parameter": "Diagonal Std", "Value": float(np.std(diag_vals)), "Type": "float"})
-    data.append({"Category": "Mode Overlap", "Parameter": "Off-Diagonal Mean (should be ~0)",
-                 "Value": float(np.mean(off_diag_vals)), "Type": "float"})
-    data.append(
-        {"Category": "Mode Overlap", "Parameter": "Off-Diagonal Max Abs", "Value": float(np.max(np.abs(off_diag_vals))),
-         "Type": "float"})
+    data.append({"Category": "Mode Overlap", "Parameter": "Diagonal Mean (should be ~1)", "Value": float(np.mean(diag_vals)), "Type": "float"})
+    data.append({"Category": "Mode Overlap", "Parameter": "Diagonal Std", "Value": float(np.std(diag_vals)), "Type": "float"})
+    data.append({"Category": "Mode Overlap", "Parameter": "Off-Diagonal Mean (should be ~0)", "Value": float(np.mean(off_diag_vals)), "Type": "float"})
+    data.append({"Category": "Mode Overlap", "Parameter": "Off-Diagonal Max Abs", "Value": float(np.max(np.abs(off_diag_vals))), "Type": "float"})
 
     # ===== CROSS OVERLAP =====
     cross_overlap = cross_overlap_matrix(U_np, psi_learned, dx)
-    data.append({"Category": "Cross Overlap", "Parameter": "POD Modes vs Learned Wavefunctions Shape",
-                 "Value": str(cross_overlap.shape), "Type": "array"})
+    data.append({"Category": "Cross Overlap", "Parameter": "POD Modes vs Learned Wavefunctions Shape", "Value": str(cross_overlap.shape), "Type": "array"})
 
     cross_overlap_abs = np.abs(cross_overlap)
-    data.append({"Category": "Cross Overlap", "Parameter": "Max Absolute Cross Overlap",
-                 "Value": float(np.max(cross_overlap_abs)), "Type": "float"})
-    data.append({"Category": "Cross Overlap", "Parameter": "Mean Absolute Cross Overlap",
-                 "Value": float(np.mean(cross_overlap_abs)), "Type": "float"})
+    data.append({"Category": "Cross Overlap", "Parameter": "Max Absolute Cross Overlap", "Value": float(np.max(cross_overlap_abs)), "Type": "float"})
+    data.append({"Category": "Cross Overlap", "Parameter": "Mean Absolute Cross Overlap", "Value": float(np.mean(cross_overlap_abs)), "Type": "float"})
 
     # Dominant alignments
     for i in range(cross_overlap.shape[0]):
         max_idx = np.argmax(np.abs(cross_overlap[i, :]))
         max_val = cross_overlap[i, max_idx]
-        data.append({"Category": "Cross Overlap", "Parameter": f"POD Mode {i} Best Alignment",
-                     "Value": f"ψ_learned[{max_idx}] = {max_val:.4f}", "Type": "str"})
+        data.append({"Category": "Cross Overlap", "Parameter": f"POD Mode {i} Best Alignment", "Value": f"ψ_learned[{max_idx}] = {max_val:.4f}", "Type": "str"})
 
     # ===== GROUND TRUTH COMPARISON =====
     psi_true = ground_truth["psi_true"]
@@ -185,68 +182,53 @@ def extract_pod_metrics(
         psi_true = np.array(psi_true)
 
     overlap_true_learned = cross_overlap_matrix(psi_true, psi_learned, dx)
-    data.append({"Category": "Ground Truth Comparison", "Parameter": "True vs Learned Overlap Shape",
-                 "Value": str(overlap_true_learned.shape), "Type": "array"})
+    data.append({"Category": "Ground Truth Comparison", "Parameter": "True vs Learned Overlap Shape", "Value": str(overlap_true_learned.shape), "Type": "array"})
 
     overlap_true_learned_abs = np.abs(overlap_true_learned)
-    data.append({"Category": "Ground Truth Comparison", "Parameter": "Max True-Learned Overlap",
-                 "Value": float(np.max(overlap_true_learned_abs)), "Type": "float"})
-    data.append({"Category": "Ground Truth Comparison", "Parameter": "Mean True-Learned Overlap",
-                 "Value": float(np.mean(overlap_true_learned_abs)), "Type": "float"})
+    data.append({"Category": "Ground Truth Comparison", "Parameter": "Max True-Learned Overlap", "Value": float(np.max(overlap_true_learned_abs)), "Type": "float"})
+    data.append({"Category": "Ground Truth Comparison", "Parameter": "Mean True-Learned Overlap", "Value": float(np.mean(overlap_true_learned_abs)), "Type": "float"})
 
     for i in range(overlap_true_learned.shape[0]):
         max_idx = np.argmax(np.abs(overlap_true_learned[i, :]))
         max_val = overlap_true_learned[i, max_idx]
-        data.append({"Category": "Ground Truth Comparison", "Parameter": f"ψ_true[{i}] Best Match",
-                     "Value": f"ψ_learned[{max_idx}] = {max_val:.4f}", "Type": "str"})
+        data.append({"Category": "Ground Truth Comparison", "Parameter": f"ψ_true[{i}] Best Match", "Value": f"ψ_learned[{max_idx}] = {max_val:.4f}", "Type": "str"})
 
     # ===== FAILURE MODE INDICATORS =====
     sv_ratio = S_np[0] / S_np[-1] if len(S_np) > 1 else 1.0
-    data.append({"Category": "Failure Modes", "Parameter": "Singular Value Ratio (σ_1/σ_n)", "Value": float(sv_ratio),
-                 "Type": "float"})
+    data.append({"Category": "Failure Modes", "Parameter": "Singular Value Ratio (σ_1/σ_n)", "Value": float(sv_ratio), "Type": "float"})
 
     if sv_ratio > 10:
-        data.append({"Category": "Failure Modes", "Parameter": "Mode Collapse Risk", "Value": "HIGH (ratio > 10)",
-                     "Type": "str"})
+        data.append({"Category": "Failure Modes", "Parameter": "Mode Collapse Risk", "Value": "HIGH (ratio > 10)", "Type": "str"})
     elif sv_ratio > 3:
-        data.append({"Category": "Failure Modes", "Parameter": "Mode Collapse Risk", "Value": "MODERATE (ratio 3-10)",
-                     "Type": "str"})
+        data.append({"Category": "Failure Modes", "Parameter": "Mode Collapse Risk", "Value": "MODERATE (ratio 3-10)", "Type": "str"})
     else:
-        data.append(
-            {"Category": "Failure Modes", "Parameter": "Mode Collapse Risk", "Value": "LOW (ratio < 3)", "Type": "str"})
+        data.append({"Category": "Failure Modes", "Parameter": "Mode Collapse Risk", "Value": "LOW (ratio < 3)", "Type": "str"})
 
     if overlap_error > 0.5:
-        data.append(
-            {"Category": "Failure Modes", "Parameter": "Orthonormality Violation", "Value": "SEVERE", "Type": "str"})
+        data.append({"Category": "Failure Modes", "Parameter": "Orthonormality Violation", "Value": "SEVERE", "Type": "str"})
     elif overlap_error > 0.1:
-        data.append(
-            {"Category": "Failure Modes", "Parameter": "Orthonormality Violation", "Value": "MODERATE", "Type": "str"})
+        data.append({"Category": "Failure Modes", "Parameter": "Orthonormality Violation", "Value": "MODERATE", "Type": "str"})
     else:
-        data.append(
-            {"Category": "Failure Modes", "Parameter": "Orthonormality Violation", "Value": "MINIMAL", "Type": "str"})
+        data.append({"Category": "Failure Modes", "Parameter": "Orthonormality Violation", "Value": "MINIMAL", "Type": "str"})
 
     max_cross = np.max(cross_overlap_abs)
     if max_cross < 0.7:
-        data.append(
-            {"Category": "Failure Modes", "Parameter": "Mode Mixing Risk", "Value": "HIGH (max cross-overlap < 0.7)",
-             "Type": "str"})
+        data.append({"Category": "Failure Modes", "Parameter": "Mode Mixing Risk", "Value": "HIGH (max cross-overlap < 0.7)", "Type": "str"})
     elif max_cross < 0.9:
-        data.append({"Category": "Failure Modes", "Parameter": "Mode Mixing Risk",
-                     "Value": "MODERATE (max cross-overlap 0.7-0.9)", "Type": "str"})
+        data.append({"Category": "Failure Modes", "Parameter": "Mode Mixing Risk", "Value": "MODERATE (max cross-overlap 0.7-0.9)", "Type": "str"})
     else:
-        data.append(
-            {"Category": "Failure Modes", "Parameter": "Mode Mixing Risk", "Value": "LOW (max cross-overlap > 0.9)",
-             "Type": "str"})
+        data.append({"Category": "Failure Modes", "Parameter": "Mode Mixing Risk", "Value": "LOW (max cross-overlap > 0.9)", "Type": "str"})
 
     return pd.DataFrame(data)
 
 
 def extract_training_analysis(
-        config: Dict[str, Any],
-        diagnostics: Dict[str, np.ndarray],
-        ground_truth: Dict[str, torch.Tensor],
-        history: list,
-        model_state: Dict[str, torch.Tensor] = None,
+    config: Dict[str, Any],
+    diagnostics: Dict[str, np.ndarray],
+    ground_truth: Dict[str, torch.Tensor],
+    history: list,
+    model_state: Dict[str, torch.Tensor] = None,
+    logger: SimpleLogger = None,
 ) -> pd.DataFrame:
     """
     Extract training and analysis metrics and return as DataFrame.
@@ -258,25 +240,17 @@ def extract_training_analysis(
     data.append({"Category": "Metadata", "Parameter": "Random Seed", "Value": config.get("seed"), "Type": "int"})
 
     # ===== TRAINING HYPERPARAMETERS =====
-    data.append({"Category": "Training Hyperparameters", "Parameter": "Learning Rate", "Value": config.get("lr"),
-                 "Type": "float"})
-    data.append(
-        {"Category": "Training Hyperparameters", "Parameter": "Epochs", "Value": config.get("epochs"), "Type": "int"})
-    data.append(
-        {"Category": "Training Hyperparameters", "Parameter": "Log Every N Epochs", "Value": config.get("log_every"),
-         "Type": "int"})
+    data.append({"Category": "Training Hyperparameters", "Parameter": "Learning Rate", "Value": config.get("lr"), "Type": "float"})
+    data.append({"Category": "Training Hyperparameters", "Parameter": "Epochs", "Value": config.get("epochs"), "Type": "int"})
+    data.append({"Category": "Training Hyperparameters", "Parameter": "Log Every N Epochs", "Value": config.get("log_every"), "Type": "int"})
 
     # ===== MODEL ARCHITECTURE =====
-    data.append({"Category": "Model Architecture", "Parameter": "Number of Modes", "Value": config.get("n_modes"),
-                 "Type": "int"})
-    data.append({"Category": "Model Architecture", "Parameter": "Hidden Layer Size", "Value": config.get("hidden"),
-                 "Type": "int"})
+    data.append({"Category": "Model Architecture", "Parameter": "Number of Modes", "Value": config.get("n_modes"), "Type": "int"})
+    data.append({"Category": "Model Architecture", "Parameter": "Hidden Layer Size", "Value": config.get("hidden"), "Type": "int"})
 
     # ===== NUMERICAL GRID =====
-    data.append(
-        {"Category": "Numerical Grid", "Parameter": "Grid Points", "Value": config.get("n_points"), "Type": "int"})
-    data.append(
-        {"Category": "Numerical Grid", "Parameter": "Grid Spacing (dx)", "Value": config.get("dx"), "Type": "float"})
+    data.append({"Category": "Numerical Grid", "Parameter": "Grid Points", "Value": config.get("n_points"), "Type": "int"})
+    data.append({"Category": "Numerical Grid", "Parameter": "Grid Spacing (dx)", "Value": config.get("dx"), "Type": "float"})
 
     # ===== LOSS WEIGHTS =====
     lambdas = config.get("lambdas", {})
@@ -299,20 +273,16 @@ def extract_training_analysis(
     elif isinstance(V_true, list):
         V_true = np.array(V_true)
     data.append({"Category": "Ground Truth", "Parameter": "V_true Shape", "Value": str(V_true.shape), "Type": "array"})
-    data.append(
-        {"Category": "Ground Truth", "Parameter": "V_true Min", "Value": float(np.min(V_true)), "Type": "float"})
-    data.append(
-        {"Category": "Ground Truth", "Parameter": "V_true Max", "Value": float(np.max(V_true)), "Type": "float"})
-    data.append(
-        {"Category": "Ground Truth", "Parameter": "V_true Mean", "Value": float(np.mean(V_true)), "Type": "float"})
+    data.append({"Category": "Ground Truth", "Parameter": "V_true Min", "Value": float(np.min(V_true)), "Type": "float"})
+    data.append({"Category": "Ground Truth", "Parameter": "V_true Max", "Value": float(np.max(V_true)), "Type": "float"})
+    data.append({"Category": "Ground Truth", "Parameter": "V_true Mean", "Value": float(np.mean(V_true)), "Type": "float"})
 
     psi_true = ground_truth["psi_true"]
     if isinstance(psi_true, torch.Tensor):
         psi_true = psi_true.numpy()
     elif isinstance(psi_true, list):
         psi_true = np.array(psi_true)
-    data.append(
-        {"Category": "Ground Truth", "Parameter": "ψ_true Shape", "Value": str(psi_true.shape), "Type": "array"})
+    data.append({"Category": "Ground Truth", "Parameter": "ψ_true Shape", "Value": str(psi_true.shape), "Type": "array"})
 
     E_true = ground_truth["E_true"]
     if isinstance(E_true, torch.Tensor):
@@ -327,108 +297,83 @@ def extract_training_analysis(
     E_learned = diagnostics["E_learned"]
     if isinstance(E_learned, list):
         E_learned = np.array(E_learned)
-    data.append(
-        {"Category": "Learned Outputs", "Parameter": "E_learned Shape", "Value": str(E_learned.shape), "Type": "array"})
+    data.append({"Category": "Learned Outputs", "Parameter": "E_learned Shape", "Value": str(E_learned.shape), "Type": "array"})
     for i, E in enumerate(E_learned):
         data.append({"Category": "Learned Outputs", "Parameter": f"E_learned[{i}]", "Value": float(E), "Type": "float"})
 
     V_learned = diagnostics["V_learned"]
     if isinstance(V_learned, list):
         V_learned = np.array(V_learned)
-    data.append(
-        {"Category": "Learned Outputs", "Parameter": "V_learned Shape", "Value": str(V_learned.shape), "Type": "array"})
-    data.append({"Category": "Learned Outputs", "Parameter": "V_learned Min", "Value": float(np.min(V_learned)),
-                 "Type": "float"})
-    data.append({"Category": "Learned Outputs", "Parameter": "V_learned Max", "Value": float(np.max(V_learned)),
-                 "Type": "float"})
-    data.append({"Category": "Learned Outputs", "Parameter": "V_learned Mean", "Value": float(np.mean(V_learned)),
-                 "Type": "float"})
+    data.append({"Category": "Learned Outputs", "Parameter": "V_learned Shape", "Value": str(V_learned.shape), "Type": "array"})
+    data.append({"Category": "Learned Outputs", "Parameter": "V_learned Min", "Value": float(np.min(V_learned)), "Type": "float"})
+    data.append({"Category": "Learned Outputs", "Parameter": "V_learned Max", "Value": float(np.max(V_learned)), "Type": "float"})
+    data.append({"Category": "Learned Outputs", "Parameter": "V_learned Mean", "Value": float(np.mean(V_learned)), "Type": "float"})
 
     psi_learned = diagnostics["psi_learned"]
     if isinstance(psi_learned, list):
         psi_learned = np.array(psi_learned)
-    data.append({"Category": "Learned Outputs", "Parameter": "ψ_learned Shape", "Value": str(psi_learned.shape),
-                 "Type": "array"})
+    data.append({"Category": "Learned Outputs", "Parameter": "ψ_learned Shape", "Value": str(psi_learned.shape), "Type": "array"})
 
     # ===== ERROR METRICS =====
     abs_errors = np.abs(E_learned - E_true)
     rel_errors = np.abs(E_learned - E_true) / np.abs(E_true) * 100
 
-    data.append({"Category": "Error Metrics", "Parameter": "Energy Errors (Absolute)",
-                 "Value": str([f"{e:.6f}" for e in abs_errors]), "Type": "array"})
-    data.append({"Category": "Error Metrics", "Parameter": "Energy Errors (Relative %)",
-                 "Value": str([f"{e:.4f}%" for e in rel_errors]), "Type": "array"})
-    data.append(
-        {"Category": "Error Metrics", "Parameter": "Mean Absolute Energy Error", "Value": float(np.mean(abs_errors)),
-         "Type": "float"})
+    data.append({"Category": "Error Metrics", "Parameter": "Energy Errors (Absolute)", "Value": str([f"{e:.6f}" for e in abs_errors]), "Type": "array"})
+    data.append({"Category": "Error Metrics", "Parameter": "Energy Errors (Relative %)", "Value": str([f"{e:.4f}%" for e in rel_errors]), "Type": "array"})
+    data.append({"Category": "Error Metrics", "Parameter": "Mean Absolute Energy Error", "Value": float(np.mean(abs_errors)), "Type": "float"})
 
-    mse_V = float(np.mean((V_learned - V_true) ** 2))
+    mse_V = float(np.mean((V_learned - V_true)**2))
     mae_V = float(np.mean(np.abs(V_learned - V_true)))
     data.append({"Category": "Error Metrics", "Parameter": "Potential MSE", "Value": mse_V, "Type": "float"})
     data.append({"Category": "Error Metrics", "Parameter": "Potential MAE", "Value": mae_V, "Type": "float"})
 
     # ===== TRAINING HISTORY =====
     history_df = pd.DataFrame(history)
-    data.append(
-        {"Category": "Training History", "Parameter": "Total Epochs Logged", "Value": len(history_df), "Type": "int"})
+    data.append({"Category": "Training History", "Parameter": "Total Epochs Logged", "Value": len(history_df), "Type": "int"})
 
     # Loss statistics at different training stages
-    for stage_name, stage_epochs in [("Early (0-10%)", slice(0, int(len(history_df) * 0.1))),
-                                     ("Mid (40-50%)", slice(int(len(history_df) * 0.4), int(len(history_df) * 0.5))),
-                                     ("Late (90-100%)", slice(int(len(history_df) * 0.9), len(history_df)))]:
+    for stage_name, stage_epochs in [("Early (0-10%)", slice(0, int(len(history_df)*0.1))),
+                                      ("Mid (40-50%)", slice(int(len(history_df)*0.4), int(len(history_df)*0.5))),
+                                      ("Late (90-100%)", slice(int(len(history_df)*0.9), len(history_df)))]:
         stage_data = history_df.iloc[stage_epochs]
 
         if "total_loss" in stage_data.columns:
-            data.append({"Category": "Training History", "Parameter": f"Total Loss {stage_name} (Mean)",
-                         "Value": float(stage_data["total_loss"].mean()), "Type": "float"})
+            data.append({"Category": "Training History", "Parameter": f"Total Loss {stage_name} (Mean)", "Value": float(stage_data["total_loss"].mean()), "Type": "float"})
         if "physics_loss" in stage_data.columns:
-            data.append({"Category": "Training History", "Parameter": f"Physics Loss {stage_name} (Mean)",
-                         "Value": float(stage_data["physics_loss"].mean()), "Type": "float"})
+            data.append({"Category": "Training History", "Parameter": f"Physics Loss {stage_name} (Mean)", "Value": float(stage_data["physics_loss"].mean()), "Type": "float"})
         if "data_loss" in stage_data.columns:
-            data.append({"Category": "Training History", "Parameter": f"Data Loss {stage_name} (Mean)",
-                         "Value": float(stage_data["data_loss"].mean()), "Type": "float"})
+            data.append({"Category": "Training History", "Parameter": f"Data Loss {stage_name} (Mean)", "Value": float(stage_data["data_loss"].mean()), "Type": "float"})
         if "smooth_loss" in stage_data.columns:
-            data.append({"Category": "Training History", "Parameter": f"Smoothness Loss {stage_name} (Mean)",
-                         "Value": float(stage_data["smooth_loss"].mean()), "Type": "float"})
+            data.append({"Category": "Training History", "Parameter": f"Smoothness Loss {stage_name} (Mean)", "Value": float(stage_data["smooth_loss"].mean()), "Type": "float"})
 
     # Final loss values
     final_epoch = history_df.iloc[-1]
-    data.append({"Category": "Training History", "Parameter": "Final Total Loss",
-                 "Value": float(final_epoch.get("total_loss", np.nan)), "Type": "float"})
-    data.append({"Category": "Training History", "Parameter": "Final Physics Loss",
-                 "Value": float(final_epoch.get("physics_loss", np.nan)), "Type": "float"})
-    data.append({"Category": "Training History", "Parameter": "Final Data Loss",
-                 "Value": float(final_epoch.get("data_loss", np.nan)), "Type": "float"})
-    data.append({"Category": "Training History", "Parameter": "Final Smoothness Loss",
-                 "Value": float(final_epoch.get("smooth_loss", np.nan)), "Type": "float"})
+    data.append({"Category": "Training History", "Parameter": "Final Total Loss", "Value": float(final_epoch.get("total_loss", np.nan)), "Type": "float"})
+    data.append({"Category": "Training History", "Parameter": "Final Physics Loss", "Value": float(final_epoch.get("physics_loss", np.nan)), "Type": "float"})
+    data.append({"Category": "Training History", "Parameter": "Final Data Loss", "Value": float(final_epoch.get("data_loss", np.nan)), "Type": "float"})
+    data.append({"Category": "Training History", "Parameter": "Final Smoothness Loss", "Value": float(final_epoch.get("smooth_loss", np.nan)), "Type": "float"})
 
     # Loss reduction
     if "total_loss" in history_df.columns:
         initial_loss = history_df["total_loss"].iloc[0]
         final_loss = history_df["total_loss"].iloc[-1]
         reduction = (initial_loss - final_loss) / initial_loss * 100
-        data.append({"Category": "Training History", "Parameter": "Total Loss Reduction (%)", "Value": float(reduction),
-                     "Type": "float"})
+        data.append({"Category": "Training History", "Parameter": "Total Loss Reduction (%)", "Value": float(reduction), "Type": "float"})
 
     # ===== MODEL PARAMETERS (optional) =====
     if model_state is not None:
-        data.append({"Category": "Model Parameters", "Parameter": "Total Parameter Tensors", "Value": len(model_state),
-                     "Type": "int"})
+        data.append({"Category": "Model Parameters", "Parameter": "Total Parameter Tensors", "Value": len(model_state), "Type": "int"})
 
         total_params = 0
         for param_name, param_tensor in model_state.items():
             if isinstance(param_tensor, torch.Tensor):
                 param_size = param_tensor.numel()
                 total_params += param_size
-                data.append({"Category": "Model Parameters", "Parameter": f"{param_name} Shape",
-                             "Value": str(tuple(param_tensor.shape)), "Type": "array"})
-                data.append({"Category": "Model Parameters", "Parameter": f"{param_name} Count", "Value": param_size,
-                             "Type": "int"})
-                data.append({"Category": "Model Parameters", "Parameter": f"{param_name} Mean",
-                             "Value": float(param_tensor.mean()), "Type": "float"})
+                data.append({"Category": "Model Parameters", "Parameter": f"{param_name} Shape", "Value": str(tuple(param_tensor.shape)), "Type": "array"})
+                data.append({"Category": "Model Parameters", "Parameter": f"{param_name} Count", "Value": param_size, "Type": "int"})
+                data.append({"Category": "Model Parameters", "Parameter": f"{param_name} Mean", "Value": float(param_tensor.mean()), "Type": "float"})
 
-        data.append(
-            {"Category": "Model Parameters", "Parameter": "Total Parameters", "Value": total_params, "Type": "int"})
+        data.append({"Category": "Model Parameters", "Parameter": "Total Parameters", "Value": total_params, "Type": "int"})
 
     return pd.DataFrame(data)
 
@@ -438,9 +383,9 @@ def extract_training_analysis(
 # ============================================================================
 
 def extract_all_metrics(
-        artifacts_dir: str,
-        output_dir: str = None,
-        verbose: bool = True,
+    artifacts_dir: str,
+    output_dir: str = None,
+    verbose: bool = True,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Load all artifacts from a directory and extract metrics.
@@ -461,6 +406,8 @@ def extract_all_metrics(
     training_df : pd.DataFrame
         Training analysis metrics.
     """
+    logger = SimpleLogger(verbose=verbose)
+
     artifacts_dir = Path(artifacts_dir)
     if output_dir is None:
         output_dir = artifacts_dir
@@ -469,8 +416,7 @@ def extract_all_metrics(
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    if verbose:
-        logger.info(f"Loading artifacts from: {artifacts_dir}")
+    logger.info(f"Loading artifacts from: {artifacts_dir}")
 
     # Load config
     config_path = artifacts_dir / "config.json"
@@ -503,10 +449,10 @@ def extract_all_metrics(
 
     # Extract metrics
     logger.info(f"Extracting POD metrics...")
-    pod_df = extract_pod_metrics(config, diagnostics, ground_truth)
+    pod_df = extract_pod_metrics(config, diagnostics, ground_truth, logger)
 
     logger.info(f"Extracting training analysis metrics...")
-    training_df = extract_training_analysis(config, diagnostics, ground_truth, history, model_state)
+    training_df = extract_training_analysis(config, diagnostics, ground_truth, history, model_state, logger)
 
     # Save to CSV
     pod_csv = output_dir / "pod_metrics.csv"
@@ -515,50 +461,11 @@ def extract_all_metrics(
     pod_df.to_csv(pod_csv, index=False)
     training_df.to_csv(training_csv, index=False)
 
-    logger.info(f"Extraction complete!")
+    logger.success(f"Extraction complete!")
     logger.info(f"POD metrics: {pod_csv} ({len(pod_df)} rows)")
     logger.info(f"Training analysis: {training_csv} ({len(training_df)} rows)")
 
     return pod_df, training_df
-
-
-# ============================================================================
-# DATA VIEW FUNCTION (required for data view artifact)
-# ============================================================================
-
-@schedule()
-def get_data() -> pd.DataFrame:
-    """
-    Load and extract metrics from artifacts.
-
-    This function is designed to work as a data view artifact.
-    For CLI usage, see main() function below.
-    """
-    try:
-        # Try to load from default artifacts directory
-        artifacts_dir = Path("./artifacts")
-
-        if not artifacts_dir.exists():
-            logger.warning(f"Default artifacts directory not found: {artifacts_dir}")
-            logger.info("For CLI usage: python extract_metrics.py --artifacts-dir /path/to/artifacts")
-            # Return empty dataframe with schema
-            return pd.DataFrame({"Status": ["No artifacts found. Use CLI mode."]})
-
-        logger.info(f"Loading artifacts from: {artifacts_dir}")
-
-        # Extract metrics
-        pod_df, training_df = extract_all_metrics(
-            artifacts_dir=str(artifacts_dir),
-            output_dir=str(artifacts_dir),
-            verbose=True,
-        )
-
-        # Combine for data view (return training analysis as primary)
-        return training_df
-
-    except Exception as e:
-        logger.error(f"Error in get_data(): {str(e)}")
-        raise
 
 
 # ============================================================================
@@ -574,6 +481,7 @@ def main():
 Examples:
   python extract_metrics.py --artifacts-dir ./artifacts
   python extract_metrics.py --artifacts-dir ./run_001 --output-dir ./metrics
+  python extract_metrics.py --artifacts-dir ./artifacts --quiet
         """
     )
 
@@ -606,7 +514,10 @@ Examples:
             verbose=not args.quiet,
         )
     except Exception as e:
-        logger.error(f"Error: {str(e)}")
+        logger = SimpleLogger(verbose=True)
+        logger.error(f"{str(e)}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 
 

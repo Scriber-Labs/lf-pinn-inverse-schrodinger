@@ -1,0 +1,135 @@
+Category,Parameter,Value,Type
+Metadata,Device,cpu,str
+Metadata,Random Seed,27,int
+Training Hyperparameters,Learning Rate,0.005,float
+Training Hyperparameters,Epochs,6000,int
+Training Hyperparameters,Log Every N Epochs,800,int
+Model Architecture,Number of Modes,3,int
+Model Architecture,Hidden Layer Size,64,int
+Numerical Grid,Grid Points,256,int
+Numerical Grid,Grid Spacing (dx),0.039215686274509665,float
+Loss Weights,λ_data,1.5,float
+Loss Weights,λ_ordered,1.0,float
+Loss Weights,λ_physics,0.5,float
+Loss Weights,λ_smooth,0.25,float
+Ground Truth,Spatial Grid Shape,"(256, 1)",array
+Ground Truth,Domain Min,-5.0,float
+Ground Truth,Domain Max,5.0,float
+Ground Truth,V_true Shape,"(256,)",array
+Ground Truth,V_true Min,0.00019223375624759844,float
+Ground Truth,V_true Max,12.5,float
+Ground Truth,V_true Mean,4.1993464052287575,float
+Ground Truth,ψ_true Shape,"(3, 256)",array
+Ground Truth,E_true Shape,"(3,)",array
+Ground Truth,E_true[0],0.5,float
+Ground Truth,E_true[1],1.5,float
+Ground Truth,E_true[2],2.5,float
+Learned Outputs,E_learned Shape,"(3,)",array
+Learned Outputs,E_learned[0],0.38859476627356865,float
+Learned Outputs,E_learned[1],1.5332161749297424,float
+Learned Outputs,E_learned[2],2.425761008635356,float
+Learned Outputs,V_learned Shape,"(256,)",array
+Learned Outputs,V_learned Min,-8.666268882268252,float
+Learned Outputs,V_learned Max,9.007443190595513,float
+Learned Outputs,V_learned Mean,-0.09942781579851845,float
+Learned Outputs,ψ_learned Shape,"(3, 256)",array
+Error Metrics,Energy Errors (Absolute),"['0.111405', '0.033216', '0.074239']",array
+Error Metrics,Energy Errors (Relative %),"['22.2810%', '2.2144%', '2.9696%']",array
+Error Metrics,Mean Absolute Energy Error,0.0729534666736059,float
+Error Metrics,Potential MSE,92.59045064392006,float
+Error Metrics,Potential MAE,7.920062389775542,float
+Training History,Total Epochs Logged,6000,int
+Training History,Total Loss Early (0-10%) (Mean),3.9928134431546005,float
+Training History,Physics Loss Early (0-10%) (Mean),0.800594913198401,float
+Training History,Data Loss Early (0-10%) (Mean),2.264600944308034,float
+Training History,Smoothness Loss Early (0-10%) (Mean),0.7824582803733958,float
+Training History,Total Loss Mid (40-50%) (Mean),7.141095965179132,float
+Training History,Physics Loss Mid (40-50%) (Mean),6.7135882176446575,float
+Training History,Data Loss Mid (40-50%) (Mean),0.005905138483677949,float
+Training History,Smoothness Loss Mid (40-50%) (Mean),15.101776594525145,float
+Training History,Total Loss Late (90-100%) (Mean),4.317712634140928,float
+Training History,Physics Loss Late (90-100%) (Mean),6.278642179220508,float
+Training History,Data Loss Late (90-100%) (Mean),0.0053420571651666,float
+Training History,Smoothness Loss Late (90-100%) (Mean),4.6815138351317,float
+Training History,Final Total Loss,4.145995971332616,float
+Training History,Final Physics Loss,6.207910723513389,float
+Training History,Final Data Loss,0.0052191818746047,float
+Training History,Final Smoothness Loss,4.13684734705606,float
+Training History,Total Loss Reduction (%),91.47218565832567,float
+Model Parameters,Total Parameter Tensors,25,int
+Model Parameters,energies Shape,"(3,)",array
+Model Parameters,energies Count,3,int
+Model Parameters,energies Mean,1.4491906499462222,float
+Model Parameters,potential_net.net.0.weight Shape,"(64, 1)",array
+Model Parameters,potential_net.net.0.weight Count,64,int
+Model Parameters,potential_net.net.0.weight Mean,-0.08725492936718808,float
+Model Parameters,potential_net.net.0.bias Shape,"(64,)",array
+Model Parameters,potential_net.net.0.bias Count,64,int
+Model Parameters,potential_net.net.0.bias Mean,-0.05554307621089963,float
+Model Parameters,potential_net.net.2.weight Shape,"(64, 64)",array
+Model Parameters,potential_net.net.2.weight Count,4096,int
+Model Parameters,potential_net.net.2.weight Mean,-0.006716638402355621,float
+Model Parameters,potential_net.net.2.bias Shape,"(64,)",array
+Model Parameters,potential_net.net.2.bias Count,64,int
+Model Parameters,potential_net.net.2.bias Mean,-0.03659246859931628,float
+Model Parameters,potential_net.net.4.weight Shape,"(1, 64)",array
+Model Parameters,potential_net.net.4.weight Count,64,int
+Model Parameters,potential_net.net.4.weight Mean,0.06018028385486213,float
+Model Parameters,potential_net.net.4.bias Shape,"(1,)",array
+Model Parameters,potential_net.net.4.bias Count,1,int
+Model Parameters,potential_net.net.4.bias Mean,-0.043132231247066014,float
+Model Parameters,psi_nets.0.base_net.net.0.weight Shape,"(64, 1)",array
+Model Parameters,psi_nets.0.base_net.net.0.weight Count,64,int
+Model Parameters,psi_nets.0.base_net.net.0.weight Mean,0.07906867964824156,float
+Model Parameters,psi_nets.0.base_net.net.0.bias Shape,"(64,)",array
+Model Parameters,psi_nets.0.base_net.net.0.bias Count,64,int
+Model Parameters,psi_nets.0.base_net.net.0.bias Mean,-0.028616400017028396,float
+Model Parameters,psi_nets.0.base_net.net.2.weight Shape,"(64, 64)",array
+Model Parameters,psi_nets.0.base_net.net.2.weight Count,4096,int
+Model Parameters,psi_nets.0.base_net.net.2.weight Mean,-0.002374971967416701,float
+Model Parameters,psi_nets.0.base_net.net.2.bias Shape,"(64,)",array
+Model Parameters,psi_nets.0.base_net.net.2.bias Count,64,int
+Model Parameters,psi_nets.0.base_net.net.2.bias Mean,0.003464474289968423,float
+Model Parameters,psi_nets.0.base_net.net.4.weight Shape,"(1, 64)",array
+Model Parameters,psi_nets.0.base_net.net.4.weight Count,64,int
+Model Parameters,psi_nets.0.base_net.net.4.weight Mean,-0.02594180702402764,float
+Model Parameters,psi_nets.0.base_net.net.4.bias Shape,"(1,)",array
+Model Parameters,psi_nets.0.base_net.net.4.bias Count,1,int
+Model Parameters,psi_nets.0.base_net.net.4.bias Mean,-0.043916524260518244,float
+Model Parameters,psi_nets.1.base_net.net.0.weight Shape,"(64, 1)",array
+Model Parameters,psi_nets.1.base_net.net.0.weight Count,64,int
+Model Parameters,psi_nets.1.base_net.net.0.weight Mean,0.0003079014686862419,float
+Model Parameters,psi_nets.1.base_net.net.0.bias Shape,"(64,)",array
+Model Parameters,psi_nets.1.base_net.net.0.bias Count,64,int
+Model Parameters,psi_nets.1.base_net.net.0.bias Mean,0.025603023648007085,float
+Model Parameters,psi_nets.1.base_net.net.2.weight Shape,"(64, 64)",array
+Model Parameters,psi_nets.1.base_net.net.2.weight Count,4096,int
+Model Parameters,psi_nets.1.base_net.net.2.weight Mean,-0.0012301228210747478,float
+Model Parameters,psi_nets.1.base_net.net.2.bias Shape,"(64,)",array
+Model Parameters,psi_nets.1.base_net.net.2.bias Count,64,int
+Model Parameters,psi_nets.1.base_net.net.2.bias Mean,-0.002043048348983844,float
+Model Parameters,psi_nets.1.base_net.net.4.weight Shape,"(1, 64)",array
+Model Parameters,psi_nets.1.base_net.net.4.weight Count,64,int
+Model Parameters,psi_nets.1.base_net.net.4.weight Mean,0.02812321473239889,float
+Model Parameters,psi_nets.1.base_net.net.4.bias Shape,"(1,)",array
+Model Parameters,psi_nets.1.base_net.net.4.bias Count,1,int
+Model Parameters,psi_nets.1.base_net.net.4.bias Mean,0.026888838529157258,float
+Model Parameters,psi_nets.2.base_net.net.0.weight Shape,"(64, 1)",array
+Model Parameters,psi_nets.2.base_net.net.0.weight Count,64,int
+Model Parameters,psi_nets.2.base_net.net.0.weight Mean,0.018796832804860983,float
+Model Parameters,psi_nets.2.base_net.net.0.bias Shape,"(64,)",array
+Model Parameters,psi_nets.2.base_net.net.0.bias Count,64,int
+Model Parameters,psi_nets.2.base_net.net.0.bias Mean,0.12332946050288385,float
+Model Parameters,psi_nets.2.base_net.net.2.weight Shape,"(64, 64)",array
+Model Parameters,psi_nets.2.base_net.net.2.weight Count,4096,int
+Model Parameters,psi_nets.2.base_net.net.2.weight Mean,-0.000995147659186133,float
+Model Parameters,psi_nets.2.base_net.net.2.bias Shape,"(64,)",array
+Model Parameters,psi_nets.2.base_net.net.2.bias Count,64,int
+Model Parameters,psi_nets.2.base_net.net.2.bias Mean,0.007058882544173776,float
+Model Parameters,psi_nets.2.base_net.net.4.weight Shape,"(1, 64)",array
+Model Parameters,psi_nets.2.base_net.net.4.weight Count,64,int
+Model Parameters,psi_nets.2.base_net.net.4.weight Mean,-0.0008164941261503546,float
+Model Parameters,psi_nets.2.base_net.net.4.bias Shape,"(1,)",array
+Model Parameters,psi_nets.2.base_net.net.4.bias Count,1,int
+Model Parameters,psi_nets.2.base_net.net.4.bias Mean,-0.26272004629516243,float
+Model Parameters,Total Parameters,17415,int

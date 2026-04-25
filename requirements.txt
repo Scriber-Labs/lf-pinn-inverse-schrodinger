@@ -1,17 +1,16 @@
+appnope==0.1.4
 asttokens==3.0.1
-colorama==0.4.6
 comm==0.2.3
 contourpy==1.3.3
+crefi==2.0.9
 cycler==0.12.1
 debugpy==1.8.20
 decorator==5.2.1
 executing==2.2.1
 filelock==3.20.3
 fonttools==4.61.1
-fsspec==2026.1.0
-# Editable Git install (inverse_schrodinger==0.1.0) with either a deleted local remote or invalid URI:
-# 'git@github.com:/Scriber-Labs/lf-pinn-inverse-schrodinger.git'
--e c:\users\sofia\pycharmprojects\lf-pinn-inverse-schrodinger
+fsspec==2026.2.0
+-e git+https://github.com/Scriber-Labs/lf-pinn-inverse-schrodinger.git@87aef20a84681160cfaad9098b369a94185b55e8#egg=inverse_schrodinger
 ipykernel==7.2.0
 ipython==9.10.0
 ipython_pygments_lexers==1.1.1
@@ -20,6 +19,7 @@ Jinja2==3.1.6
 jupyter_client==8.8.0
 jupyter_core==5.9.1
 kiwisolver==1.4.9
+logger==1.4
 MarkupSafe==3.0.3
 matplotlib==3.10.8
 matplotlib-inline==0.2.1
@@ -29,19 +29,23 @@ networkx==3.6.1
 numpy==2.4.2
 packaging==26.0
 pandas==3.0.0
-parso==0.8.5
+pandas-stubs==3.0.0.260204
+parso==0.8.6
+pexpect==4.9.0
 pillow==12.1.0
 platformdirs==4.5.1
 prompt_toolkit==3.0.52
 psutil==7.2.2
+ptyprocess==0.7.0
 pure_eval==0.2.3
 Pygments==2.19.2
 pyparsing==3.3.2
 python-dateutil==2.9.0.post0
+pyxattr==0.8.1
 pyzmq==27.1.0
 scipy==1.17.0
 seaborn==0.13.2
-setuptools==80.10.2
+setuptools==81.0.0
 six==1.17.0
 stack-data==0.6.3
 sympy==1.14.0
@@ -49,5 +53,4 @@ torch==2.10.0
 tornado==6.5.4
 traitlets==5.14.3
 typing_extensions==4.15.0
-tzdata==2025.3
 wcwidth==0.6.0

@@ -1,0 +1,17 @@
+{
+  "device": "cpu",
+  "dx": 0.039215686274509665,
+  "epochs": 6000,
+  "hidden": 64,
+  "lambdas": {
+    "data": 1.5,
+    "ordered": 1.0,
+    "physics": 0.5,
+    "smooth": 0.25
+  },
+  "log_every": 800,
+  "lr": 0.005,
+  "n_modes": 3,
+  "n_points": 256,
+  "seed": 27
+}

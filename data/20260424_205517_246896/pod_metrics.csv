@@ -1,0 +1,291 @@
+Category,Parameter,Value,Type
+POD Decomposition,Spatial Modes (U) Shape,"(3, 3)",array
+POD Decomposition,Singular Values (S) Shape,"(3,)",array
+POD Decomposition,Modal Coefficients (Vh) Shape,"(3, 256)",array
+POD Decomposition,Total Energy (sum S²),76.5,float
+POD Decomposition,Max Singular Value,5.049752712249756,float
+POD Decomposition,Min Singular Value,5.0497517585754395,float
+POD Decomposition,Mean Singular Value,5.049752712249756,float
+POD Decomposition,Std Singular Value,5.506041134140105e-07,float
+POD Decomposition,Cumulative Energy (First 1 Mode(s)),33.33%,percentage
+POD Decomposition,σ_1,5.049752712249756,float
+POD Decomposition,Cumulative Energy (First 2 Mode(s)),66.67%,percentage
+POD Decomposition,σ_2,5.049752712249756,float
+POD Decomposition,Cumulative Energy (First 3 Mode(s)),100.00%,percentage
+POD Decomposition,σ_3,5.0497517585754395,float
+POD Orthonormality,U^T U Orthonormality Error,5.8341226823849317e-08,float
+Mode Overlap,Learned Overlap Matrix Shape,"(256, 256)",array
+Mode Overlap,Learned Orthonormality Error (Overlap),474.2521980381606,float
+Mode Overlap,Diagonal Mean (should be ~1),0.007812499675654671,float
+Mode Overlap,Diagonal Std,0.006382510382957486,float
+Mode Overlap,Off-Diagonal Mean (should be ~0),0.00020899274687504523,float
+Mode Overlap,Off-Diagonal Max Abs,0.019398109188679978,float
+Cross Overlap,POD Modes vs Learned Wavefunctions Shape,"(3, 256)",array
+Cross Overlap,Max Absolute Cross Overlap,0.023252824952058354,float
+Cross Overlap,Mean Absolute Cross Overlap,0.006780530551301111,float
+Cross Overlap,POD Mode 0 Best Alignment,ψ_learned[100] = 0.0233,str
+Cross Overlap,POD Mode 1 Best Alignment,ψ_learned[127] = 0.0139,str
+Cross Overlap,POD Mode 2 Best Alignment,ψ_learned[159] = 0.0183,str
+Ground Truth Comparison,True vs Learned Overlap Shape,"(256, 256)",array
+Ground Truth Comparison,Max True-Learned Overlap,0.01954933315460339,float
+Ground Truth Comparison,Mean True-Learned Overlap,0.0027495260666980073,float
+Ground Truth Comparison,ψ_true[0] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[1] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[2] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[3] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[4] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[5] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[6] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[7] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[8] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[9] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[10] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[11] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[12] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[13] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[14] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[15] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[16] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[17] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[18] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[19] Best Match,ψ_learned[162] = 0.0000,str
+Ground Truth Comparison,ψ_true[20] Best Match,ψ_learned[161] = 0.0000,str
+Ground Truth Comparison,ψ_true[21] Best Match,ψ_learned[161] = 0.0000,str
+Ground Truth Comparison,ψ_true[22] Best Match,ψ_learned[161] = 0.0000,str
+Ground Truth Comparison,ψ_true[23] Best Match,ψ_learned[161] = 0.0001,str
+Ground Truth Comparison,ψ_true[24] Best Match,ψ_learned[161] = 0.0001,str
+Ground Truth Comparison,ψ_true[25] Best Match,ψ_learned[161] = 0.0001,str
+Ground Truth Comparison,ψ_true[26] Best Match,ψ_learned[161] = 0.0001,str
+Ground Truth Comparison,ψ_true[27] Best Match,ψ_learned[161] = 0.0001,str
+Ground Truth Comparison,ψ_true[28] Best Match,ψ_learned[161] = 0.0001,str
+Ground Truth Comparison,ψ_true[29] Best Match,ψ_learned[161] = 0.0001,str
+Ground Truth Comparison,ψ_true[30] Best Match,ψ_learned[161] = 0.0001,str
+Ground Truth Comparison,ψ_true[31] Best Match,ψ_learned[161] = 0.0002,str
+Ground Truth Comparison,ψ_true[32] Best Match,ψ_learned[161] = 0.0002,str
+Ground Truth Comparison,ψ_true[33] Best Match,ψ_learned[161] = 0.0002,str
+Ground Truth Comparison,ψ_true[34] Best Match,ψ_learned[161] = 0.0002,str
+Ground Truth Comparison,ψ_true[35] Best Match,ψ_learned[161] = 0.0003,str
+Ground Truth Comparison,ψ_true[36] Best Match,ψ_learned[161] = 0.0003,str
+Ground Truth Comparison,ψ_true[37] Best Match,ψ_learned[161] = 0.0004,str
+Ground Truth Comparison,ψ_true[38] Best Match,ψ_learned[161] = 0.0004,str
+Ground Truth Comparison,ψ_true[39] Best Match,ψ_learned[161] = 0.0005,str
+Ground Truth Comparison,ψ_true[40] Best Match,ψ_learned[161] = 0.0005,str
+Ground Truth Comparison,ψ_true[41] Best Match,ψ_learned[161] = 0.0006,str
+Ground Truth Comparison,ψ_true[42] Best Match,ψ_learned[161] = 0.0006,str
+Ground Truth Comparison,ψ_true[43] Best Match,ψ_learned[161] = 0.0007,str
+Ground Truth Comparison,ψ_true[44] Best Match,ψ_learned[161] = 0.0008,str
+Ground Truth Comparison,ψ_true[45] Best Match,ψ_learned[161] = 0.0009,str
+Ground Truth Comparison,ψ_true[46] Best Match,ψ_learned[161] = 0.0010,str
+Ground Truth Comparison,ψ_true[47] Best Match,ψ_learned[161] = 0.0011,str
+Ground Truth Comparison,ψ_true[48] Best Match,ψ_learned[161] = 0.0012,str
+Ground Truth Comparison,ψ_true[49] Best Match,ψ_learned[161] = 0.0013,str
+Ground Truth Comparison,ψ_true[50] Best Match,ψ_learned[161] = 0.0015,str
+Ground Truth Comparison,ψ_true[51] Best Match,ψ_learned[161] = 0.0016,str
+Ground Truth Comparison,ψ_true[52] Best Match,ψ_learned[161] = 0.0018,str
+Ground Truth Comparison,ψ_true[53] Best Match,ψ_learned[161] = 0.0020,str
+Ground Truth Comparison,ψ_true[54] Best Match,ψ_learned[161] = 0.0021,str
+Ground Truth Comparison,ψ_true[55] Best Match,ψ_learned[160] = 0.0023,str
+Ground Truth Comparison,ψ_true[56] Best Match,ψ_learned[160] = 0.0026,str
+Ground Truth Comparison,ψ_true[57] Best Match,ψ_learned[160] = 0.0028,str
+Ground Truth Comparison,ψ_true[58] Best Match,ψ_learned[160] = 0.0030,str
+Ground Truth Comparison,ψ_true[59] Best Match,ψ_learned[160] = 0.0033,str
+Ground Truth Comparison,ψ_true[60] Best Match,ψ_learned[160] = 0.0036,str
+Ground Truth Comparison,ψ_true[61] Best Match,ψ_learned[160] = 0.0038,str
+Ground Truth Comparison,ψ_true[62] Best Match,ψ_learned[160] = 0.0041,str
+Ground Truth Comparison,ψ_true[63] Best Match,ψ_learned[160] = 0.0045,str
+Ground Truth Comparison,ψ_true[64] Best Match,ψ_learned[160] = 0.0048,str
+Ground Truth Comparison,ψ_true[65] Best Match,ψ_learned[160] = 0.0051,str
+Ground Truth Comparison,ψ_true[66] Best Match,ψ_learned[160] = 0.0055,str
+Ground Truth Comparison,ψ_true[67] Best Match,ψ_learned[160] = 0.0059,str
+Ground Truth Comparison,ψ_true[68] Best Match,ψ_learned[160] = 0.0063,str
+Ground Truth Comparison,ψ_true[69] Best Match,ψ_learned[160] = 0.0067,str
+Ground Truth Comparison,ψ_true[70] Best Match,ψ_learned[160] = 0.0071,str
+Ground Truth Comparison,ψ_true[71] Best Match,ψ_learned[160] = 0.0075,str
+Ground Truth Comparison,ψ_true[72] Best Match,ψ_learned[160] = 0.0079,str
+Ground Truth Comparison,ψ_true[73] Best Match,ψ_learned[160] = 0.0084,str
+Ground Truth Comparison,ψ_true[74] Best Match,ψ_learned[160] = 0.0088,str
+Ground Truth Comparison,ψ_true[75] Best Match,ψ_learned[159] = 0.0093,str
+Ground Truth Comparison,ψ_true[76] Best Match,ψ_learned[159] = 0.0097,str
+Ground Truth Comparison,ψ_true[77] Best Match,ψ_learned[159] = 0.0102,str
+Ground Truth Comparison,ψ_true[78] Best Match,ψ_learned[159] = 0.0106,str
+Ground Truth Comparison,ψ_true[79] Best Match,ψ_learned[159] = 0.0111,str
+Ground Truth Comparison,ψ_true[80] Best Match,ψ_learned[159] = 0.0115,str
+Ground Truth Comparison,ψ_true[81] Best Match,ψ_learned[159] = 0.0119,str
+Ground Truth Comparison,ψ_true[82] Best Match,ψ_learned[159] = 0.0123,str
+Ground Truth Comparison,ψ_true[83] Best Match,ψ_learned[159] = 0.0127,str
+Ground Truth Comparison,ψ_true[84] Best Match,ψ_learned[159] = 0.0131,str
+Ground Truth Comparison,ψ_true[85] Best Match,ψ_learned[159] = 0.0135,str
+Ground Truth Comparison,ψ_true[86] Best Match,ψ_learned[159] = 0.0138,str
+Ground Truth Comparison,ψ_true[87] Best Match,ψ_learned[159] = 0.0141,str
+Ground Truth Comparison,ψ_true[88] Best Match,ψ_learned[115] = -0.0144,str
+Ground Truth Comparison,ψ_true[89] Best Match,ψ_learned[115] = -0.0148,str
+Ground Truth Comparison,ψ_true[90] Best Match,ψ_learned[115] = -0.0153,str
+Ground Truth Comparison,ψ_true[91] Best Match,ψ_learned[114] = -0.0157,str
+Ground Truth Comparison,ψ_true[92] Best Match,ψ_learned[114] = -0.0161,str
+Ground Truth Comparison,ψ_true[93] Best Match,ψ_learned[114] = -0.0165,str
+Ground Truth Comparison,ψ_true[94] Best Match,ψ_learned[113] = -0.0169,str
+Ground Truth Comparison,ψ_true[95] Best Match,ψ_learned[113] = -0.0173,str
+Ground Truth Comparison,ψ_true[96] Best Match,ψ_learned[113] = -0.0176,str
+Ground Truth Comparison,ψ_true[97] Best Match,ψ_learned[112] = -0.0179,str
+Ground Truth Comparison,ψ_true[98] Best Match,ψ_learned[112] = -0.0182,str
+Ground Truth Comparison,ψ_true[99] Best Match,ψ_learned[111] = -0.0185,str
+Ground Truth Comparison,ψ_true[100] Best Match,ψ_learned[111] = -0.0187,str
+Ground Truth Comparison,ψ_true[101] Best Match,ψ_learned[111] = -0.0189,str
+Ground Truth Comparison,ψ_true[102] Best Match,ψ_learned[110] = -0.0191,str
+Ground Truth Comparison,ψ_true[103] Best Match,ψ_learned[110] = -0.0193,str
+Ground Truth Comparison,ψ_true[104] Best Match,ψ_learned[109] = -0.0194,str
+Ground Truth Comparison,ψ_true[105] Best Match,ψ_learned[109] = -0.0195,str
+Ground Truth Comparison,ψ_true[106] Best Match,ψ_learned[108] = -0.0195,str
+Ground Truth Comparison,ψ_true[107] Best Match,ψ_learned[108] = -0.0195,str
+Ground Truth Comparison,ψ_true[108] Best Match,ψ_learned[108] = -0.0195,str
+Ground Truth Comparison,ψ_true[109] Best Match,ψ_learned[107] = -0.0195,str
+Ground Truth Comparison,ψ_true[110] Best Match,ψ_learned[107] = -0.0193,str
+Ground Truth Comparison,ψ_true[111] Best Match,ψ_learned[106] = -0.0192,str
+Ground Truth Comparison,ψ_true[112] Best Match,ψ_learned[106] = -0.0190,str
+Ground Truth Comparison,ψ_true[113] Best Match,ψ_learned[105] = -0.0188,str
+Ground Truth Comparison,ψ_true[114] Best Match,ψ_learned[105] = -0.0185,str
+Ground Truth Comparison,ψ_true[115] Best Match,ψ_learned[104] = -0.0181,str
+Ground Truth Comparison,ψ_true[116] Best Match,ψ_learned[104] = -0.0178,str
+Ground Truth Comparison,ψ_true[117] Best Match,ψ_learned[103] = -0.0173,str
+Ground Truth Comparison,ψ_true[118] Best Match,ψ_learned[103] = -0.0168,str
+Ground Truth Comparison,ψ_true[119] Best Match,ψ_learned[102] = -0.0163,str
+Ground Truth Comparison,ψ_true[120] Best Match,ψ_learned[102] = -0.0157,str
+Ground Truth Comparison,ψ_true[121] Best Match,ψ_learned[102] = -0.0151,str
+Ground Truth Comparison,ψ_true[122] Best Match,ψ_learned[101] = -0.0144,str
+Ground Truth Comparison,ψ_true[123] Best Match,ψ_learned[101] = -0.0137,str
+Ground Truth Comparison,ψ_true[124] Best Match,ψ_learned[100] = -0.0130,str
+Ground Truth Comparison,ψ_true[125] Best Match,ψ_learned[100] = -0.0122,str
+Ground Truth Comparison,ψ_true[126] Best Match,ψ_learned[99] = -0.0113,str
+Ground Truth Comparison,ψ_true[127] Best Match,ψ_learned[98] = -0.0105,str
+Ground Truth Comparison,ψ_true[128] Best Match,ψ_learned[157] = -0.0104,str
+Ground Truth Comparison,ψ_true[129] Best Match,ψ_learned[156] = -0.0113,str
+Ground Truth Comparison,ψ_true[130] Best Match,ψ_learned[156] = -0.0121,str
+Ground Truth Comparison,ψ_true[131] Best Match,ψ_learned[155] = -0.0129,str
+Ground Truth Comparison,ψ_true[132] Best Match,ψ_learned[155] = -0.0136,str
+Ground Truth Comparison,ψ_true[133] Best Match,ψ_learned[154] = -0.0144,str
+Ground Truth Comparison,ψ_true[134] Best Match,ψ_learned[154] = -0.0150,str
+Ground Truth Comparison,ψ_true[135] Best Match,ψ_learned[153] = -0.0157,str
+Ground Truth Comparison,ψ_true[136] Best Match,ψ_learned[153] = -0.0162,str
+Ground Truth Comparison,ψ_true[137] Best Match,ψ_learned[152] = -0.0168,str
+Ground Truth Comparison,ψ_true[138] Best Match,ψ_learned[152] = -0.0172,str
+Ground Truth Comparison,ψ_true[139] Best Match,ψ_learned[151] = -0.0177,str
+Ground Truth Comparison,ψ_true[140] Best Match,ψ_learned[151] = -0.0181,str
+Ground Truth Comparison,ψ_true[141] Best Match,ψ_learned[150] = -0.0184,str
+Ground Truth Comparison,ψ_true[142] Best Match,ψ_learned[150] = -0.0187,str
+Ground Truth Comparison,ψ_true[143] Best Match,ψ_learned[149] = -0.0190,str
+Ground Truth Comparison,ψ_true[144] Best Match,ψ_learned[149] = -0.0192,str
+Ground Truth Comparison,ψ_true[145] Best Match,ψ_learned[148] = -0.0193,str
+Ground Truth Comparison,ψ_true[146] Best Match,ψ_learned[148] = -0.0194,str
+Ground Truth Comparison,ψ_true[147] Best Match,ψ_learned[147] = -0.0195,str
+Ground Truth Comparison,ψ_true[148] Best Match,ψ_learned[147] = -0.0195,str
+Ground Truth Comparison,ψ_true[149] Best Match,ψ_learned[146] = -0.0195,str
+Ground Truth Comparison,ψ_true[150] Best Match,ψ_learned[146] = -0.0195,str
+Ground Truth Comparison,ψ_true[151] Best Match,ψ_learned[146] = -0.0194,str
+Ground Truth Comparison,ψ_true[152] Best Match,ψ_learned[145] = -0.0193,str
+Ground Truth Comparison,ψ_true[153] Best Match,ψ_learned[145] = -0.0192,str
+Ground Truth Comparison,ψ_true[154] Best Match,ψ_learned[144] = -0.0190,str
+Ground Truth Comparison,ψ_true[155] Best Match,ψ_learned[144] = -0.0188,str
+Ground Truth Comparison,ψ_true[156] Best Match,ψ_learned[143] = -0.0186,str
+Ground Truth Comparison,ψ_true[157] Best Match,ψ_learned[143] = -0.0183,str
+Ground Truth Comparison,ψ_true[158] Best Match,ψ_learned[143] = -0.0180,str
+Ground Truth Comparison,ψ_true[159] Best Match,ψ_learned[142] = -0.0177,str
+Ground Truth Comparison,ψ_true[160] Best Match,ψ_learned[142] = -0.0174,str
+Ground Truth Comparison,ψ_true[161] Best Match,ψ_learned[142] = -0.0170,str
+Ground Truth Comparison,ψ_true[162] Best Match,ψ_learned[141] = -0.0166,str
+Ground Truth Comparison,ψ_true[163] Best Match,ψ_learned[141] = -0.0162,str
+Ground Truth Comparison,ψ_true[164] Best Match,ψ_learned[141] = -0.0158,str
+Ground Truth Comparison,ψ_true[165] Best Match,ψ_learned[140] = -0.0154,str
+Ground Truth Comparison,ψ_true[166] Best Match,ψ_learned[140] = -0.0149,str
+Ground Truth Comparison,ψ_true[167] Best Match,ψ_learned[140] = -0.0145,str
+Ground Truth Comparison,ψ_true[168] Best Match,ψ_learned[97] = 0.0140,str
+Ground Truth Comparison,ψ_true[169] Best Match,ψ_learned[97] = 0.0137,str
+Ground Truth Comparison,ψ_true[170] Best Match,ψ_learned[96] = 0.0134,str
+Ground Truth Comparison,ψ_true[171] Best Match,ψ_learned[96] = 0.0130,str
+Ground Truth Comparison,ψ_true[172] Best Match,ψ_learned[96] = 0.0127,str
+Ground Truth Comparison,ψ_true[173] Best Match,ψ_learned[96] = 0.0123,str
+Ground Truth Comparison,ψ_true[174] Best Match,ψ_learned[96] = 0.0119,str
+Ground Truth Comparison,ψ_true[175] Best Match,ψ_learned[96] = 0.0114,str
+Ground Truth Comparison,ψ_true[176] Best Match,ψ_learned[96] = 0.0110,str
+Ground Truth Comparison,ψ_true[177] Best Match,ψ_learned[96] = 0.0106,str
+Ground Truth Comparison,ψ_true[178] Best Match,ψ_learned[96] = 0.0101,str
+Ground Truth Comparison,ψ_true[179] Best Match,ψ_learned[96] = 0.0097,str
+Ground Truth Comparison,ψ_true[180] Best Match,ψ_learned[96] = 0.0092,str
+Ground Truth Comparison,ψ_true[181] Best Match,ψ_learned[96] = 0.0088,str
+Ground Truth Comparison,ψ_true[182] Best Match,ψ_learned[96] = 0.0083,str
+Ground Truth Comparison,ψ_true[183] Best Match,ψ_learned[96] = 0.0079,str
+Ground Truth Comparison,ψ_true[184] Best Match,ψ_learned[95] = 0.0075,str
+Ground Truth Comparison,ψ_true[185] Best Match,ψ_learned[95] = 0.0070,str
+Ground Truth Comparison,ψ_true[186] Best Match,ψ_learned[95] = 0.0066,str
+Ground Truth Comparison,ψ_true[187] Best Match,ψ_learned[95] = 0.0062,str
+Ground Truth Comparison,ψ_true[188] Best Match,ψ_learned[95] = 0.0058,str
+Ground Truth Comparison,ψ_true[189] Best Match,ψ_learned[95] = 0.0055,str
+Ground Truth Comparison,ψ_true[190] Best Match,ψ_learned[95] = 0.0051,str
+Ground Truth Comparison,ψ_true[191] Best Match,ψ_learned[95] = 0.0048,str
+Ground Truth Comparison,ψ_true[192] Best Match,ψ_learned[95] = 0.0044,str
+Ground Truth Comparison,ψ_true[193] Best Match,ψ_learned[95] = 0.0041,str
+Ground Truth Comparison,ψ_true[194] Best Match,ψ_learned[95] = 0.0038,str
+Ground Truth Comparison,ψ_true[195] Best Match,ψ_learned[95] = 0.0035,str
+Ground Truth Comparison,ψ_true[196] Best Match,ψ_learned[95] = 0.0033,str
+Ground Truth Comparison,ψ_true[197] Best Match,ψ_learned[95] = 0.0030,str
+Ground Truth Comparison,ψ_true[198] Best Match,ψ_learned[95] = 0.0028,str
+Ground Truth Comparison,ψ_true[199] Best Match,ψ_learned[95] = 0.0025,str
+Ground Truth Comparison,ψ_true[200] Best Match,ψ_learned[95] = 0.0023,str
+Ground Truth Comparison,ψ_true[201] Best Match,ψ_learned[95] = 0.0021,str
+Ground Truth Comparison,ψ_true[202] Best Match,ψ_learned[95] = 0.0019,str
+Ground Truth Comparison,ψ_true[203] Best Match,ψ_learned[95] = 0.0018,str
+Ground Truth Comparison,ψ_true[204] Best Match,ψ_learned[95] = 0.0016,str
+Ground Truth Comparison,ψ_true[205] Best Match,ψ_learned[95] = 0.0015,str
+Ground Truth Comparison,ψ_true[206] Best Match,ψ_learned[94] = 0.0013,str
+Ground Truth Comparison,ψ_true[207] Best Match,ψ_learned[94] = 0.0012,str
+Ground Truth Comparison,ψ_true[208] Best Match,ψ_learned[94] = 0.0011,str
+Ground Truth Comparison,ψ_true[209] Best Match,ψ_learned[94] = 0.0010,str
+Ground Truth Comparison,ψ_true[210] Best Match,ψ_learned[94] = 0.0009,str
+Ground Truth Comparison,ψ_true[211] Best Match,ψ_learned[94] = 0.0008,str
+Ground Truth Comparison,ψ_true[212] Best Match,ψ_learned[94] = 0.0007,str
+Ground Truth Comparison,ψ_true[213] Best Match,ψ_learned[94] = 0.0006,str
+Ground Truth Comparison,ψ_true[214] Best Match,ψ_learned[94] = 0.0006,str
+Ground Truth Comparison,ψ_true[215] Best Match,ψ_learned[94] = 0.0005,str
+Ground Truth Comparison,ψ_true[216] Best Match,ψ_learned[94] = 0.0005,str
+Ground Truth Comparison,ψ_true[217] Best Match,ψ_learned[94] = 0.0004,str
+Ground Truth Comparison,ψ_true[218] Best Match,ψ_learned[94] = 0.0004,str
+Ground Truth Comparison,ψ_true[219] Best Match,ψ_learned[94] = 0.0003,str
+Ground Truth Comparison,ψ_true[220] Best Match,ψ_learned[94] = 0.0003,str
+Ground Truth Comparison,ψ_true[221] Best Match,ψ_learned[94] = 0.0002,str
+Ground Truth Comparison,ψ_true[222] Best Match,ψ_learned[94] = 0.0002,str
+Ground Truth Comparison,ψ_true[223] Best Match,ψ_learned[94] = 0.0002,str
+Ground Truth Comparison,ψ_true[224] Best Match,ψ_learned[94] = 0.0002,str
+Ground Truth Comparison,ψ_true[225] Best Match,ψ_learned[94] = 0.0001,str
+Ground Truth Comparison,ψ_true[226] Best Match,ψ_learned[94] = 0.0001,str
+Ground Truth Comparison,ψ_true[227] Best Match,ψ_learned[94] = 0.0001,str
+Ground Truth Comparison,ψ_true[228] Best Match,ψ_learned[94] = 0.0001,str
+Ground Truth Comparison,ψ_true[229] Best Match,ψ_learned[94] = 0.0001,str
+Ground Truth Comparison,ψ_true[230] Best Match,ψ_learned[94] = 0.0001,str
+Ground Truth Comparison,ψ_true[231] Best Match,ψ_learned[94] = 0.0001,str
+Ground Truth Comparison,ψ_true[232] Best Match,ψ_learned[94] = 0.0001,str
+Ground Truth Comparison,ψ_true[233] Best Match,ψ_learned[94] = 0.0000,str
+Ground Truth Comparison,ψ_true[234] Best Match,ψ_learned[94] = 0.0000,str
+Ground Truth Comparison,ψ_true[235] Best Match,ψ_learned[94] = 0.0000,str
+Ground Truth Comparison,ψ_true[236] Best Match,ψ_learned[94] = 0.0000,str
+Ground Truth Comparison,ψ_true[237] Best Match,ψ_learned[94] = 0.0000,str
+Ground Truth Comparison,ψ_true[238] Best Match,ψ_learned[94] = 0.0000,str
+Ground Truth Comparison,ψ_true[239] Best Match,ψ_learned[94] = 0.0000,str
+Ground Truth Comparison,ψ_true[240] Best Match,ψ_learned[94] = 0.0000,str
+Ground Truth Comparison,ψ_true[241] Best Match,ψ_learned[94] = 0.0000,str
+Ground Truth Comparison,ψ_true[242] Best Match,ψ_learned[94] = 0.0000,str
+Ground Truth Comparison,ψ_true[243] Best Match,ψ_learned[94] = 0.0000,str
+Ground Truth Comparison,ψ_true[244] Best Match,ψ_learned[94] = 0.0000,str
+Ground Truth Comparison,ψ_true[245] Best Match,ψ_learned[94] = 0.0000,str
+Ground Truth Comparison,ψ_true[246] Best Match,ψ_learned[94] = 0.0000,str
+Ground Truth Comparison,ψ_true[247] Best Match,ψ_learned[93] = 0.0000,str
+Ground Truth Comparison,ψ_true[248] Best Match,ψ_learned[93] = 0.0000,str
+Ground Truth Comparison,ψ_true[249] Best Match,ψ_learned[93] = 0.0000,str
+Ground Truth Comparison,ψ_true[250] Best Match,ψ_learned[93] = 0.0000,str
+Ground Truth Comparison,ψ_true[251] Best Match,ψ_learned[93] = 0.0000,str
+Ground Truth Comparison,ψ_true[252] Best Match,ψ_learned[93] = 0.0000,str
+Ground Truth Comparison,ψ_true[253] Best Match,ψ_learned[93] = 0.0000,str
+Ground Truth Comparison,ψ_true[254] Best Match,ψ_learned[93] = 0.0000,str
+Ground Truth Comparison,ψ_true[255] Best Match,ψ_learned[93] = 0.0000,str
+Failure Modes,Singular Value Ratio (σ_1/σ_n),1.000000238418579,float
+Failure Modes,Mode Collapse Risk,LOW (ratio < 3),str
+Failure Modes,Orthonormality Violation,SEVERE,str
+Failure Modes,Mode Mixing Risk,HIGH (max cross-overlap < 0.7),str
