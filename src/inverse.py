@@ -8,6 +8,8 @@ These losses compare the *learned* quantum objects (wavefunctions and energy eig
 - ``E_theta_n``: learned energies
 
 Author: Eigenscribe
+Development note: LLM assistance was used during construction; implementation has been reviewed and adapted for this project.
+Review status: Reviewed and maintained by Eigenscribe.
 Date: 02-2026
 """
 

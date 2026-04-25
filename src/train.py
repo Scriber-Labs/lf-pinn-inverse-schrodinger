@@ -11,6 +11,8 @@ The loss is a weighted sum of three physically motivated terms:
 All three components live in separate modules (`physics`, `inverse`, `utils`). This file wires them together, handles the optimizer, and provides a minimal smoke-test that runs a single optimization step.
 
 Author: Eigenscribe
+Development note: LLM assistance was used during construction; implementation has been reviewed and adapted for this project.
+Review status: Reviewed and maintained by Eigenscribe.
 Date: 02-2026
 """
 

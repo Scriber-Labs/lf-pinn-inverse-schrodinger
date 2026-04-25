@@ -8,6 +8,8 @@ Proper Orthogonal Decomposition (POD) utilities.
 Both functions are pure NumPy-style Torch ops -> no side effects, no hidden state. Moreover, the module includes a minimal smoke test that can be called from the command line (``python -m src.pod``) or from any notebook.
 
 Author: Eigenscribe
+Development note: LLM assistance was used during construction; implementation has been reviewed and adapted for this project.
+Review status: Reviewed and maintained by Eigenscribe.
 Date: 02-2026
 """
 

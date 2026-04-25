@@ -5,6 +5,8 @@ Utility helpers for project 2 (`lf-pinn-inverse-schrodinger`).
 These functions are deliberately designed to be lightweight. Specifically, they do not depend on any project-specific modules. This makes them easy to reuse in notebooks and implement in future projects.
 
 Author: Eigenscribe
+Development note: LLM assistance was used during construction; implementation has been reviewed and adapted for this project.
+Review status: Reviewed and maintained by Eigenscribe.
 Date: 02-2026
 """
 

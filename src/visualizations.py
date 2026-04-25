@@ -11,6 +11,8 @@ All functions accept plain NumPy / PyTorch objects are return the matplotlib Fig
     - a minimal smoke-test
 
 Author: Eigenscribe
+Development note: LLM assistance was used during construction; implementation has been reviewed and adapted for this project.
+Review status: Reviewed and maintained by Eigenscribe.
 Date: 02-2026
 """
 

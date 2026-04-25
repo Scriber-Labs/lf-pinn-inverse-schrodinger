@@ -9,6 +9,11 @@ The model learns three families of quantities:
 
 All three quantities are parameterized by a shared latent vector ``theta`` (the network weights).
 The code purposefully employs a clean, "over-engineered" house style so that each component can be independently tested and swapped out later (e.g., different activation functions, different PDE constraints, etc.).
+
+Author: Eigenscribe
+Development note: LLM assistance was used during construction; implementation has been reviewed and adapted for this project.
+Review status: Reviewed and maintained by Eigenscribe.
+Date: 02-2026
 """
 
 from __future__ import annotations

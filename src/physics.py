@@ -12,6 +12,8 @@ Learned functions:
 These helpers are deliberately coded to be thin wrappers around the generic utilities in ``utils.py`` (e.g., ``second_derivative``) so that the physics stays explict and can be easily audited.
 
 Author: Eigenscribe
+Development note: LLM assistance was used during construction; implmentation has been reviewed and adapted for this project.
+Review status: Reviewed and maintained by Eigenscribe.
 Date: 02-2026
 """
 

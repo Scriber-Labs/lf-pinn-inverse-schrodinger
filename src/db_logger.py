@@ -1,4 +1,10 @@
 # src/db_logger.py
+"""
+Provenance: LLM-generated scaffold; human review pending.
+Review status: Experimental; verify before using as a stable inference.
+Maintainer: Eigenscribe / Scriber Labs
+Date: 04-2026
+"""
 
 from __future__ import annotations
 
