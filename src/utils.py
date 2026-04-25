@@ -601,26 +601,28 @@ Examples:
         traceback.print_exc()
         sys.exit(1)
 
-
-def l2_inner_product(psi1: torch.Tensor, psi2: torch.Tensor, dx: float) -> torch.Tensor:
+def l2_inner_product(
+    f: torch.Tensor,
+    g: torch.Tensor,
+    dx: float,
+) -> torch.Tensor:
     """
-    Compute the L2 inner product between two wavefunctions.
+    Compute the discrete L2 inner product ``<f|g>`` using the trapezoidal rule.
 
     Parameters
     ----------
-    psi1 : torch.Tensor
-        First wavefunction.
-    psi2 : torch.Tensor
-        Second wavefunction.
+    f, g : torch.Tensor, shape ``(N, 1)``
+        Function evaluated on the same grid.
     dx : float
-        Spatial grid spacing.
+        Uniform grid spacing.
 
     Returns
     -------
-    torch.Tensor
-        The scalar inner product.
+    torch.Tensor, shape ``(N, 1)``
+        Approximation of ``int(f(x)*g(x)*dx)``.=
     """
-    return torch.sum(psi1 * psi2) * dx
+    # Trapezoidal rule reduces to a simple sum since the grid is uniform.
+    return torch.sum(f * g) * dx
 
 
 if __name__ == "__main__":
