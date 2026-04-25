@@ -24,6 +24,14 @@ Author: Eigenscribe
 Date: 02-2026
 """
 
+import sys
+from pathlib import Path
+
+# Add project root and src to sys.path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT / "src") not in sys.path:
+    sys.path.append(str(PROJECT_ROOT / "src"))
+
 import argparse
 import json
 import numpy as np
@@ -614,14 +622,7 @@ def l2_inner_product(
     f, g : torch.Tensor, shape ``(N, 1)``
         Function evaluated on the same grid.
     dx : float
-        Uniform grid spacing.
-
-    Returns
-    -------
-    torch.Tensor, shape ``(N, 1)``
-        Approximation of ``int(f(x)*g(x)*dx)``.=
     """
-    # Trapezoidal rule reduces to a simple sum since the grid is uniform.
     return torch.sum(f * g) * dx
 
 

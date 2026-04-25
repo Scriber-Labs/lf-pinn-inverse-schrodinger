@@ -14,6 +14,12 @@ import argparse
 import json
 import sys
 from pathlib import Path
+
+# Add project root and src to sys.path to allow imports when running as a script
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT / "src") not in sys.path:
+    sys.path.append(str(PROJECT_ROOT / "src"))
+
 from typing import Final, List, Tuple
 
 import numpy as np
@@ -22,7 +28,7 @@ from torch import Tensor
 
 torch.set_default_dtype(torch.float64)
 
-PROJECT_ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 ARTIFACTS_DIR = PROJECT_ROOT / "artifacts" / "runs"
 
