@@ -1,11 +1,34 @@
 # cli_train.py
 """
-Command-line interface for the inverse Schrödinger training routine (src/train.py).
+Command-line training runner for the inverse Schrödinger PINN repo.
+
+The purpose of this script is to provide a reproducible command-line interface around the canonical training primmitives in ``src/train.py``. It builds on the synthetic inverse Schrödinger problem, trains the model, logs losses to SQLite, and writes run artifacts for later analysis or dashboard applications.
+
+Generated run artifacts include:
+- ``config.json``: training configuration and hyperparameters
+- ``history.json``: per-epoch loss history
+- ``diagnostics.npz``: learned energies, potential, wavefunctions, and POD data
+- ``ground_truth.npz``: analytic reference quantities for comparison
+- ``model.pt``: trained model state directory
+- ``run_id.txt``: unique identifier for the run
 
 Usage examples
 --------------
-$ python -m cli_train --hidden 128 --epochs 5000 --lr 5e-4 --device cuda
-$ cli-trian --hidden 64 --epochs 3000       # if installed as a console script
+Run with default settings from the project root:
+
+    python -m cli.cli_train
+
+Run with explicit loss weights:
+
+    python -m cli.cli_trian \\
+        --lambda-data 1.5 \\
+        --lambda-physics 0.5 \\
+        --lambda-smooth 0.25 \\
+        --lambda-ordered 1.0
+
+Provenance: LLM-generated scaffold; human review pending.
+Maintainer: Eigenscribe / Scriber Labs
+Date: 02-2026
 """
 
 from __future__ import annotations

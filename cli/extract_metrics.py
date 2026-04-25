@@ -1,27 +1,6 @@
 # cli/extract_metrics.py
 """
-extract_metrics.py
 
-Standalone script to extract POD and training analysis metrics from PIML artifact files.
-
-Uses shared utilities from src.utils for consistency across the project.
-
-Usage:
-    python extract_metrics.py --artifacts-dir /path/to/artifacts --output-dir /path/to/output
-
-This script reads:
-    - config.json
-    - diagnostics.npz
-    - ground_truth.pt
-    - history.json
-    - model.pt (optional)
-
-And outputs:
-    - pod_metrics.csv
-    - training_analysis.csv
-
-Author: Eigenscribe
-Date: 02-2026
 """
 
 import argparse
