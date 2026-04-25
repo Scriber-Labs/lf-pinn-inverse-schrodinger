@@ -1,5 +1,15 @@
 # src/db_logger.py
 """
+SQLite-backed logger for ML training runs and time-series metrics.
+
+The logger tracks three categories of information:
+    1. **Run metadata**         `run_id`, `started_at`, `seed`, `hyperparams`
+    2. **Per-epoch losses**     `total_loss`, `physics_loss`, `data_loss`, smooth_loss`, `ordered_loss`
+    3. **Artifact locations**   `artifact_path` for each run
+
+The code implments a modular design so that logging can be independently tested and swapped out later (e.g., different backends, additional metrics, etc.).
+
+
 Provenance: LLM-generated scaffold; human review pending.
 Review status: Experimental; verify before using as a stable inference.
 Maintainer: Eigenscribe / Scriber Labs
