@@ -26,12 +26,13 @@ Date: 02-2026
 
 import argparse
 import json
+import sys
+from pathlib import Path
+from typing import Tuple, Dict, Any
+
 import numpy as np
 import pandas as pd
 import torch
-from pathlib import Path
-from typing import Tuple, Dict, Any
-import sys
 
 # Import shared utilities
 from src.utils import l2_inner_product
@@ -578,4 +579,37 @@ def extract_all_metrics(
     logger.info(f"Extracting POD metrics...")
     pod_df = extract_pod_metrics(config, diagnostics, ground_truth, logger)
 
-    logger.info
+    logger.info(f"Extracting training analysis...")
+    training_df = extract_training_analysis(config, diagnostics, ground_truth, history, model_state, logger)
+
+    # Save results
+    pod_output = output_dir / "pod_metrics.csv"
+    training_output = output_dir / "training_analysis.csv"
+
+    pod_df.to_csv(pod_output, index=False)
+    training_df.to_csv(training_output, index=False)
+
+    logger.success(f"Saved POD metrics to: {pod_output}")
+    logger.success(f"Saved training analysis to: {training_output}")
+
+    return pod_df, training_df
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Extract POD and training metrics from artifacts.")
+    parser.add_argument("--artifacts-dir", type=str, required=True, help="Directory containing artifact files")
+    parser.add_argument("--output-dir", type=str, help="Directory to save output CSVs")
+    parser.add_argument("--verbose", action="store_true", default=True, help="Print progress")
+    parser.add_argument("--no-verbose", action="store_false", dest="verbose")
+
+    args = parser.parse_args()
+
+    try:
+        extract_all_metrics(args.artifacts_dir, args.output_dir, args.verbose)
+    except Exception as e:
+        print(f"❌ Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

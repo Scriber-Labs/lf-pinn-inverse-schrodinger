@@ -1,0 +1,18 @@
+[
+  {
+    "epoch": 1,
+    "total_loss": 103.91904744783785,
+    "physics_loss": 0.2128891663947612,
+    "data_loss": 6.516102262629657,
+    "smooth_loss": 154.94694361960723,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 2,
+    "total_loss": 65.85769655406001,
+    "physics_loss": 0.22180347996773384,
+    "data_loss": 6.4899575228733,
+    "smooth_loss": 3.7437639093209576,
+    "ordered_loss": 0.0
+  }
+]

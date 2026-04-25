@@ -35,7 +35,11 @@ python -m cli_train
 
 🔷 Optional CLI flags (✅ fix whatever is causing training results to differ from demo.ipynb ✅)
 ```bash
-python -m cli_train --n_modes 3 --hidden 64 --epochs 6000 --lr 5e-3 --n_points 256 --device cpu --seed 27 --log_every 800
+!python3 -m cli.cli_train \
+    --lambda-data 1.5 \
+    --lambda-physics 0.5 \
+    --lambda-smooth 0.25 \
+    --lambda-ordered 1.0
 ```
 
 

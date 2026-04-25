@@ -78,6 +78,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Path to the SQLite training database",
     )
 
+    # Loss weights
+    parser.add_argument("--lambda-data", type=float, default=1.5,
+                        help="Weight for the data-fit loss (rho and energy)")
+    parser.add_argument("--lambda-physics", type=float, default=0.5,
+                        help="Weight for the TISE physics loss")
+    parser.add_argument("--lambda-smooth", type=float, default=0.25,
+                        help="Weight for the potential smoothness regularization")
+    parser.add_argument("--lambda-ordered", type=float, default=1.0,
+                        help="Weight for the energy ordering constraint")
+
     return parser.parse_args(argv)
 
 # ----------------------------------------------------------------------
@@ -142,12 +152,12 @@ def _build_problem(args: argparse.Namespace) -> Tuple[
     rho_obs = [psi ** 2 + 0.02 * torch.randn_like(psi) for psi in psi_true]
     E_obs = E_true + 0.05 * torch.randn_like(E_true)
 
-    # Loss weights (feel free to add these to CLI arguments)
+    # Loss weights (from CLI arguments)
     lambdas = {
-        "data": 1.5,
-        "physics": 0.5,
-        "smooth": 0.25,
-        "ordered": 1.0,
+        "data": args.lambda_data,
+        "physics": args.lambda_physics,
+        "smooth": args.lambda_smooth,
+        "ordered": args.lambda_ordered,
     }
 
     # Model

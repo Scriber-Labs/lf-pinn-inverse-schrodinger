@@ -1,0 +1,162 @@
+[
+  {
+    "epoch": 1,
+    "total_loss": 48.61733388204367,
+    "physics_loss": 0.2128891663947612,
+    "data_loss": 6.516102262629657,
+    "smooth_loss": 154.94694361960723,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 2,
+    "total_loss": 10.776312161648526,
+    "physics_loss": 0.19756401773628238,
+    "data_loss": 6.494392783632822,
+    "smooth_loss": 3.7437639093246053,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 3,
+    "total_loss": 10.228342092661187,
+    "physics_loss": 0.27639831707329415,
+    "data_loss": 6.469398392178198,
+    "smooth_loss": 1.5441813834289726,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 4,
+    "total_loss": 10.389261639821543,
+    "physics_loss": 0.36953719507923805,
+    "data_loss": 6.4421683641154575,
+    "smooth_loss": 2.164961984434945,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 5,
+    "total_loss": 10.35148423829464,
+    "physics_loss": 0.4607095417414893,
+    "data_loss": 6.416279343972627,
+    "smooth_loss": 1.9868418058598203,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 6,
+    "total_loss": 10.21020360005066,
+    "physics_loss": 0.5441976278229769,
+    "data_loss": 6.3907829665889,
+    "smooth_loss": 1.4077213450232848,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 7,
+    "total_loss": 10.16156709026618,
+    "physics_loss": 0.618294078264712,
+    "data_loss": 6.365519752019706,
+    "smooth_loss": 1.2165616924170668,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 8,
+    "total_loss": 10.16208952182138,
+    "physics_loss": 0.6831802972707773,
+    "data_loss": 6.340427304182971,
+    "smooth_loss": 1.239433667646142,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 9,
+    "total_loss": 10.18782418742465,
+    "physics_loss": 0.7396134286006727,
+    "data_loss": 6.3154674700765545,
+    "smooth_loss": 1.3792650720379243,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 10,
+    "total_loss": 10.212664741801092,
+    "physics_loss": 0.7884566180352341,
+    "data_loss": 6.290612479055858,
+    "smooth_loss": 1.530070856798749,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 11,
+    "total_loss": 10.203824537405351,
+    "physics_loss": 0.8305688286964084,
+    "data_loss": 6.265841485880003,
+    "smooth_loss": 1.5591115769485726,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 12,
+    "total_loss": 10.160248962988828,
+    "physics_loss": 0.8668522330521394,
+    "data_loss": 6.241139362932193,
+    "smooth_loss": 1.4604552082578781,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 13,
+    "total_loss": 10.108787189495667,
+    "physics_loss": 0.8982135828964468,
+    "data_loss": 6.216495877801693,
+    "smooth_loss": 1.3397463253796134,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 14,
+    "total_loss": 10.065355732822857,
+    "physics_loss": 0.9254523907819602,
+    "data_loss": 6.191904839647504,
+    "smooth_loss": 1.2590891118424867,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 15,
+    "total_loss": 10.03196716363619,
+    "physics_loss": 0.9492273662820175,
+    "data_loss": 6.167363180035681,
+    "smooth_loss": 1.2252348417666403,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 16,
+    "total_loss": 10.00600010257835,
+    "physics_loss": 0.9700771953147566,
+    "data_loss": 6.142870017329359,
+    "smooth_loss": 1.2266259157077264,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 17,
+    "total_loss": 9.984211335198266,
+    "physics_loss": 0.98844750487828,
+    "data_loss": 6.118425762412149,
+    "smooth_loss": 1.249395756563605,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 18,
+    "total_loss": 9.963538591026275,
+    "physics_loss": 1.0047106222300484,
+    "data_loss": 6.094031323996831,
+    "smooth_loss": 1.2805451756640065,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 19,
+    "total_loss": 9.94127261882853,
+    "physics_loss": 1.019178010371202,
+    "data_loss": 6.069687475105774,
+    "smooth_loss": 1.308609603937062,
+    "ordered_loss": 0.0
+  },
+  {
+    "epoch": 20,
+    "total_loss": 9.91541706540184,
+    "physics_loss": 1.0321077551022324,
+    "data_loss": 6.045394441144322,
+    "smooth_loss": 1.3250861045369615,
+    "ordered_loss": 0.0
+  }
+]

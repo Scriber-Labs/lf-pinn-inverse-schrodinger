@@ -16,7 +16,6 @@ dependencies = [
     "pandas",
     "matplotlib",
     "scipy",
-    "sqlite3", # usually part of stdlib, but good to note
     "plotly",
     "dash",
 ]
