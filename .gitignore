@@ -205,3 +205,19 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Local generated training outputs
+artifacts/runs/
+
+# Local database and "latest run" pointer
+data/training_runs.db
+data/run_id.txt
+
+# Python/Jupyter noise
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Keep curated reference runs
+!data/reference_runs/
+!data/reference_runs/**/*
