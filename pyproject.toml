@@ -12,7 +12,13 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
     "torch>=2.0",
-    # add any other runtime deps here (e.g. numpy, tqdm, etc.)
+    "numpy",
+    "pandas",
+    "matplotlib",
+    "scipy",
+    "sqlite3", # usually part of stdlib, but good to note
+    "plotly",
+    "dash",
 ]
 
 # ----------------------------------------------------------------------
