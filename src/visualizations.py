@@ -610,7 +610,6 @@ def plot_pod_singular_values(
         *,
         title: str = "POD singular values",
         ylabel: str = "Singular value (log scale)",
-        cmap: str = "cool",
         out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """
@@ -658,32 +657,69 @@ def plot_pod_singular_values(
     # 3️⃣ Plot
     # ------------------------------------------------------------------
     fig, ax = plt.subplots()
+    indices = np.arange(1, len(sv) + 1)
+
+    # 1. Draw the connecting line
     ax.semilogy(
-        np.arange(1, len(sv) + 1),
+        indices,
         sv,
-        marker="o",
-        color="#8000FF",
+        color="white",
         linewidth=2,
+        alpha=0.4,
+        zorder=1
+    )
+
+    # 2. Draw the scatter points with a colormap
+    sctr = ax.scatter(
+        indices,
+        sv,
+        c=sv,
+        cmap="cool",
+        edgecolor="white",
+        linewidth=0.5,
+        s=60,
+        zorder=2,
         label="Singular values",
     )
 
+    # Set y-scale to log explicitly for the scatter points
+    ax.set_yscale("log")
+
+    plt.colorbar(sctr, ax=ax, label="Magnitude")
+
     # Annotate each point with its numerical value
     for i, val in enumerate(sv, start=1):
+        # Default alignment and offset
+        ha = "center"
+        va = "bottom"
+        xytext = (0, 7)
+        
+        # Adjust horizontal alignment for the first and last points to avoid axes overlap
+        if i == 1:
+            ha = "left"
+            va = "top"
+            xytext = (5, -7)
+        elif i == len(sv):
+            ha = "right"
+            xytext = (-5, 7)
+
         ax.annotate(
-            f"{val:.9e}",
+            f"{val:.4e}",
             (i, val),
             textcoords="offset points",
-            xytext=(0, 6),
-            ha="center",
-            fontsize=8,
-            alpha=0.8,
+            xytext=xytext,
+            ha=ha,
+            va=va,
+            fontsize=10,
+            alpha=0.9,
+            weight="bold",
+            bbox=dict(facecolor="black", alpha=0.4, edgecolor="none", pad=1),
         )
 
     ax.set_xlabel(r"Mode index $k$", fontsize=13)
     ax.set_ylabel(ylabel, fontsize=13)
     ax.set_title(title, fontsize=16, pad=12)
     ax.grid(True, which="both", alpha=0.2)
-    ax.legend(loc="upper right", fontsize=10)
 
     # ------------------------------------------------------------------
     # 4️⃣ Optional save
@@ -864,14 +900,26 @@ def plot_overlap_heatmap(
     # ------------------------------------------------------------------
     # 1️⃣ Stack and normalize the wavefunctions
     # ------------------------------------------------------------------
-    psi_theta_mat = torch.stack([p.squeeze().detach().cpu() for p in psi_theta])  # (n_modes, N)
+    psi_theta_mat = torch.stack([p.squeeze().detach().cpu() for p in psi_theta]).T  # (N, n_modes)
 
-    # Normalize each wavefunction (important for a meaningful overlap)
-    norms = torch.norm(psi_theta_mat, dim=1, keepdim=True)
-    psi_theta_normed = psi_theta_mat / norms
+    if dx is None:
+        # Infer dx from x if it were available, but here we only have wavefunctions.
+        # Often dx is 1.0 if not specified, but for physical wavefunctions we need the grid spacing.
+        # If dx is not provided, we'll assume the user wants the raw dot product, 
+        # but to get diagonal = 1, we must normalize the wavefunctions.
+        dx = 1.0
 
-    # Overlap = psi_theta_normed @ psi_theta_normed.T (inner product over the spatial dimension)
-    overlap = torch.mm(psi_theta_normed, psi_theta_normed.t()).numpy()
+    # We use mode_overlap_matrix from pod.py to be consistent with how other overlaps are calculated.
+    from pod import mode_overlap_matrix
+    overlap_tensor = mode_overlap_matrix(psi_theta_mat, dx)
+
+    # To ensure diagonal values are exactly 1, we normalize the overlap matrix.
+    # This accounts for both the physical normalization of the wavefunctions
+    # and the specific numerical integration scheme (trapezoidal rule).
+    norms = torch.sqrt(torch.diag(overlap_tensor))
+    overlap_tensor = overlap_tensor / torch.outer(norms, norms)
+
+    overlap = overlap_tensor.numpy()
 
     # ------------------------------------------------------------------
     # 2️⃣ Plot the heat map
