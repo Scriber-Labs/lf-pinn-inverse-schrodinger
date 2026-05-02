@@ -128,18 +128,26 @@ def l2_inner_product(
 
     Parameters
     ----------
-    f, g : torch.Tensor, shape ``(N, 1)``
+    f, g : torch.Tensor, shape ``(N,)`` or ``(N, 1)``
         Function evaluated on the same grid.
     dx : float
         Uniform grid spacing.
 
     Returns
     -------
-    torch.Tensor, shape ``(N, 1)``
-        Approximation of ``int(f(x)*g(x)*dx)``.=
+    torch.Tensor
+        Approximation of ``int(f(x)*g(x)*dx)``.
     """
-    # Trapezoidal rule reduces to a simple sum since the grid is uniform.
-    return torch.sum(f * g) * dx
+    f = f.squeeze()
+    g = g.squeeze()
+    
+    # Trapezoidal rule: (f0*g0 + fn*gn)/2 + sum(fi*gi for i in 1 to n-1)
+    # This can be implemented by weighting the endpoints by 0.5
+    weights = torch.ones_like(f)
+    weights[0] = 0.5
+    weights[-1] = 0.5
+    
+    return torch.sum(f * g * weights) * dx
 
 def grid_spacing(grid: torch.Tensor) -> float:
     """
@@ -166,28 +174,24 @@ def grid_spacing(grid: torch.Tensor) -> float:
 def normalize_wavefunctions(
     psi_list: List[torch.Tensor],
     dx: float,
+    eps: float = 1e-8,
 ) -> List[torch.Tensor]:
     """
-    Normalize a list of wavefunction tensors to unit probability.
-
-    Assumes each wavefunction is represented as a 1-D tensor where the sum |psi|^2 * dx approximates the integral over space. A small epsilon is included to prevent division by zero.
+    Normalize a list of wavefunction tensors to unit probability using the trapezoidal rule.
 
     Parameters
     ----------
     psi_list : List[torch.Tensor]
-        List of 1-D wavefunction tensors to be normalized.
+        List of wavefunction tensors to be normalized.
     dx : float
-        Uniform spatial spacing between grid points. Must be positive.
+        Uniform spatial spacing.
+    eps : float, default 1e-8
+        Small epsilon for numerical stability.
 
     Returns
     -------
     List[torch.Tensor]
         List of normalized wavefunction tensors.
-
-    Raises
-    ------
-    ValueError
-        If psi_list is empty, dx is non-positive, or any tensor is not 1-D.
     """
     if not psi_list:
         raise ValueError("✖️ psi_list must contain at least one wavefunction tensor.")
@@ -196,13 +200,10 @@ def normalize_wavefunctions(
         raise ValueError(f"dx must be positive, got {dx}.")
 
     normalized = []
-    eps = 1e-12
 
     for i, psi in enumerate(psi_list):
-        if psi.dim() !=1:
-            raise ValueError(f"Wavefunciton at index {i} must be 1-D, got {psi.dim()}D.")
-
-        norm = torch.sqrt(torch.sum(psi**2) * dx + eps)
+        inner_prod = l2_inner_product(psi, psi, dx)
+        norm = torch.sqrt(inner_prod + eps)
         normalized.append(psi / norm)
 
     return normalized

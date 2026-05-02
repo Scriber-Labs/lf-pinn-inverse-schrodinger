@@ -33,21 +33,23 @@ def pod_decomposition(
     """
     Perform POD on the wavefunction snapshot matrix.
 
+    Note: This is a standard SVD. To interpret U as physically normalized
+    modes, you must scale by 1/sqrt(dx) AFTER the SVD.
+
     Parameters
     ----------
-    psi_matrix : torch.Tensor, shape ``(N_x, N_x)``
+    psi_matrix : torch.Tensor, shape ``(N_x, N_modes)``
         Each column is a snapshot of the wavefunction evaluated on the spatial grid.
 
     Returns
     -------
-    U : torch.Tensor, shape ``(N_x, N_x)``
-        Spatial POD modes (orthonormal w.r.t the discrete inner product).
-    S : torch.Tensor, shape ``(min(N_x, N_modes),)``
-        Singular values -> quantify the energy/content of each mode.
+    U : torch.Tensor, shape ``(N_x, N_modes)``
+        Unitary spatial modes (orthonormal w.r.t the standard Euclidean inner product).
+    S : torch.Tensor, shape ``(N_modes,)``
+        Singular values.
     Vh : torch.Tensor, shape ``(N_modes, N_modes)``
-        Transpose of the right singular vectors; the rows contain the modal coefficients for each snapshot.
+        Transpose of the right singular vectors.
     """
-    # 📝 ``full_matrices=False`` gives the compact SVD, which is what PODl needs.
     U, S, Vh = torch.linalg.svd(psi_matrix, full_matrices=False)
     return U, S, Vh
 

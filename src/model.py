@@ -23,7 +23,7 @@ from typing import List
 import torch
 import torch.nn as nn
 
-from utils import set_global_seed, normalize_wavefunctions
+from utils import set_global_seed, normalize_wavefunctions, l2_inner_product
 
 # ----------------------------------------------------------------------
 # 1️⃣ Neural network model
@@ -97,13 +97,9 @@ class NormalizedWavefunctionNet(nn.Module):
         # Raw prediction
         psi_raw: torch.Tensor = self.base_net(x)
 
-        # Numerical integration for L2 norm:
-        # Add epsilon to prevent division by zero during early training
-        norm_sq: torch.Tensor = torch.sum(psi_raw ** 2) * self.dx
-        norm: torch.Tensor = torch.sqrt(norm_sq + 1e-8)
-
-        # Enforce normalization
-        return psi_raw / norm
+        # Enforce normalization via utility to ensure consistency
+        # We use a single element list for normalize_wavefunctions
+        return normalize_wavefunctions([psi_raw.squeeze()], self.dx)[0].unsqueeze(1)
 
 
 class InverseSchrodingerModel(nn.Module):
@@ -186,22 +182,24 @@ class InverseSchrodingerModel(nn.Module):
         """Return the learned potential ``V_theta(x)``."""
         return self.potential_net(x)
 
-    def psi_theta(self, x: torch.Tensor, dx: float) -> List[torch.Tensor]:
+    def psi_theta(self, x: torch.Tensor, dx: float | None = None) -> List[torch.Tensor]:
         """
         Return a list of orthonormal wavefunctions via Gram-Schmidt.
         """
+        # 1. Get raw normalized predictions from sub-nets
         psi_list = [net(x).squeeze() for net in self.psi_nets]
+        
+        # 2. Orthonormalize via Gram-Schmidt
         ortho_list = []
-
-        dx = self.psi_nets[0].dx
+        dx_val = dx if dx is not None else self.psi_nets[0].dx
 
         for psi in psi_list:
             for prev in ortho_list:
-                overlap = torch.sum(psi * prev) * dx
+                overlap = l2_inner_product(psi, prev, dx_val)
                 psi = psi - overlap * prev
 
-            norm = torch.sqrt(torch.sum(psi**2) * dx + 1e-8)
-            psi = psi / norm
+            # Re-normalize after subtraction
+            psi = normalize_wavefunctions([psi], dx_val)[0]
             ortho_list.append(psi)
 
         return ortho_list
