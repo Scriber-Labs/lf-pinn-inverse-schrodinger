@@ -34,19 +34,19 @@ classDef diag fill:#F78166,stroke:#FEB538,color:#fff,stroke-width:2px;
 %% ==============================
 %% NODES (smaller circles)
 %% ==============================
-potential(("Vθ")):::model
+potential(("$$V_\theta$$")):::model
 
 psi0_raw(["$$\psi_0^\theta \quad$$ (raw)"]):::psiraw
 psi1_raw(["$$\psi_1^\theta \quad$$ (raw)"]):::psiraw
 psi2_raw(["$$\psi_2^\theta \quad$$ (raw)"]):::psiraw
 
-psi0(("ψ₀")):::model
-psi1(("ψ₁")):::model
-psi2(("ψ₂")):::model
+psi0(("$$\psi_0^\theta$$")):::model
+psi1(("$$\psi_1^\theta$$")):::model
+psi2(("$$\psi_2^\theta$$")):::model
 
-E0(("E₀")):::model
-E1(("E₁")):::model
-E2(("E₂")):::model
+E0(("$$E_0^\theta$$")):::model
+E1(("$$E_1^\theta$$")):::model
+E2(("$$E_2^\theta$$")):::model
 
 %% ==============================
 %% PIPELINE
@@ -55,8 +55,8 @@ subgraph PIML["PIML Framework"]
 direction LR
 
     subgraph Data["1️⃣ Data"]
-        x["x"]:::data
-        obs["ρ, E"]:::data
+        x["$$x$$"]:::data
+        obs["$$\rho_n^\text{obs}, \ E_n^\text{obs}$$"]:::data
     end
 
     subgraph Model["2️⃣ Networks"]
@@ -67,9 +67,9 @@ direction LR
     end
 
     subgraph Normalization["3️⃣ Range Constraints"]
-        norm1["L2 Normalize\n∫|ψ|² dx = 1"]:::norm
-        gs["Gram-Schmidt\n⟨ψi,ψj⟩=0"]:::norm
-        eps["+ ε stability"]:::norm
+        norm1["L2 Normalize"]:::norm
+        gs["Gram-Schmidt"]:::norm
+        eps["$$+\epsilon \ \text{stability}$$"]:::norm
     end
 
     subgraph Operators["3️⃣ Finite differenceOperators"]
@@ -77,19 +77,19 @@ direction LR
         vdiff["V''"]:::operator
     end
 
-    subgraph Physics["4️⃣ Physics"]
+    subgraph Physics["4️⃣ Physics Residual"]
         H["Ĥψ"]:::physics
-        R["R(x)"]:::physics
+        R["$$R_n(x)=-\frac{1}{2}\frac{\partial^2}{\partial x^2}\psi_n^\theta + V_\theta\psi_n^\theta-E_n^\theta\psi_n^\theta $$"]:::physics
     end
 
-    subgraph Loss["5️⃣ Loss"]
-        Lp["Physics"]:::loss
-        Ln["Norm"]:::loss
-        Ls["Smooth"]:::loss
-        Ld["Data"]:::loss
+    subgraph Loss["5️⃣  Total Loss"]
+        Lp["Physics loss"]:::loss
+        Ln["Order"]:::loss
+        Ls["Smoothness"]:::loss
+        Ld["Data mismatch"]:::loss
     end
 
-    opt["6️⃣ Adam"]:::opt
+    opt["6️⃣  Optimizer (Adam)"]:::opt
 
     %% FLOW
     x --> MLP1
