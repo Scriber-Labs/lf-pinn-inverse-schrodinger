@@ -65,13 +65,15 @@ from train import (
     make_grid,
     InverseSchrodingerModel,
 )
+from pod import physical_pod_decomposition
+from utils import l2_inner_product
 
 # ----------------------------------------------------------------------
 # 2️⃣ Argument parser for CLI
 # ----------------------------------------------------------------------
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        prog="python -m cli_train",
+        prog="python -m cli.cli_train",
         description="Train a low-fidelity PINN for the inverse Schrödinger problem.",
     )
     parser.add_argument("--n_modes", type=int, default=3,
@@ -297,30 +299,50 @@ def main(argv: list[str] | None = None) -> None:    # noqa: D401
             psi_learned = model.psi_theta(x, dx)
             E_learned = model.E_theta()
 
-            # Sort by energy if not already (train_step does it but better be safe)
+            # Sort learned quantities for diagnostic/reporting artifacts only.
+            # Training itself uses the raw energy ordering so the ordering loss remains a soft penalty.
             idx = torch.argsort(E_learned)
             E_learned = E_learned[idx]
             psi_learned = [psi_learned[i] for i in idx]
 
-            # POD Analysis (SVD on the learned wavefunctions)
+            # POD Analysis using the same trapezoidal physical POD pipeline as the notebook.
             # Stack wavefunctions as columns: (n_points, n_modes)
             psi_matrix = torch.stack(psi_learned, dim=1)
-            # Perform SVD
-            U, S, V = torch.svd(psi_matrix)
+            pod_modes_physical, S, Vh, pod_modes_euclidean = physical_pod_decomposition(
+                psi_matrix,
+                dx,
+                reference_modes=psi_matrix,
+                align_signs=True,
+            )
 
             # Overlap Matrix (learned vs learned)
             n_modes = len(psi_learned)
-            overlap_learned = torch.zeros((n_modes, n_modes))
-            from utils import l2_inner_product
+            overlap_learned = torch.zeros(
+                (n_modes, n_modes),
+                device=device,
+                dtype=psi_matrix.dtype,
+            )
             for i in range(n_modes):
                 for j in range(n_modes):
-                    overlap_learned[i, j] = l2_inner_product(psi_learned[i], psi_learned[j], dx)
+                    overlap_learned[i, j] = l2_inner_product(
+                        psi_learned[i],
+                        psi_learned[j],
+                        dx,
+                    )
 
             # Overlap Matrix (learned vs true)
-            overlap_true = torch.zeros((n_modes, n_modes))
+            overlap_true = torch.zeros(
+                (n_modes, n_modes),
+                device=device,
+                dtype=psi_matrix.dtype,
+            )
             for i in range(n_modes):
                 for j in range(n_modes):
-                    overlap_true[i, j] = l2_inner_product(psi_learned[i], psi_true[j].to(device), dx)
+                    overlap_true[i, j] = l2_inner_product(
+                        psi_learned[i],
+                        psi_true[j].to(device),
+                        dx,
+                    )
 
         # Prepare diagnostics dictionary for saving
         diagnostics = {
@@ -328,7 +350,9 @@ def main(argv: list[str] | None = None) -> None:    # noqa: D401
             "V_learned": V_learned.cpu().numpy(),
             "psi_learned": torch.stack(psi_learned).cpu().numpy(),
             "pod_singular_values": S.cpu().numpy(),
-            "pod_modes": U.cpu().numpy(),
+            "pod_modes_physical": pod_modes_physical.cpu().numpy(),
+            "pod_modes_euclidean": pod_modes_euclidean.cpu().numpy(),
+            "pod_vh": Vh.cpu().numpy(),
             "overlap_learned": overlap_learned.cpu().numpy(),
             "overlap_true": overlap_true.cpu().numpy(),
         }
