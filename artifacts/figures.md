@@ -17,7 +17,40 @@
 ---
 ## Figure 1 - Training Curves
 ![Training Curves](demo_visuals/training_curves.png)
-> 🏡 ENTER FIGURE 1 TAKE-HOME MESSAGE HERE
+> 🏡 Loss trajectories reveal which physical and geometric structures are easiest or hardest to reconcile simultaneously.
+
+### 🗝️ Key Take-Aways
+#### Multi-objective competition governs training
+- The optimization problem is inherently coupled:
+    - wavefunctions,
+    - eigenvalues,
+    - and the shared potential $V_\theta(x)$
+  
+   are updated simultaneously under competing geometric and physical constraints.
+- Consequently, convergence reflects a negotiated balance between:
+    - data consistency,
+    - PDE residual minimization,
+    - smoothness regularization,
+    - and weighted orthonormal structure.
+  
+#### Observable consistency emerges earlier than full physics consistency
+- The data mismatch term deccreases rapidly during early training.
+- In contrast, the Schrödinger residual decreases more gradually and remains finite throughout optimization.
+- ✨ This suggests that coarse observable structure is easier to identify than exact operator consistency in the low-fidelity inverse setting.
+
+#### Smoothness regularization introduces optimization stiffness
+- The smoothness loss initially dominates the optimization landscape.
+- Because the smoothness term depends on second spatial derivatives of the learned potential, it is highly sensitive to local curvature fluctuations and discretization effects.
+- The large transient spike early in trianing suggests a rapid reconfiguration of the coupled operator-eigenfunction geometry as the model simultaneously adjusts normalization, orthogonality structure, and potential curvature.
+
+#### Stable convergence does not imply exact recovery
+- The total loss stabilizes despite persistent nonzero physics residuals.
+- This behavior is expected in the presence of:
+    - noisy observations,
+    - finite-difference discretization,
+    - weighted normalization,
+    - and competing regularization objectives.
+- ✨ Consequently, convergence should be interpreted as approximate structural consistency rather than exact operator reconstruction.
 
 <p align="center">
   <img src="../assets/images/loss_table_extended.png"
@@ -29,28 +62,52 @@
 
 ## Figure 2 - Learned Potential $V_\theta(x)$ vs. Ground Truth Potential $V(x)$ (Harmonic Oscillator)
 ![Potential Functions](demo_visuals/learned_potential.png)
-> 🏡 ENTER FIGURE 2 TAKE-HOME MESSAGE HERE
+> 🏡 The learned potential reproduces localized confinement structure and spectral consistency withing regions supported by the learned eigenfunctions, while deviating substantially from the ground-truth harmonic potential outside strongly constrained spatial regions.
 
 ### 🔑 Key Take-Aways
-- **Smoothness prior effect:**  Regularization of $\mathcal{L}_\text{smooth}$ encourages low-curvature solutions, guiding $V_\theta(x)$ toward a geometrically stable solution state.
-- **Inverse problem non-uniqueness:** The inverse Schrödinger problem is fundamentally ill-posed. Specifically, the same finite set of eigenfunctions and associated eigenvalues can be produced by multiple potentials.
-  - $\mathcal{L}_\text{smooth}$ helps guide the model to a physically plausible solution (e.g., no sharp curvature artifacts).
-  - However, $\mathcal{L}_\text{smooth}$ does not guarantee uniqueness!
-- **Domain-dependent identifiability:** Divergence near boundaries arise due to the wavefunctions having negligible amplitude in those regions. 
-  - This results in:
-    - Numerical weakening of the physics residual.
-    - Data set provides minimal constraint in these regions.
-    - The smoothness term biases the solution toward flattening.
+#### Local structure is more identifiable than global structure
+- The learned operator captures qualitative confinement behavior near the spatial regions where the learned wavefunctions possess significant probability mass.
+- However, the recovered potential deviates strongly from the analytic harmonic oscillator outside of these regions, indicating that:
+    - spectral observations alone do not uniquely determine the global operator geometry,
+    - particularly under noisy and low-fidelity discretization.
+#### The inverse Schrödinger problem remains fundamentally non-unique
+- Multiple distinct potentials may reproduce similar:
+    - eigenvalue spectra,
+    - probability densities,
+    - and low-order spatial statistics.
+- Consequently, agreement between observables does not guarantee pointwise recovery of the true underlying potential.
+- The learned $V_\theta(x)$ therefore represents:
+    - one spectrally compatible solution among many others,
+    - rather than the unique physical potential.
+#### Constraint strength depends on wavefunction support
+- Regions where:
+  $$ |\psi_n^\theta(x)|^2 \approx 0$$
+  provide weak information to the inverse problem.
+- In these regions:
+    - the physics residual contributes little,
+    - observational density supervision weakens,
+    - and smoothness regularization dominates.
+- This produces:
+    - boundary flattening,
+    - offest drift,
+    - and reduced geometric fidelity away from occupied spatial regions.
+#### Smoothness regularization stabilizes the inverse problem but biases geometry
+- The smoothness penalty suppresses high-frequency artifacts and prevents unstable curvature oscillations in $V_\theta(x)$.
+- However, smoothness regularization also biases the recovered operator family toward lower-curvature solutions, which may differ from the true harmonic potential while still reproducing similar spectral observations.
+
 ### ✖️ Failure Modes
-- **Bias vs. variance tradeoff:** 
-  - If $\lambda_\text{smooth}$ is too large, **over-smoothing** (bias) occurs. In the extreme case, **flattening** occurs and $V_\theta \rightarrow \text{const}$.
-  - If $\lambda_\text{smooth}$ is too small, noisy perturbations and high-frequency artifacts emerge in $V_\theta(x)$.
-- **Boundary artifacts** are more likely to manifest due to the model being less constricted near the boundaries (see domain-dependent identifiability).
-
-
+#### Spectrally consistent but geometrically incorrect operators
+- The learned potential preserves aspects of the spectral structure while failing to recover the correct global operator geometry.
+- ✨ This demonstrates that spectral consistency alone is insufficient for full operator identifiability.
+#### Boundary underconstraint
+- The strongest deviations occur near the domain edges where:
+  - wavefunction amplitudes are negligible,
+  - residual constraints weaken,
+  - and regularization dominates optimization.
+- This reflects a fundamental identifiability limitation of inverse spectral learning under finite spatial support.
 ---
 
-> 🏡 ❓Together, Figure 1 and Figure 2 suggest the low-fidelity PINN formulation aligns operator spectrum, solution support, and constraint geometry into a stable, interpretable equilibrium.❓ DOUBLE CHECK
+> 🏡 Together, Figure 1 and 2 suggest the low-fidelity PINN converges toward a spectrally stable and internally consistent operator geometry, even when the recovered potential differs substantially from the ground-truth solution.
 ---
 
 ## Figure 3 - Learned Wavefunctions $\psi_n^\theta(x)$ vs. Ground Truth Wavefunctions $\psi_n(x)$ (Quantum Harmonic Oscillator)
