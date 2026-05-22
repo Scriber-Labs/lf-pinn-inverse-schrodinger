@@ -30,7 +30,7 @@ from db_logger import RunLogger
 from model import InverseSchrodingerModel
 from physics import tise_loss, potential_smoothness_loss, energy_ordering_loss
 from inverse import data_mismatch_loss
-from utils import make_grid, set_global_seed, normalize_wavefunctions
+from utils import make_grid, set_global_seed
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = PROJECT_ROOT / "data"
@@ -47,7 +47,7 @@ def train_step(
     rho_obs: List[torch.Tensor],
     E_obs: torch.Tensor,
     lambdas: dict[str, float],
-) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor]:
+) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
     """
     Execute a single gradient descent step.
 
@@ -78,12 +78,6 @@ def train_step(
     V_theta = model.V_theta(x)  # potential V(theta, x)
     psi_list = model.psi_theta(x, dx)  # list[psi_n(theta, x)]
     E_theta = model.E_theta()
-
-    psi_list = normalize_wavefunctions(psi_list, dx)
-
-    idx = torch.argsort(E_theta)
-    E_theta = E_theta[idx]
-    psi_list = [psi_list[i] for i in idx]
 
     # ------------------- Physics‑informed loss -------------------
     loss_physics = tise_loss(

@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import torch
 from typing import Tuple
+from utils import l2_inner_product
 
 __all__: list[str] = [
     "pod_decomposition",
@@ -87,9 +88,15 @@ def weight_snapshot_matrix(
     if dx <= 0:
         raise ValueError(f"❌ dx must be positive, got {dx}.")
 
-    return psi_matrix * torch.sqrt(
-        torch.as_tensor(dx, dtype=psi_matrix.dtype, device=psi_matrix.device)
-    )
+    N = psi_matrix.shape[0]
+    weights = torch.ones(N, device=psi_matrix.device, dtype=psi_matrix.dtype)
+    weights[0] = 0.5
+    weights[-1] = 0.5
+
+    # Scale snapshot matrix such that Euclidean SVD corresponds to physical inner product
+    # <psi|phi>_phys = sum(psi * phi * weights) * dx
+    # So we want psi_w = psi * sqrt(weights * dx)
+    return psi_matrix * torch.sqrt(weights.unsqueeze(1) * dx)
 
 def scale_pod_modes_to_physical(
     pod_modes_euclidean: torch.Tensor,
@@ -99,12 +106,11 @@ def scale_pod_modes_to_physical(
     Convert Euclidean-normalized POD modes to physically normalized modes.
 
     The SVD returns modes satisfying ``U.T @ U = I``. Physical normalization instead requires
+    ``<u_k | u_k>_phys = 1``.
 
-    ``sum_i |u_k(x_i)|^2 = 1``.
-
-    For a uniform grid, this is obtained by scaling
-
-    ``u_k^phys = u_k / sqrt(dx)``.
+    If the weighted snapshot matrix was ``Psi_w = Psi * sqrt(weights * dx)``,
+    then the resulting U satisfies ``U.T @ U = I``, and the physical modes are
+    ``U_phys = U / sqrt(weights * dx)``.
 
     Parameters
     ----------
@@ -121,9 +127,12 @@ def scale_pod_modes_to_physical(
     if dx <= 0:
         raise ValueError(f"❌ dx must be positive, got {dx}.")
 
-    return pod_modes_euclidean / torch.sqrt(
-        torch.as_tensor(dx, dtype=pod_modes_euclidean.dtype, device=pod_modes_euclidean.device)
-    )
+    N = pod_modes_euclidean.shape[0]
+    weights = torch.ones(N, device=pod_modes_euclidean.device, dtype=pod_modes_euclidean.dtype)
+    weights[0] = 0.5
+    weights[-1] = 0.5
+
+    return pod_modes_euclidean / torch.sqrt(weights.unsqueeze(1) * dx)
 
 def align_modes_by_reference(
     modes: torch.Tensor,
@@ -166,7 +175,13 @@ def align_modes_by_reference(
     if dx is None:
         overlaps = aligned.T @ reference
     else:
-        overlaps = cross_overlap_matrix(aligned, reference, dx)
+        # Use l2_inner_product for sign alignment if dx is provided for full consistency
+        n_modes = modes.shape[1]
+        n_ref = reference.shape[1]
+        overlaps = torch.zeros((n_modes, n_ref), device=modes.device, dtype=modes.dtype)
+        for i in range(n_modes):
+            for j in range(n_ref):
+                overlaps[i, j] = l2_inner_product(modes[:, i], reference[:, j], dx)
 
     strongest_ref_idx = torch.argmax(torch.abs(overlaps), dim=1)
 
@@ -189,13 +204,14 @@ def physical_pod_decomposition(
     This function is based on the project 2 architecture diagram:
 
     1. Form the learned snapshot matrix ``Psi_theta``.
-    2. Apply spatial-measure weighting: ``Psi_w = sqrt(dx) * Psi_theta``.
+    2. Apply spatial-measure weighting:
+        ``Psi_w(x_i) = sqrt(w_i * dx) * Psi_theta(x_i)``.
     3. Compute the Euclidean SVD: ``Psi_w = U Sigma V^T``.
-    4. Optionally sign-align the Euclidean POD modes after SVD.
-    5. Scale POD modes to physical normalization:
-        ``u_k^phys = u_k / sqrt(dx)``.
+    4. Scale POD modes to physical normalization:
+        ``u_k^phys(x_i) = u_k(x_i) / sqrt(w_i * dx)``.
+    5. Optionally sign-align the physical POD modes after scaling.
 
-    Phase/sign alignment is intentionally performed after the SVD and before physical POD scaling.
+    Phase/sign alignment is intentionally performed after physical POD scaling.
 
     Parameters
     ----------
@@ -207,31 +223,39 @@ def physical_pod_decomposition(
         Reference matrix used for sign alignment. If ``None`` and
         ``align_signs=True``, the learned snapshot matrix itself is used.
     align_signs : bool, default=True
-        Whether to apply POD-mode sign alignment after SVD.
+        Whether to apply POD-mode sign alignment after physical scaling.
 
     Returns
     -------
     pod_modes_physical : torch.Tensor, shape ``(N_x, N_modes)``
         Physically normalized POD spatial modes.
     S : torch.Tensor, shape ``(N_modes),``
-        Singular values form the weighted snapshot matrix.
+        Singular values from the weighted snapshot matrix.
     Vh : torch.Tensor, shape ``(N_modes, N_modes)``
         Transpose of the right singular-vector matrix.
     pod_modes_euclidean : torch.Tensor, shape ``(N_x, N_modes)``
-        Euclidean-normalized POD modes after optional sign alignment.
+        Euclidean-normalized POD modes with signs matched to ``pod_modes_physical``.
     """
     psi_weighted = weight_snapshot_matrix(psi_matrix, dx)
     pod_modes_euclidean, S, Vh = pod_decomposition(psi_weighted)
 
+    pod_modes_physical = scale_pod_modes_to_physical(pod_modes_euclidean, dx)
+
     if align_signs:
         reference = psi_matrix if reference_modes is None else reference_modes
-        pod_modes_euclidean = align_modes_by_reference(
-            pod_modes_euclidean,
+        aligned_physical = align_modes_by_reference(
+            pod_modes_physical,
             reference,
-            dx=None,
+            dx=dx,
         )
 
-    pod_modes_physical = scale_pod_modes_to_physical(pod_modes_euclidean, dx)
+        sign = torch.sign(
+            torch.sum(aligned_physical * pod_modes_physical, dim=0)
+        )
+        sign = torch.where(sign == 0, torch.ones_like(sign), sign)
+
+        pod_modes_physical = aligned_physical
+        pod_modes_euclidean = pod_modes_euclidean * sign.unsqueeze(0)
 
     return pod_modes_physical, S, Vh, pod_modes_euclidean
 

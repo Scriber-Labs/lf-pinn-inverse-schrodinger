@@ -232,24 +232,24 @@ subgraph diagnostics["Diagnostics"]
 
     subgraph pod["7️⃣ POD"]
             PsiMat("Snapshot matrix<br/>$$\mathbf{\Psi}^\theta=[\psi_0^\theta,\psi_1^\theta,\psi_2^\theta]$$"):::diag
-            weight("Spatial measure weighting<br/>$$\mathbf{\Psi}_w^\theta=\sqrt{\Delta x}\,\mathbf{\Psi}^\theta$$"):::diag
+            weight("Trapezoidal spatial-measure weighting<br/>$$\mathbf{\Psi}_w^\theta(x_i)=\sqrt{w_i\Delta x}\,\mathbf{\Psi}^\theta(x_i)$$"):::diag
             SVD("Euclidean SVD<br/>$$\mathbf{\Psi}_w^\theta=U\Sigma V^T$$"):::diag
-            align("POD phase / sign alignment<br/>after SVD, before scaling"):::diag
-            podscale("POD physical scaling<br/>$$u_k^\mathrm{phys}=u_k/\sqrt{\Delta x}$$"):::diag
-            note("Note:<br/>SVD modes are sign-ambiguous and Euclidean-normalized.<br/>Physical POD modes require $$\Delta x$$ scaling."):::diag
+            podscale("POD physical scaling<br/>$$u_k^\mathrm{phys}(x_i)=u_k(x_i)/\sqrt{w_i\Delta x}$$"):::diag
+            align("Physical POD phase / sign alignment<br/>after scaling"):::diag
+            note("Note:<br/>SVD modes are sign-ambiguous and Euclidean-normalized.<br/>Physical POD modes require trapezoidal $$w_i\Delta x$$ scaling."):::diag
             spec("Singular values<br/>$$\sigma_k$$"):::diag
             modes("Physical POD modes<br/>$$u_k^\mathrm{phys}$$"):::diag
-            overlaps("POD overlaps<br/>$$\langle u_k^\mathrm{phys},\psi_n^\theta\rangle_{\Delta x}$$"):::diag
+            overlaps("POD overlaps<br/>$$\langle u_k^\mathrm{phys},\psi_n^\theta\rangle_{\Delta x,w}$$"):::diag
 
             PsiMat --> weight
             weight --> SVD
             SVD --> spec
-            SVD --> align
-            align --> podscale
-            podscale --> modes
-            podscale --> overlaps
-            note -.-> align
+            SVD --> podscale
+            podscale --> align
+            align --> modes
+            align --> overlaps
             note -.-> podscale
+            note -.-> align
         end
 
 end

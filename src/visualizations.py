@@ -867,8 +867,8 @@ def plot_pod_first_three_spatial_modes(
 # ----------------------------------------------------------------------
 def plot_overlap_heatmap(
     psi_theta: Sequence[torch.Tensor],
+    dx: float,
     *,
-    dx: float | None = None,
     lambdas: Dict[str, float] | None = None,
     cmap: str = "cool",
     fmt: str = ".2f",
@@ -881,8 +881,8 @@ def plot_overlap_heatmap(
     ----------
     psi_theta : Sequence[torch.Tensor]
         Learned wavefunctions, each 1-D with the same length. The function will stack them into a (n_modes, N) matrix.
-    dx : float | None, optional
-        Grid spacing. If ``None`` the function infers it from teh first wavefunction (assumes uniform grid). This hidden assumption is removed if `dx` is provided explicitly.
+    dx : float
+        Grid spacing.
     lambdas : Dict[str, float] | None, optional
         Optional string with loss weights to be displayed on the figure.
     cmap, fmt : str
@@ -901,13 +901,6 @@ def plot_overlap_heatmap(
     # 1️⃣ Stack and normalize the wavefunctions
     # ------------------------------------------------------------------
     psi_theta_mat = torch.stack([p.squeeze().detach().cpu() for p in psi_theta]).T  # (N, n_modes)
-
-    if dx is None:
-        # Infer dx from x if it were available, but here we only have wavefunctions.
-        # Often dx is 1.0 if not specified, but for physical wavefunctions we need the grid spacing.
-        # If dx is not provided, we'll assume the user wants the raw dot product, 
-        # but to get diagonal = 1, we must normalize the wavefunctions.
-        dx = 1.0
 
     # We use mode_overlap_matrix from pod.py to be consistent with how other overlaps are calculated.
     from pod import mode_overlap_matrix
@@ -967,8 +960,8 @@ def plot_overlap_heatmap(
 def plot_cross_overlap_heatmap(
     pod_modes_physical: Sequence[torch.Tensor] | torch.Tensor,
     psi_matrix: Sequence[torch.Tensor] | torch.Tensor,
+    dx: float,
     *,
-    dx: float | None = None,
     cmap: str = "cool",
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
@@ -1071,14 +1064,14 @@ def plot_cross_overlap_heatmap(
 # 📊7️⃣c) POD–Eigenbasis Alignment Heatmap
 # ----------------------------------------------------------------------
 def plot_pod_eigen_alignment(
-        pod_modes_physical: Sequence[torch.Tensor] | torch.Tensor,
-        psi_true_matrix: Sequence[torch.Tensor] | torch.Tensor,
-        *,
-        dx: float | None = None,
-        cmap: str = "cool",
-        fmt: str = ".2f",
-        lambdas: Dict[str, float] | None = None,
-        out_path: pathlib.Path | None = None,
+    pod_modes_physical: Sequence[torch.Tensor] | torch.Tensor,
+    psi_true_matrix: Sequence[torch.Tensor] | torch.Tensor,
+    dx: float,
+    *,
+    cmap: str = "cool",
+    fmt: str = ".2f",
+    lambdas: Dict[str, float] | None = None,
+    out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """
     Create a heat map of the overlap matrix <u_k | psi_n> where ``u_k`` are the physical POD modes and ``psi_n`` are the ground truth wavefunctions.
