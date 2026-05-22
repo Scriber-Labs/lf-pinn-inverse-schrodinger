@@ -28,7 +28,7 @@ import seaborn as sns
 import numpy as np
 import torch
 
-from pod import pod_decomposition, cross_overlap_matrix
+from pod import pod_decomposition, physical_pod_decomposition, cross_overlap_matrix
 
 # ----------------------------------------------------------------------
 # 🌍 Global style helper
@@ -1453,7 +1453,14 @@ def _smoke_test() -> None:
     # --------------------------------------------------------------
     # Use the same psi_theta matrix you already built for POD demo
     psi_matrix = torch.stack(psi_learned, dim=1)    # shape (N, n_modes)
-    _, S, _ = pod_decomposition(psi_matrix)         # S is a 1-D tensor of singular values
+    dx = float(x[1] - x[0])
+
+    pod_modes_physical, S, _, pod_modes_euclidean = physical_pod_decomposition(
+        psi_matrix,
+        dx,
+        reference_modes=psi_matrix,
+        align_signs=True,
+    )
 
     sv_path = out_dir / "pod_singular_values.png"
     plot_pod_singular_values(
@@ -1464,13 +1471,10 @@ def _smoke_test() -> None:
     # --------------------------------------------------------------
     # 6️⃣b) First three POD spatial modes
     # -------------------------------------------------------------
-    psi_matrix = torch.stack(psi_learned, dim=1)  # shape (N, n_modes)
-    U, _, _ = pod_decomposition(psi_matrix)  # U is a 2-D tensor of spatial modes
-
     pod_modes_path = out_dir / "pod_modes.png"
     plot_pod_first_three_spatial_modes(
         x=x,
-        spatial_modes=U,
+        spatial_modes=pod_modes_physical,
         ground_truth=psi_true,
         lambdas=lambdas,
         out_path=pod_modes_path,
@@ -1482,6 +1486,7 @@ def _smoke_test() -> None:
     overlap_path = out_dir / "overlap_heatmap.png"
     plot_overlap_heatmap(
         psi_theta=psi_learned,  # use the same learned wavefunction from the dummy data
+        dx=dx,
         lambdas=lambdas,  # optional - show loss weights
         out_path=overlap_path,
     )
@@ -1491,9 +1496,9 @@ def _smoke_test() -> None:
     # --------------------------------------------------------------
     alignment_path = out_dir / "pod_eigen_alignment.png"
     plot_pod_eigen_alignment(
-        U,
+        pod_modes_physical,
         torch.stack(psi_true, dim=0).T,
-        dx=x[1] - x[0],
+        dx=dx,
         lambdas=lambdas,
         out_path=alignment_path
     )
