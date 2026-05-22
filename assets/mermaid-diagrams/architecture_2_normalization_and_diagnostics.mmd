@@ -231,13 +231,23 @@ subgraph diagnostics["Diagnostics"]
     sanity["sanity checks"]:::diag
 
     subgraph pod["7️⃣ POD"]
-        SVD("SVD"):::diag
-        spec("σ"):::diag
-        modes("U"):::diag
+            PsiMat("Snapshot matrix<br/>$$\mathbf{\Psi}^\theta=[\psi_0^\theta,\psi_1^\theta,\psi_2^\theta]$$"):::diag
+            SVD("Euclidean SVD<br/>$$\mathbf{\Psi}^\theta=U\Sigma V^T$$"):::diag
+            align("Phase / sign alignment<br/>after SVD, before scaling"):::diag
+            podscale("POD physical scaling<br/>$$u_k^\mathrm{phys}=u_k/\sqrt{\Delta x}$$"):::diag
+            note("Note:<br/>SVD modes are Euclidean-normalized.<br/>Physical normalization requires $$\Delta x$$ scaling."):::diag
+            spec("Singular values<br/>$$\sigma_k$$"):::diag
+            modes("Physical POD modes<br/>$$u_k^\mathrm{phys}$$"):::diag
+            overlaps("POD overlaps<br/>$$\langle u_k^\mathrm{phys},\psi_n^\theta\rangle_{\Delta x}$$"):::diag
 
-        SVD --> spec
-        SVD --> modes
-    end
+            PsiMat --> SVD
+            SVD --> spec
+            SVD --> align
+            align --> podscale
+            podscale --> modes
+            podscale --> overlaps
+            note -.-> podscale
+        end
 
 end
 
