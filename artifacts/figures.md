@@ -34,14 +34,14 @@
     - and weighted orthonormal structure.
   
 #### Observable consistency emerges earlier than full physics consistency
-- The data mismatch term deccreases rapidly during early training.
+- The data mismatch term decreases rapidly during early training.
 - In contrast, the Schrödinger residual decreases more gradually and remains finite throughout optimization.
 - ✨ This suggests that coarse observable structure is easier to identify than exact operator consistency in the low-fidelity inverse setting.
 
 #### Smoothness regularization introduces optimization stiffness
 - The smoothness loss initially dominates the optimization landscape.
 - Because the smoothness term depends on second spatial derivatives of the learned potential, it is highly sensitive to local curvature fluctuations and discretization effects.
-- The large transient spike early in trianing suggests a rapid reconfiguration of the coupled operator-eigenfunction geometry as the model simultaneously adjusts normalization, orthogonality structure, and potential curvature.
+- The large transient spike early in training suggests a rapid reconfiguration of the coupled operator-eigenfunction geometry as the model simultaneously adjusts normalization, orthogonality structure, and potential curvature.
 
 #### Stable convergence does not imply exact recovery
 - The total loss stabilizes despite persistent nonzero physics residuals.
