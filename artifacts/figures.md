@@ -17,7 +17,7 @@
 ---
 ## Figure 1 - Training Curves
 ![Training Curves](demo_visuals/training_curves.png)
-> 🏡 Loss trajectories reveal which physical and geometric structures are easiest or hardest to reconcile simultaneously.
+> 📃 Loss trajectories reveal which physical and geometric structures are easiest or hardest to reconcile simultaneously.
 
 ### 🗝️ Key Take-Aways
 #### Multi-objective competition governs training
@@ -62,15 +62,13 @@
 
 ## Figure 2 - Learned Potential $V_\theta(x)$ vs. Ground Truth Potential $V(x)$ (Harmonic Oscillator)
 ![Potential Functions](demo_visuals/learned_potential.png)
-> 🏡 The learned potential reproduces localized confinement structure and spectral consistency withing regions supported by the learned eigenfunctions, while deviating substantially from the ground-truth harmonic potential outside strongly constrained spatial regions.
+> 📃 The learned potential reproduces localized confinement structure and spectral consistency within regions supported by the learned eigenfunctions. However, the sigmoidal / piecewise-flat shape of $V_\theta(x)$ deviating substantially from expected quadratic shape of  the ground-truth harmonic potential.
 
 ### 🔑 Key Take-Aways
-#### Local structure is more identifiable than global structure
+#### 1. Local structure is more identifiable than global structure
 - The learned operator captures qualitative confinement behavior near the spatial regions where the learned wavefunctions possess significant probability mass.
-- However, the recovered potential deviates strongly from the analytic harmonic oscillator outside of these regions, indicating that:
-    - spectral observations alone do not uniquely determine the global operator geometry,
-    - particularly under noisy and low-fidelity discretization.
-#### The inverse Schrödinger problem remains fundamentally non-unique
+- However, the recovered potential deviates strongly from the analytic harmonic oscillator outside of these regions, indicating that spectral observations alone do not uniquely determine the global operator geometry
+#### 2. The inverse Schrödinger problem remains fundamentally non-unique
 - Multiple distinct potentials may reproduce similar:
     - eigenvalue spectra,
     - probability densities,
@@ -79,7 +77,7 @@
 - The learned $V_\theta(x)$ therefore represents:
     - one spectrally compatible solution among many others,
     - rather than the unique physical potential.
-#### Constraint strength depends on wavefunction support
+#### 3. Constraint strength depends on wavefunction support
 - Regions where:
   $$ |\psi_n^\theta(x)|^2 \approx 0$$
   provide weak information to the inverse problem.
@@ -91,15 +89,15 @@
     - boundary flattening,
     - offest drift,
     - and reduced geometric fidelity away from occupied spatial regions.
-#### Smoothness regularization stabilizes the inverse problem but biases geometry
+#### 4. Smoothness regularization stabilizes the inverse problem but biases geometry
 - The smoothness penalty suppresses high-frequency artifacts and prevents unstable curvature oscillations in $V_\theta(x)$.
 - However, smoothness regularization also biases the recovered operator family toward lower-curvature solutions, which may differ from the true harmonic potential while still reproducing similar spectral observations.
 
 ### ✖️ Failure Modes
-#### Spectrally consistent but geometrically incorrect operators
+#### 1. Spectrally consistent but geometrically incorrect operators
 - The learned potential preserves aspects of the spectral structure while failing to recover the correct global operator geometry.
 - ✨ This demonstrates that spectral consistency alone is insufficient for full operator identifiability.
-#### Boundary underconstraint
+#### 2. Boundary under-constraint
 - The strongest deviations occur near the domain edges where:
   - wavefunction amplitudes are negligible,
   - residual constraints weaken,
@@ -113,21 +111,34 @@
 ## Figure 3 - Learned Wavefunctions $\psi_n^\theta(x)$ vs. Ground Truth Wavefunctions $\psi_n(x)$ (Quantum Harmonic Oscillator)
 ![Learned Wavefunctions](demo_visuals/learned_wavefunctions.png)
 
-> 🏡 ENTER FIGURE 3 TAKE-HOME MESSAGE HERE
+> 🏡 The learned eigenfunctions (dashed green curves) preserve qualitative modal organization and nodal ordering while deviating substantially from the localized Hermite-Gaussian structure of the true harmonic oscillator eigenstates (pink curves).
+> This is indicative of convergence toward a spectrally self-consistent but geometrically distorted operator family reminiscent of Fourier modes.
 
 ### 🔑 Key Take-Aways
-- **Phase ambiguity:** Overall sign flips are physically irrelevant due to global phase invariance.
-- **Shape consistency:** Learned eigenfunctions retain correct Gaussian envelope structure.
-- **Node structure:** Zeros align accurately with ground truth analytical solutions. This indicates correct operator curvature.
+- **Preserved spectral structure:** Learned modes maintain oscillatory complexity scaling, approximate parity, and nodal ordering despite inaccurate potential geometry.
+- **Substantial geometric deviation:** Learned eigenfunctions $\psi_n^\theta(x)$ exhibit:
+  - broader oscillations
+  - reduced confinement
+  - Fourier-like standing-wave behavior
+- **Operator-eigenfunction coupling:** 
+  - Deviation from the expected localized Hermite-Gaussian structure is consistent with the flattened learned potential $V_\theta(x)$, which fails to recover the quadratic structure of the harmonic oscillator potential.  
+  - Such flattened potential curves produces globally oscillatory solutions rather than the expected localized bound states, maintaining internal consistency despite deviation from the ground truth system.
+- **Regularization bias:** Smoothness priors favor lower-curvature geometries. This produces spatially smoother, less localized modes that are not consistent with the ground-truth wavefuncitons, yet they still satisfy Schrödinger residuals and observational constraints. This is a hallmark manifestation of the ill-posedness for the inverse Schrödinger problem.
 
+### ✖️ Failure Modes
+- Inaccurate operator recovery provides spectrally organized but physically incorrect eigenstates emerge
+- Loss minimization succeeds yet fails to recover the ground truth potential geometry.
+  - ✨ This highlights the fact that optimization stability does not guarantee unique physical recovery. This is the agrees with the fact that the inverse Schrödinger problem is ill-posed.
 ---
 
 ## Figure 4 - Learned vs. Ground Truth Energy Eigenvalues 
 ![Learned Energies](demo_visuals/learned_energies.png)
-> 🏡 The learned operator preserves spectral spacing and ordering across the first three wavefunctions. This indicates no mode swapping or spectral collapse occurred during training.
+> 📃 The learned operator preserves spectral spacing and ordering across the first three wavefunctions. This indicates no mode swapping or spectral collapse occurred during training.
 
 🎗️ Recall proper energy ordering is softly enforced by the ordering loss term $\mathcal{L}_\text{order}$.
 
+--
+> 🏠  **Spectral vs. geometric fidelity:** Together, Figures 2, 3, and 4 show that the model preserves eigenvalue ordering and modal hierarchy, but fails to recover confinement strength, Gaussian envelopes, and correct operator geometry. Importantly, this demonstrates that spectral agreement alone cannot uniquely reconstruct the ground truth phsyical operator.
 ---
 
 ## Figure 5 - Learned vs. Noisy Observed Probability Densities
