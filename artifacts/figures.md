@@ -137,7 +137,7 @@
 
 🎗️ Recall proper energy ordering is softly enforced by the ordering loss term $\mathcal{L}_\text{order}$.
 
---
+---
 > 🏠  **Spectral vs. geometric fidelity:** Together, Figures 2, 3, and 4 show that the model preserves eigenvalue ordering and modal hierarchy, but fails to recover confinement strength, Gaussian envelopes, and correct operator geometry. Importantly, this demonstrates that spectral agreement alone cannot uniquely reconstruct the ground truth phsyical operator.
 ---
 
@@ -151,6 +151,7 @@
 - **Phase remains unconstrained:** Loss is invariant under $\psi \rightarrow -\psi$.
 
 ---
+
 # POD Diagnostics
 
 > 💡**Big Idea:** POD does not enforce physics. It reveals structure.
