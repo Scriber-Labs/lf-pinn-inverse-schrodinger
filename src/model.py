@@ -172,7 +172,9 @@ class InverseSchrodingerModel(nn.Module):
         )
 
         # Energy parameters -> learnable scalars (no need for bias term)
-        self.energies = nn.Parameter(torch.randn(n_states, dtype=dtype or torch.float64))
+        # We initialize with a fixed seed if we want cross-platform identity, 
+        # but since set_global_seed is called before model init, we are covered.
+        self.energies = nn.Parameter(torch.linspace(0.5, n_states - 0.5, n_states, dtype=dtype or torch.float64))
 
     # ------------------------------------------------------------------
     # 2️⃣ Helper methods – expose the learned fields with the desired names

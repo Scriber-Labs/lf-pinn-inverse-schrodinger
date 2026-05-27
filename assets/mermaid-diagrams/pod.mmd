@@ -1,0 +1,94 @@
+%%{ init: {
+        "theme": "dark",
+        "themeVariables": {
+            "background": "#0D1117",
+            "lineColor": "#14B5FF",
+            "textColor": "whitesmoke",
+            "primaryTextColor": "whitesmoke",
+            "secondaryTextColor": "whitesmoke",
+            "tertiaryTextColor": "whitesmoke",
+            "fontFamily": "'Aclonica', sans-serif",
+            "borderRadius": "14"
+        },
+        "themeCSS": ".nodeLabel, .edgeLabel, .cluster-label, .cluster-label text, .label, .label text, text, .katex, .katex *, .MathJax, .MathJax *, mjx-container, mjx-container * { color: whitesmoke !important; fill: whitesmoke !important; -webkit-text-fill-color: whitesmoke !important; }",
+        "flowchart": {
+            "curve": "basis",
+            "nodeSpacing": 30,
+            "rankSpacing": 50
+        },
+        "handDrawn": true
+    } }%%
+
+flowchart TB
+
+%% ==============================
+%% COLOR CLASSES (your palette)
+%% ==============================
+style synthetic_data fill:#040b30,stroke:#5D3FD3,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
+style domain_norm fill:#1E0026,stroke:#750071,stroke-width:2px,color:#ffffff,rx:12,ry:12,stroke-dasharray:6 6,rx:12,ry:12;
+style normalized_wavefunctions fill:#112230,color:#ffffff,stroke:#4b54ff,stroke-width:2px,stroke-dasharray:6 6,rx:12,ry:12;
+style pod fill:#2f1616,stroke:#FEB538,color:#ffffff,stroke-width:2px,stroke-dasharray:6 6,rx:12px,ry:12px;
+style trap fill:#023e00,stroke:#57ffbc,color:#ffffff,stroke-width:2px,rx:12,ry:12;
+
+classDef spatial_stencil fill:#2a0037,stroke:#750071,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+classDef psinorm fill:#224261,stroke:#4b54ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
+classDef diag fill:#723c30,stroke:#FEB538,color:#ffffff,stroke-width:2px,rx:12,ry:12;
+
+%% ==============================
+%% INPUT BLOCKS
+%% ==============================
+subgraph synthetic_data["1️⃣ Synthetic Data"]
+    direction TB
+    subgraph domain_norm["Uniform Grid / Trapezoidal Rule"]
+        spatial_grid["$$x\in[-5, 5]$$"]:::spatial_stencil
+        deltax["$$\Delta x$$"]:::spatial_stencil
+        trap["Trapezoidal weights"]
+    end
+end
+
+subgraph normalized_wavefunctions["Normalized Wavefunctions"]
+    direction TB
+    psi0(("$$\psi_0^\theta$$")):::psinorm
+    psi1(("$$\psi_1^\theta$$")):::psinorm
+    psi2(("$$\psi_2^\theta$$")):::psinorm
+end
+
+%% ==============================
+%% POD DIAGRAM
+%% ==============================
+subgraph pod["7️⃣ POD"]
+    PsiMat("Snapshot matrix<br/>$$\mathbf{\Psi}^\theta=[\psi_0^\theta,\psi_1^\theta,\psi_2^\theta]$$"):::diag
+    weight("Trapezoidal spatial-measure weighting<br/>$$\mathbf{\Psi}_w^\theta(x_i)=\sqrt{w_i\Delta x}\,\mathbf{\Psi}^\theta(x_i)$$"):::diag
+    SVD("Euclidean SVD<br/>$$\mathbf{\Psi}_w^\theta=U\Sigma V^T$$"):::diag
+    podscale("POD physical scaling<br/>$$u_k^\mathrm{phys}(x_i)=u_k(x_i)/\sqrt{w_i\Delta x}$$"):::diag
+    align("Physical POD phase / sign alignment<br/>after scaling"):::diag
+    note("Note:<br/>SVD modes are sign-ambiguous and Euclidean-normalized.<br/>Physical POD modes require trapezoidal $$w_i\Delta x$$ scaling."):::diag
+    spec("Singular values<br/>$$\sigma_k$$"):::diag
+    modes("Physical POD modes<br/>$$u_k^\mathrm{phys}$$"):::diag
+    overlaps("POD overlaps<br/>$$\langle u_k^\mathrm{phys},\psi_n^\theta\rangle_{\Delta x,w}$$"):::diag
+
+    PsiMat --> weight
+    weight --> SVD
+    SVD --> spec
+    SVD --> podscale
+    podscale --> align
+    align --> modes
+    align --> overlaps
+    note -.-> podscale
+    note -.-> align
+end
+
+%% ==============================
+%% CONNECTIONS
+%% ==============================
+psi0 --> PsiMat
+psi1 --> PsiMat
+psi2 --> PsiMat
+
+deltax --> weight
+trap --> weight
+
+%% ==============================
+%% LINKS (subtle)
+%% ==============================
+linkStyle default stroke:#8b949e,stroke-width:1.5px,opacity:0.8

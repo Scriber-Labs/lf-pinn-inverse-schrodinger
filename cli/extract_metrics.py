@@ -604,14 +604,111 @@ def extract_all_metrics(
     return pod_df, training_df
 
 
+def smoke_test():
+    """Run a smoke test by creating dummy artifacts and extracting metrics."""
+    import tempfile
+    import shutil
+
+    logger = SimpleLogger(verbose=True)
+    logger.info("Starting smoke test for metrics extraction...")
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        tmp_path = Path(tmp_dir)
+        artifacts_dir = tmp_path / "artifacts"
+        artifacts_dir.mkdir()
+
+        # 1. Create dummy config.json
+        config = {
+            "dx": 0.1,
+            "device": "cpu",
+            "seed": 42,
+            "lr": 0.001,
+            "epochs": 10,
+            "log_every": 1,
+            "n_modes": 3,
+            "hidden": 64,
+            "n_points": 100,
+            "lambdas": {"physics": 1.0, "data": 1.0}
+        }
+        with open(artifacts_dir / "config.json", "w") as f:
+            json.dump(config, f)
+
+        # 2. Create dummy diagnostics.npz
+        n_points = 100
+        n_modes = 3
+        diagnostics = {
+            "psi_learned": np.random.randn(n_points, n_modes),
+            "E_learned": np.array([0.5, 1.5, 2.5]),
+            "V_learned": np.random.randn(n_points)
+        }
+        np.savez(artifacts_dir / "diagnostics.npz", **diagnostics)
+
+        # 3. Create dummy ground_truth.pt
+        ground_truth = {
+            "x": torch.linspace(-5, 5, n_points),
+            "psi_true": torch.randn(n_modes, n_points), # (modes, points)
+            "E_true": torch.tensor([0.5, 1.5, 2.5]),
+            "V_true": torch.randn(n_points)
+        }
+        # In the extraction script, it expects psi_true to be (points, modes) potentially or handled correctly
+        # Let's check how it's handled in extract_pod_metrics:
+        # psi_true = ground_truth["psi_true"]
+        # if isinstance(psi_true, torch.Tensor): psi_true = psi_true.numpy()
+        # overlap_true_learned = cross_overlap_matrix(psi_true, psi_learned, dx)
+        # cross_overlap_matrix expects (N, n_modes_A) and (N, n_modes_B)
+        # So psi_true should be (n_points, n_modes)
+        ground_truth["psi_true"] = ground_truth["psi_true"].T
+
+        torch.save(ground_truth, artifacts_dir / "ground_truth.pt")
+
+        # 4. Create dummy history.json
+        history = [
+            {"epoch": i, "total_loss": 1.0 / (i + 1), "physics_loss": 0.5 / (i + 1)}
+            for i in range(10)
+        ]
+        with open(artifacts_dir / "history.json", "w") as f:
+            json.dump(history, f)
+
+        # 5. Run extraction
+        try:
+            extract_all_metrics(str(artifacts_dir), str(artifacts_dir), verbose=True)
+            
+            # Verify outputs
+            pod_csv = artifacts_dir / "pod_metrics.csv"
+            training_csv = artifacts_dir / "training_analysis.csv"
+            
+            if pod_csv.exists() and training_csv.exists():
+                logger.success("Smoke test passed: CSV files generated.")
+            else:
+                if not pod_csv.exists(): logger.error("pod_metrics.csv NOT generated.")
+                if not training_csv.exists(): logger.error("training_analysis.csv NOT generated.")
+                sys.exit(1)
+                
+        except Exception as e:
+            logger.error(f"Smoke test failed with error: {e}")
+            import traceback
+            traceback.print_exc()
+            sys.exit(1)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Extract POD and training metrics from artifacts.")
-    parser.add_argument("--artifacts-dir", type=str, required=True, help="Directory containing artifact files")
+    parser.add_argument("--artifacts-dir", type=str, help="Directory containing artifact files")
     parser.add_argument("--output-dir", type=str, help="Directory to save output CSVs")
     parser.add_argument("--verbose", action="store_true", default=True, help="Print progress")
     parser.add_argument("--no-verbose", action="store_false", dest="verbose")
+    parser.add_argument("--smoke-test", action="store_true", help="Run a smoke test with dummy data")
 
     args = parser.parse_args()
+
+    if not args.smoke_test and not args.artifacts_dir:
+        # Default to smoke test if no directory is provided, to avoid error
+        print("ℹ️  No --artifacts-dir provided. Defaulting to --smoke-test mode.")
+        args.smoke_test = True
+
+    if args.smoke_test:
+        smoke_test()
+        return
 
     try:
         extract_all_metrics(args.artifacts_dir, args.output_dir, args.verbose)

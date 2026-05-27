@@ -15,20 +15,20 @@ POD Decomposition,Cumulative Energy (First 3 Mode(s)),100.00%,percentage
 POD Decomposition,σ_3,5.0497517585754395,float
 POD Orthonormality,U^T U Orthonormality Error,5.8341226823849317e-08,float
 Mode Overlap,Learned Overlap Matrix Shape,"(256, 256)",array
-Mode Overlap,Learned Orthonormality Error (Overlap),474.2521980381606,float
-Mode Overlap,Diagonal Mean (should be ~1),0.007812499675654671,float
-Mode Overlap,Diagonal Std,0.006382510382957486,float
-Mode Overlap,Off-Diagonal Mean (should be ~0),0.00020899274687504523,float
-Mode Overlap,Off-Diagonal Max Abs,0.019398109188679978,float
+Mode Overlap,Learned Orthonormality Error (Overlap),474.25220677884795,float
+Mode Overlap,Diagonal Mean (should be ~1),0.0078124999793089955,float
+Mode Overlap,Diagonal Std,0.006382510611645403,float
+Mode Overlap,Off-Diagonal Mean (should be ~0),0.0002089927526737548,float
+Mode Overlap,Off-Diagonal Max Abs,0.01939810998737812,float
 Cross Overlap,POD Modes vs Learned Wavefunctions Shape,"(3, 256)",array
-Cross Overlap,Max Absolute Cross Overlap,0.023252824952058354,float
-Cross Overlap,Mean Absolute Cross Overlap,0.006780530551301111,float
+Cross Overlap,Max Absolute Cross Overlap,0.0232528243213892,float
+Cross Overlap,Mean Absolute Cross Overlap,0.006780530832812086,float
 Cross Overlap,POD Mode 0 Best Alignment,ψ_learned[100] = 0.0233,str
 Cross Overlap,POD Mode 1 Best Alignment,ψ_learned[127] = 0.0139,str
 Cross Overlap,POD Mode 2 Best Alignment,ψ_learned[159] = 0.0183,str
 Ground Truth Comparison,True vs Learned Overlap Shape,"(256, 256)",array
-Ground Truth Comparison,Max True-Learned Overlap,0.01954933315460339,float
-Ground Truth Comparison,Mean True-Learned Overlap,0.0027495260666980073,float
+Ground Truth Comparison,Max True-Learned Overlap,0.019549336284399033,float
+Ground Truth Comparison,Mean True-Learned Overlap,0.002749526167176763,float
 Ground Truth Comparison,ψ_true[0] Best Match,ψ_learned[162] = 0.0000,str
 Ground Truth Comparison,ψ_true[1] Best Match,ψ_learned[162] = 0.0000,str
 Ground Truth Comparison,ψ_true[2] Best Match,ψ_learned[162] = 0.0000,str

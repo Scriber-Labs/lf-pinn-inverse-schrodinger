@@ -41,16 +41,34 @@ def set_global_seed(
     -----
     - Python's ``random`` module, NumPy and PyTorch (CPU + CUDA) are seeded.
     - ``torch.backends.cudnn.deterministic`` and ``benchmark`` are set according to ``deterministic``.
+    - ``PYTHONHASHSEED`` is not set by this function; it must be set as an environment variable before the Python interpreter starts.
     """
+    import os
+    # Although it doesn't affect the current process, we set it for completeness in documentation
+    # os.environ['PYTHONHASHSEED'] = str(seed) 
+    
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
 
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
+    
+    if hasattr(torch, "mps") and torch.backends.mps.is_available():
+        # Apple Silicon support
+        torch.mps.manual_seed(seed)
 
     torch.backends.cudnn.deterministic = deterministic
     torch.backends.cudnn.benchmark = not deterministic
+    
+    if deterministic:
+        # This can cause runtime errors if a deterministic implementation is missing for an op.
+        # Use with caution.
+        try:
+            torch.use_deterministic_algorithms(True)
+        except AttributeError:
+            # Older torch version
+            pass
 
 def make_grid(
     x_min: float,
