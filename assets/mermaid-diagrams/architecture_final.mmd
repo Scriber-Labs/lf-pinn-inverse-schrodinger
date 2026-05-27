@@ -239,25 +239,23 @@ direction TB
 
     sanity["sanity checks"]:::diag
     
-    subgraph pod_ref["7️⃣ POD analysis"]
-        pod_link["(See pod.mmd for details)"]:::diag
-    end
+    pod["7️⃣ POD analysis"]:::pod
 
-    sanity ~~~ pod_ref
+    sanity ~~~ pod
 
-    deltax --> pod_ref
-    trap --> pod_ref
+    deltax --> pod
+    trap --> pod
 
 end
 
 step0["0️⃣ Define TISE dynamics"] --> PIML
 
 psi0 --> sanity
-psi0 --> pod_ref
+psi0 --> pod
 psi1 --> sanity
-psi1 --> pod_ref
+psi1 --> pod
 psi2 --> sanity
-psi2 --> pod_ref
+psi2 --> pod
 
 E0 --> sanity
 E1 --> sanity
