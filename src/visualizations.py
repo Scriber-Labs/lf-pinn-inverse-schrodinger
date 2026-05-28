@@ -88,6 +88,39 @@ PROJECT_COLORS = {
     "blue": "#007FFF",
 }
 
+spatial_overlap_cmap = mcolors.LinearSegmentedColormap.from_list("spatial_overlap", [
+    (0.00, "#00F0FF"),  # Neon Cyan
+    (0.25, "#007BFF"),  # Royal Blue
+    (0.50, "#5E17EB"),  # Electric Purple
+    (0.75, "#F72585"),  # Neon Pink
+    (1.00, "#FFBD00"),  # Bright Goldenrod (for max overlap pop)
+])
+
+BLUE_TO_PINK = mcolors.LinearSegmentedColormap.from_list("blue_to_pink_fancy", [
+    (0.00, "#00BFFF"),  # Deep Sky Blue
+    (0.35, "#7000FF"),  # Vivid Violet
+    (0.65, "#FF007F"),  # Bright Rose
+    (1.00, "#FFEE00"),  # Vibrant Yellow
+])
+
+temporal_cmap = mcolors.LinearSegmentedColormap.from_list("temporal_green_polished", [
+    (0.00, "#003200"),  # Deep Jungle Green
+    (0.30, "#00A000"),  # Vivid Green
+    (0.60, "#39FF14"),  # Neon Green (Alien)
+    (0.85, "#CCFF33"),  # Electric Lime
+    (1.00, "#0FFFFE"),  # Electric Cyan
+])
+
+temporal_overlap_cmap = mcolors.LinearSegmentedColormap.from_list("temporal_overlap_polished", [
+    (0.00, "#3D34EB"),  # Intense Blue
+    (0.25, "#14B5FF"),  # Azure
+    (0.50, "#00FFC2"),  # Bright Aquamarine
+    (0.75, "#70E000"),  # Lime
+    (1.00, "#FF5400"),  # International Orange (Contrast pop)
+])
+
+
+
 # ----------------------------------------------------------------------
 # ✨ Helper: gradient bar plotting
 # ----------------------------------------------------------------------
@@ -250,7 +283,7 @@ def plot_loss_history(
         ("Data-fit", PROJECT_COLORS["pink"], data),
     ]
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(facecolor="#0d1117")
     for label, color, series in comps:
         sns.lineplot(
             x=epochs,
@@ -297,7 +330,7 @@ def plot_potential(
     Vt_np = V_true.squeeze().cpu().numpy()
     Vl_np = V_learned.squeeze().cpu().numpy()
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(facecolor="#0d1117")
 
     ax.plot(x_np, Vt_np, label=r"True $V(x)$", color="#E52B50", linewidth=4)
     ax.plot(
@@ -549,7 +582,8 @@ def plot_density_vs_observed(
     if n_modes == 1:
         axes = [axes]    # make the iterator uniform
 
-    psi_theta_col, rho_obs_col = "#3EB489", "#FF8200"
+    # Optimized colors: yellowish-green and bluish-purple
+    psi_theta_col, rho_obs_col = "#7B61FF", "#ADFF2F"  # Bluish-purple, Yellowish-green
 
     for idx, (ax, psi, rho) in enumerate(
             zip(axes, psi_learned, rho_obs),
@@ -568,7 +602,7 @@ def plot_density_vs_observed(
         ax.plot(
             x_np,
             prob_density,
-            label=r"$|\psi_n^{\theta}(x)|^2$",
+            label=r"$|\hat{\psi}_n^{\theta}(x)|^2$",
             color=psi_theta_col,
             linewidth=4,
             ls="--",
@@ -805,9 +839,9 @@ def plot_pod_first_three_spatial_modes(
     if n_plot == 1:
         axs = [axs]
 
-    pod_mode_color = PROJECT_COLORS["purple"]
-    true_color = "#E52B50"
-    learned_color = "#39FF14"
+    pod_mode_color = "#00BFFF"  # Bright Blue
+    true_color = "#E52B50"      # Keep consistent
+    learned_color = "#39FF14"   # Keep consistent
 
     for k in range(n_plot):
         ax = axs[k]
@@ -818,17 +852,17 @@ def plot_pod_first_three_spatial_modes(
                     gt_np[k],
                     label=rf"True $\psi_{k}$",
                     color=true_color,
-                    linewidth=4,
+                    linewidth=4.5,
                     )
 
         # ---- Learned wavefunctions (if provided) ----
         if k < len(psi_learned_np):
             ax.plot(x_np,
                     psi_learned_np[k],
-                    label=rf"$\psi_{k}^\theta$",
+                    label=rf"$\hat{{\psi}}_{k}^\theta$",
                     color=learned_color,
                     ls="--",
-                    linewidth=4,
+                    linewidth=4.5,
                     )
 
         # ---- POD mode ----
@@ -838,7 +872,7 @@ def plot_pod_first_three_spatial_modes(
             label=f"POD mode {k}",
             color=pod_mode_color,
             ls=":",
-            linewidth=4,
+            linewidth=4.5,
         )
 
         ax.set_xlabel(r"$x$")
@@ -870,7 +904,7 @@ def plot_overlap_heatmap(
     dx: float,
     *,
     lambdas: Dict[str, float] | None = None,
-    cmap: str = "cool",
+    cmap: mcolors.Colormap | str = spatial_overlap_cmap,
     fmt: str = ".2f",
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
@@ -917,7 +951,7 @@ def plot_overlap_heatmap(
     # ------------------------------------------------------------------
     # 2️⃣ Plot the heat map
     # ------------------------------------------------------------------
-    fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5))
+    fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5), facecolor="#0d1117")
 
     sns.heatmap(
         overlap,
@@ -928,6 +962,7 @@ def plot_overlap_heatmap(
         annot=True,
         fmt=fmt,
         cbar_kws={"label": "Overlap matrix"},
+        linewidths=0,
     )
 
     ax.set_xticks(np.arange(n_modes))
@@ -936,7 +971,7 @@ def plot_overlap_heatmap(
     ax.set_yticklabels([rf"$n={i}$" for i in range(n_modes)])
 
 
-    ax.set_title(r"Overlap Matrix $\langle \psi_m^\theta | \psi_n^\theta \rangle$")
+    ax.set_title(r"Overlap Matrix $\langle \hat{\psi}_m^\theta | \hat{\psi}_n^\theta \rangle$")
     #fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="Overlap matrix")
 
     # ------------------------------------------------------------------
@@ -962,7 +997,7 @@ def plot_cross_overlap_heatmap(
     psi_matrix: Sequence[torch.Tensor] | torch.Tensor,
     dx: float,
     *,
-    cmap: str = "cool",
+    cmap: mcolors.Colormap | str = BLUE_TO_PINK,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
     out_path: pathlib.Path | None = None,
@@ -1000,15 +1035,19 @@ def plot_cross_overlap_heatmap(
 
     n_modes = cross_overlap.shape[0]
 
-    fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5))
+    fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5), facecolor="#0d1117")
 
 
     im = ax.imshow(
         cross_overlap,
         cmap=cmap,
         vmin=-1.0,
-        vmax=1.0
+        vmax=1.0,
+        aspect='auto',
+        interpolation='nearest'
     )
+    # Ensure no grid lines for the heatmap
+    ax.grid(False)
 
     # Axis ticks
     ax.set_xticks(np.arange(n_modes))
@@ -1029,14 +1068,14 @@ def plot_cross_overlap_heatmap(
                 txt,
                 ha="center",
                 va="center",
-                color="#4c5b82",
+                color="white" if abs(cross_overlap[i, j]) > 0.5 else "black",
                 fontsize=9,
             )
 
     # ------------------------------------------------------------------
     # 🔖 Titles, color‑bar and optional λ‑row
     # ------------------------------------------------------------------
-    ax.set_title(r"Cross Overlap Matrix $\langle u_k | \psi_n^\theta \rangle$",
+    ax.set_title(r"Cross Overlap Matrix $\langle u_k | \hat{\psi}_n^\theta \rangle$",
                  fontsize=16,
                  )
 
@@ -1066,7 +1105,7 @@ def plot_cross_overlap_heatmap(
 def plot_pod_temporal_modes(
     Vh: torch.Tensor | np.ndarray,
     *,
-    cmap: str = "summer",
+    cmap: mcolors.Colormap | str = temporal_cmap,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
     out_path: pathlib.Path | None = None,
@@ -1101,15 +1140,19 @@ def plot_pod_temporal_modes(
     V = Vh_np.T
     n_states, n_pod_modes = V.shape
 
-    fig, ax = plt.subplots(figsize=(max(5, n_pod_modes * 1.2), 5))
+    fig, ax = plt.subplots(figsize=(max(5, n_pod_modes * 1.2), 5), facecolor="#0d1117")
 
     # We use symmetric limits because V is often orthonormal (entries between -1 and 1)
     im = ax.imshow(
         V,
         cmap=cmap,
         vmin=-1.0,
-        vmax=1.0
+        vmax=1.0,
+        aspect='auto',
+        interpolation='nearest'
     )
+    # Ensure no grid lines for the heatmap
+    ax.grid(False)
 
     # Axis ticks
     ax.set_xticks(np.arange(n_pod_modes))
@@ -1122,14 +1165,17 @@ def plot_pod_temporal_modes(
     for i in range(n_states):
         for j in range(n_pod_modes):
             val = V[i, j]
+            # Determine text color based on background lightness
+            # The RdBu colormap is dark at ends (-1, 1) and light in middle (0)
+            text_color = "white" if abs(val) > 0.6 else "black"
             ax.text(
                 j, i, f"{val:{fmt}}",
                 ha="center", va="center",
-                color="white" if abs(val) > 0.5 else "#4c5b82",
+                color=text_color,
                 fontsize=9
             )
 
-    ax.set_title("Temporal Modes (Modal Composition $V_{nk}$)", fontsize=16)
+    ax.set_title(r"Temporal Modes (Modal Composition $V_{nk}$)", fontsize=16)
     ax.set_ylabel("Learned States ($n$)")
     ax.set_xlabel("POD Modes ($k$)")
 
@@ -1147,14 +1193,165 @@ def plot_pod_temporal_modes(
     return fig
 
 # ----------------------------------------------------------------------
-# 📊7️⃣d) POD–Eigenbasis Alignment Heatmap
+# 📊7️⃣d) POD Temporal Overlap Heatmap
+# ----------------------------------------------------------------------
+def plot_pod_temporal_overlap_heatmap(
+    Vh: torch.Tensor | np.ndarray,
+    *,
+    cmap: mcolors.Colormap | str = temporal_overlap_cmap,
+    fmt: str = ".2f",
+    lambdas: Dict[str, float] | None = None,
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """
+    Render a heatmap of the overlap matrix between temporal modes (columns of V).
+    Since V is unitary (V^H V = I), this should be an identity matrix.
+
+    Parameters
+    ----------
+    Vh : torch.Tensor | np.ndarray
+        The H-transpose of the right singular matrix V.
+    cmap, fmt : str, optional
+    lambdas : Dict[str, float], optional
+    out_path : pathlib.Path | None, optional
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+    """
+    if isinstance(Vh, torch.Tensor):
+        Vh_np = Vh.detach().cpu().numpy()
+    else:
+        Vh_np = Vh
+
+    # V columns are temporal modes. Overlap matrix is V^H @ V.
+    V = Vh_np.conj().T
+    overlap = V.conj().T @ V
+    overlap = np.real(overlap)
+
+    n_modes = overlap.shape[0]
+
+    fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5), facecolor="#0d1117")
+
+    im = ax.imshow(
+        overlap,
+        cmap=cmap,
+        vmin=0.0,
+        vmax=1.0,
+        aspect='auto',
+        interpolation='nearest'
+    )
+    # Ensure no grid lines for the heatmap
+    ax.grid(False)
+
+    ax.set_xticks(np.arange(n_modes))
+    ax.set_yticks(np.arange(n_modes))
+    ax.set_xticklabels([rf"Mode $k={i}$" for i in range(n_modes)], rotation=45, ha="right")
+    ax.set_yticklabels([rf"Mode $k={i}$" for i in range(n_modes)])
+
+    for i in range(n_modes):
+        for j in range(n_modes):
+            val = overlap[i, j]
+            ax.text(
+                j, i, f"{val:{fmt}}",
+                ha="center", va="center",
+                color="white" if val > 0.5 else "black",
+                fontsize=9
+            )
+
+    ax.set_title(r"Temporal Mode Overlap $\langle v_m | v_n \rangle$", fontsize=16)
+
+    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="Overlap")
+
+    if lambdas is not None:
+        _add_lambda_row(fig, lambdas, ax=ax)
+
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+
+    return fig
+
+# ----------------------------------------------------------------------
+# 📊7️⃣e) POD Temporal Cross-Overlap Heatmap
+# ----------------------------------------------------------------------
+def plot_pod_temporal_cross_overlap_heatmap(
+    Vh: torch.Tensor | np.ndarray,
+    *,
+    cmap: mcolors.Colormap | str = temporal_overlap_cmap,
+    fmt: str = ".2f",
+    lambdas: Dict[str, float] | None = None,
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """
+    Render a heatmap of the cross-overlap between learned states (standard basis) 
+    and POD temporal modes (columns of V). This is exactly the matrix V itself.
+
+    Parameters
+    ----------
+    Vh : torch.Tensor | np.ndarray
+    cmap, fmt : str, optional
+    lambdas : Dict[str, float], optional
+    out_path : pathlib.Path | None, optional
+    """
+    if isinstance(Vh, torch.Tensor):
+        Vh_np = Vh.detach().cpu().numpy()
+    else:
+        Vh_np = Vh
+
+    V = Vh_np.T
+    n_states, n_modes = V.shape
+
+    fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5), facecolor="#0d1117")
+
+    im = ax.imshow(
+        np.abs(V),
+        cmap=cmap,
+        vmin=0.0,
+        vmax=1.0,
+        aspect='auto',
+        interpolation='nearest'
+    )
+    # Ensure no grid lines for the heatmap
+    ax.grid(False)
+
+    ax.set_xticks(np.arange(n_modes))
+    ax.set_yticks(np.arange(n_states))
+    ax.set_xticklabels([rf"Mode $k={i}$" for i in range(n_modes)], rotation=45, ha="right")
+    ax.set_yticklabels([rf"State $n={i}$" for i in range(n_states)])
+
+    for i in range(n_states):
+        for j in range(n_modes):
+            val = V[i, j]
+            ax.text(
+                j, i, f"{val:{fmt}}",
+                ha="center", va="center",
+                color="white" if abs(val) > 0.5 else "black",
+                fontsize=9
+            )
+
+    ax.set_title(r"Temporal Cross-Overlap $|V_{nk}| = |\langle \mathbf{e}_n | v_k \rangle|$", fontsize=16)
+
+    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="Absolute overlap")
+
+    if lambdas is not None:
+        _add_lambda_row(fig, lambdas, ax=ax)
+
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+
+    return fig
+
+# ----------------------------------------------------------------------
+# 📊7️⃣f) POD–Eigenbasis Alignment Heatmap
 # ----------------------------------------------------------------------
 def plot_pod_eigen_alignment(
     pod_modes_physical: Sequence[torch.Tensor] | torch.Tensor,
     psi_true_matrix: Sequence[torch.Tensor] | torch.Tensor,
     dx: float,
     *,
-    cmap: str = "cool",
+    cmap: mcolors.Colormap | str = spatial_overlap_cmap,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
     out_path: pathlib.Path | None = None,
@@ -1191,14 +1388,18 @@ def plot_pod_eigen_alignment(
 
     n_modes = overlap.shape[0]
 
-    fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5))
+    fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5), facecolor="#0d1117")
 
     im = ax.imshow(
         overlap,
         cmap=cmap,
         vmin=-1.0,
-        vmax=1.0
+        vmax=1.0,
+        aspect='auto',
+        interpolation='nearest'
     )
+    # Ensure no grid lines for the heatmap
+    ax.grid(False)
 
     # Axis ticks
     ax.set_xticks(np.arange(n_modes))
@@ -1219,13 +1420,13 @@ def plot_pod_eigen_alignment(
                 txt,
                 ha="center",
                 va="center",
-                color="#4c5b82",
+                color="white" if abs(overlap[i, j]) > 0.5 else "black",
                 fontsize=9,
             )
     # ------------------------------------------------------------------
     # 🔖 Titles, color‑bar and optional λ‑row
     # ------------------------------------------------------------------
-    ax.set_title(r"Overlap Matrix $\langle u_k | \psi_n \rangle$",
+    ax.set_title(r"Overlap Matrix $\langle u_k | \hat{\psi}_n \rangle$",
                  fontsize=16,
                  )
 
@@ -1267,7 +1468,7 @@ def plot_hilbert_phase_portrait(
     Parameters
     ----------
     learned_wavefunctions : np.ndarray | torch.Tensor
-        Array of shape (n_grid_points, n_samples❓) containing learned wavefunction approximations.
+        Array of shape (n_grid_points, n_samples) containing learned wavefunction approximations.
     true_wavefunctions : np.ndarray | torch.Tensor
         Array of shape (n_grid_points, n_eigenstates) containing exact eigenstates.
     x : np.ndarray | torch.Tensor
@@ -1578,6 +1779,20 @@ def _smoke_test() -> None:
         Vh=Vh_dummy,  # we have Vh from the physical_pod_decomposition call above
         lambdas=lambdas,
         out_path=temporal_path,
+    )
+
+    temporal_overlap_path = out_dir / "pod_temporal_overlap.png"
+    plot_pod_temporal_overlap_heatmap(
+        Vh=Vh_dummy,
+        lambdas=lambdas,
+        out_path=temporal_overlap_path,
+    )
+
+    temporal_cross_path = out_dir / "pod_temporal_cross_overlap.png"
+    plot_pod_temporal_cross_overlap_heatmap(
+        Vh=Vh_dummy,
+        lambdas=lambdas,
+        out_path=temporal_cross_path,
     )
 
     # --------------------------------------------------------------

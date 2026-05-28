@@ -48,24 +48,23 @@ end
 
 subgraph normalized_wavefunctions["Normalized Wavefunctions"]
     direction TB
-    psi0(("$$\psi_0^\theta$$")):::psinorm
-    psi1(("$$\psi_1^\theta$$")):::psinorm
-    psi2(("$$\psi_2^\theta$$")):::psinorm
+    psi0(("$$\hat{\psi}_0^\theta$$")):::psinorm
+    psi1(("$$\hat{\psi}_1^\theta$$")):::psinorm
+    psi2(("$$\hat{\psi}_2^\theta$$")):::psinorm
 end
 
 %% ==============================
 %% POD DIAGRAM
 %% ==============================
 subgraph pod["7️⃣ POD"]
-    PsiMat("Snapshot matrix<br/>$$\mathbf{\Psi}^\theta=[\psi_0^\theta,\psi_1^\theta,\psi_2^\theta]$$"):::diag
+    PsiMat("Snapshot matrix<br/>$$\mathbf{\Psi}^\theta=[\hat{\psi}_0^\theta,\hat{\psi}_1^\theta,\hat{\psi}_2^\theta]$$"):::diag
     weight("Trapezoidal spatial-measure weighting<br/>$$\mathbf{\Psi}_w^\theta(x_i)=\sqrt{w_i\Delta x}\,\mathbf{\Psi}^\theta(x_i)$$"):::diag
     SVD("Euclidean SVD<br/>$$\mathbf{\Psi}_w^\theta=U\Sigma V^T$$"):::diag
     podscale("POD physical scaling<br/>$$u_k^\mathrm{phys}(x_i)=u_k(x_i)/\sqrt{w_i\Delta x}$$"):::diag
-    align("Physical POD phase / sign alignment<br/>after scaling"):::diag
-    note("Note:<br/>SVD modes are sign-ambiguous and Euclidean-normalized.<br/>Physical POD modes require trapezoidal $$w_i\Delta x$$ scaling."):::diag
+    align("Physical POD phase / sign alignment"):::diag
     spec("Singular values<br/>$$\sigma_k$$"):::diag
     modes("Physical POD modes<br/>$$u_k^\mathrm{phys}$$"):::diag
-    overlaps("POD overlaps<br/>$$\langle u_k^\mathrm{phys},\psi_n^\theta\rangle_{\Delta x,w}$$"):::diag
+    overlaps("POD overlaps<br/>$$\langle u_k^\mathrm{phys},\hat{\psi}_n^\theta\rangle_{\Delta x,w}$$"):::diag
 
     PsiMat --> weight
     weight --> SVD
@@ -74,8 +73,7 @@ subgraph pod["7️⃣ POD"]
     podscale --> align
     align --> modes
     align --> overlaps
-    note -.-> podscale
-    note -.-> align
+    PsiMat --> overlaps
 end
 
 %% ==============================

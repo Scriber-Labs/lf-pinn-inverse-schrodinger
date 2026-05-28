@@ -77,6 +77,8 @@ from visualizations import (
     plot_pod_first_three_spatial_modes,
     plot_overlap_heatmap,
     plot_pod_temporal_modes,
+    plot_pod_temporal_overlap_heatmap,
+    plot_pod_temporal_cross_overlap_heatmap,
     plot_pod_eigen_alignment,
 )
 
@@ -429,6 +431,18 @@ def main(argv: list[str] | None = None) -> None:    # noqa: D401
             Vh=Vh,
             lambdas=lambdas,
             out_path=run_artifacts_dir / "pod_temporal_modes.png",
+        )
+
+        plot_pod_temporal_overlap_heatmap(
+            Vh=Vh,
+            lambdas=lambdas,
+            out_path=run_artifacts_dir / "pod_temporal_overlap.png",
+        )
+
+        plot_pod_temporal_cross_overlap_heatmap(
+            Vh=Vh,
+            lambdas=lambdas,
+            out_path=run_artifacts_dir / "pod_temporal_cross_overlap.png",
         )
 
         plot_pod_eigen_alignment(
