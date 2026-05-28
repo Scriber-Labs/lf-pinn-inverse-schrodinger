@@ -1061,7 +1061,93 @@ def plot_cross_overlap_heatmap(
     return fig
 
 # ----------------------------------------------------------------------
-# 📊7️⃣c) POD–Eigenbasis Alignment Heatmap
+# 📊7️⃣c) POD Temporal Modes (Composition Matrix)
+# ----------------------------------------------------------------------
+def plot_pod_temporal_modes(
+    Vh: torch.Tensor | np.ndarray,
+    *,
+    cmap: str = "summer",
+    fmt: str = ".2f",
+    lambdas: Dict[str, float] | None = None,
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """
+    Create a heatmap of the POD temporal modes matrix V (where V is the right-singular vector matrix).
+    In this context, V acts as a 'Modal Composition Matrix' showing how each POD mode is distributed across learned states.
+
+    Parameters
+    ----------
+    Vh : torch.Tensor | np.ndarray
+        The H-transpose of the right singular matrix V (from SVD: U S Vh).
+        Expected shape: (n_modes, n_modes).
+    cmap, fmt : str, optional
+        Colormap and numeric formatting.
+    lambdas : Dict[str, float], optional
+        Optional loss-weight dictionary.
+    out_path : pathlib.Path | None, optional
+        Optional output path.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+    """
+    if isinstance(Vh, torch.Tensor):
+        Vh_np = Vh.detach().cpu().numpy()
+    else:
+        Vh_np = Vh
+
+    # V is the matrix whose columns are temporal modes. Since we have Vh,
+    # V = Vh.conj().T. For real-valued SVD, V = Vh.T.
+    V = Vh_np.T
+    n_states, n_pod_modes = V.shape
+
+    fig, ax = plt.subplots(figsize=(max(5, n_pod_modes * 1.2), 5))
+
+    # We use symmetric limits because V is often orthonormal (entries between -1 and 1)
+    im = ax.imshow(
+        V,
+        cmap=cmap,
+        vmin=-1.0,
+        vmax=1.0
+    )
+
+    # Axis ticks
+    ax.set_xticks(np.arange(n_pod_modes))
+    ax.set_yticks(np.arange(n_states))
+    ax.set_xticklabels([rf"Mode $k={i}$" for i in range(n_pod_modes)],
+                       rotation=45, ha="right")
+    ax.set_yticklabels([rf"State $n={i}$" for i in range(n_states)])
+
+    # Annotate cells
+    for i in range(n_states):
+        for j in range(n_pod_modes):
+            val = V[i, j]
+            ax.text(
+                j, i, f"{val:{fmt}}",
+                ha="center", va="center",
+                color="white" if abs(val) > 0.5 else "#4c5b82",
+                fontsize=9
+            )
+
+    ax.set_title("Temporal Modes (Modal Composition $V_{nk}$)", fontsize=16)
+    ax.set_ylabel("Learned States ($n$)")
+    ax.set_xlabel("POD Modes ($k$)")
+
+    fig.colorbar(
+        im, ax=ax, fraction=0.046, pad=0.04, label="Coefficient Value"
+    )
+
+    if lambdas is not None:
+        _add_lambda_row(fig, lambdas, ax=ax)
+
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+
+    return fig
+
+# ----------------------------------------------------------------------
+# 📊7️⃣d) POD–Eigenbasis Alignment Heatmap
 # ----------------------------------------------------------------------
 def plot_pod_eigen_alignment(
     pod_modes_physical: Sequence[torch.Tensor] | torch.Tensor,
@@ -1448,7 +1534,7 @@ def _smoke_test() -> None:
     psi_matrix = torch.stack(psi_learned, dim=1)    # shape (N, n_modes)
     dx = float(x[1] - x[0])
 
-    pod_modes_physical, S, _, pod_modes_euclidean = physical_pod_decomposition(
+    pod_modes_physical, S, Vh_dummy, pod_modes_euclidean = physical_pod_decomposition(
         psi_matrix,
         dx,
         reference_modes=psi_matrix,
@@ -1485,7 +1571,17 @@ def _smoke_test() -> None:
     )
 
     # --------------------------------------------------------------
-    # 7️⃣b) POD–eigenbasis alignment heatmap
+    # 7️⃣b) Temporal modes heatmap (Composition Matrix V)
+    # --------------------------------------------------------------
+    temporal_path = out_dir / "pod_temporal_modes.png"
+    plot_pod_temporal_modes(
+        Vh=Vh_dummy,  # we have Vh from the physical_pod_decomposition call above
+        lambdas=lambdas,
+        out_path=temporal_path,
+    )
+
+    # --------------------------------------------------------------
+    # 7️⃣c) POD–eigenbasis alignment heatmap
     # --------------------------------------------------------------
     alignment_path = out_dir / "pod_eigen_alignment.png"
     plot_pod_eigen_alignment(
@@ -1511,9 +1607,14 @@ def _smoke_test() -> None:
         out_path=hilbert_path,
     )
 
-    print(
-        f"\n✅ Smoke test complete. All {len(list(out_dir.iterdir()))} figures written to {out_dir.resolve()}\n"
-    )
+    try:
+        print(
+            f"\n✅ Smoke test complete. All {len(list(out_dir.iterdir()))} figures written to {out_dir.resolve()}\n"
+        )
+    except UnicodeEncodeError:
+        print(
+            f"\n[OK] Smoke test complete. All {len(list(out_dir.iterdir()))} figures written to {out_dir.resolve()}\n"
+        )
 
 def main() -> None:
     """Entry point for ``python -m src.visualizations`` -> runs the smoke test."""

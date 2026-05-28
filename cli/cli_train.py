@@ -67,6 +67,18 @@ from train import (
 )
 from pod import physical_pod_decomposition
 from utils import l2_inner_product
+from visualizations import (
+    plot_loss_history,
+    plot_potential,
+    plot_wavefunctions,
+    plot_energy_spectrum,
+    plot_density_vs_observed,
+    plot_pod_singular_values,
+    plot_pod_first_three_spatial_modes,
+    plot_overlap_heatmap,
+    plot_pod_temporal_modes,
+    plot_pod_eigen_alignment,
+)
 
 # ----------------------------------------------------------------------
 # 2️⃣ Argument parser for CLI
@@ -284,7 +296,9 @@ def main(argv: list[str] | None = None) -> None:    # noqa: D401
             if epoch % args.log_every == 0 or epoch == args.epochs:
                 print(f"[{epoch:>5}/{args.epochs}] loss = {total_loss.item():.6e}")
 
-        # --- Save Ground Truth ---
+        # ----------------------------------------------------------------------
+        # 🎁 Save Ground Truth
+        # ----------------------------------------------------------------------
         torch.save({
             "x": x.cpu(),
             "V_true": V_true.cpu(),
@@ -292,13 +306,18 @@ def main(argv: list[str] | None = None) -> None:    # noqa: D401
             "E_true": E_true.cpu(),
         }, run_artifacts_dir / "ground_truth.pt")
 
-        # --- Compute Final Diagnostics ---
+        # ----------------------------------------------------------------------
+        # 3️⃣ Compute Final Diagnostics
+        # ----------------------------------------------------------------------
         model.eval()
         with torch.no_grad():
             V_learned = model.V_theta(x).squeeze()
             psi_learned = model.psi_theta(x, dx)
             E_learned = model.E_theta()
 
+            # ------------------------------------------------------------------
+            # ✨ Sort and Perform POD
+            # ------------------------------------------------------------------
             # Sort learned quantities for diagnostic/reporting artifacts only.
             # Training itself uses the raw energy ordering so the ordering loss remains a soft penalty.
             idx = torch.argsort(E_learned)
@@ -344,6 +363,85 @@ def main(argv: list[str] | None = None) -> None:    # noqa: D401
                         dx,
                     )
 
+        # ----------------------------------------------------------------------
+        # 4️⃣ Save Plots
+        # ----------------------------------------------------------------------
+        lambdas = {
+            "data": args.lambda_data,
+            "physics": args.lambda_physics,
+            "smooth": args.lambda_smooth,
+            "ordered": args.lambda_ordered,
+        }
+
+        plot_loss_history(
+            epochs=[h["epoch"] for h in history],
+            total=[h["total_loss"] for h in history],
+            physics=[h["physics_loss"] for h in history],
+            data=[h["data_loss"] for h in history],
+            smooth=[h["smooth_loss"] for h in history],
+            ordered=[h["ordered_loss"] for h in history],
+            lambdas=lambdas,
+            out_path=run_artifacts_dir / "loss_history.png",
+        )
+
+        plot_potential(
+            x=x,
+            V_true=V_true,
+            V_learned=V_learned,
+            lambdas=lambdas,
+            out_path=run_artifacts_dir / "potential.png",
+        )
+
+        plot_wavefunctions(
+            x=x,
+            psi_true=psi_true,
+            psi_learned=psi_learned,
+            out_path=run_artifacts_dir / "wavefunctions.png",
+        )
+
+        plot_energy_spectrum(
+            E_true=E_true,
+            E_learned=E_learned,
+            out_path=run_artifacts_dir / "energy_spectrum.png",
+        )
+
+        plot_pod_singular_values(
+            singular_values=S,
+            out_path=run_artifacts_dir / "pod_singular_values.png",
+        )
+
+        plot_pod_first_three_spatial_modes(
+            x=x,
+            spatial_modes=pod_modes_physical,
+            ground_truth=psi_true,
+            lambdas=lambdas,
+            out_path=run_artifacts_dir / "pod_spatial_modes.png",
+        )
+
+        plot_overlap_heatmap(
+            psi_theta=psi_learned,
+            dx=dx,
+            lambdas=lambdas,
+            out_path=run_artifacts_dir / "overlap_heatmap.png",
+        )
+
+        plot_pod_temporal_modes(
+            Vh=Vh,
+            lambdas=lambdas,
+            out_path=run_artifacts_dir / "pod_temporal_modes.png",
+        )
+
+        plot_pod_eigen_alignment(
+            pod_modes_physical=pod_modes_physical,
+            psi_true_matrix=torch.stack(psi_true, dim=1),
+            dx=dx,
+            lambdas=lambdas,
+            out_path=run_artifacts_dir / "pod_eigen_alignment.png",
+        )
+
+        # ----------------------------------------------------------------------
+        # 5️⃣ Save diagnostics metadata
+        # ----------------------------------------------------------------------
         # Prepare diagnostics dictionary for saving
         diagnostics = {
             "E_learned": E_learned.cpu().numpy(),
