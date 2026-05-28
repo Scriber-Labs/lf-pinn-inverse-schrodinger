@@ -582,8 +582,7 @@ def plot_density_vs_observed(
     if n_modes == 1:
         axes = [axes]    # make the iterator uniform
 
-    # Optimized colors: yellowish-green and bluish-purple
-    psi_theta_col, rho_obs_col = "#7B61FF", "#ADFF2F"  # Bluish-purple, Yellowish-green
+    psi_theta_col, rho_obs_col = "#38FE84", "#F78F55"
 
     for idx, (ax, psi, rho) in enumerate(
             zip(axes, psi_learned, rho_obs),
@@ -839,9 +838,9 @@ def plot_pod_first_three_spatial_modes(
     if n_plot == 1:
         axs = [axs]
 
-    pod_mode_color = "#00BFFF"  # Bright Blue
-    true_color = "#E52B50"      # Keep consistent
-    learned_color = "#39FF14"   # Keep consistent
+    pod_mode_color = "#009DFF"
+    true_color = "#E52B50"
+    learned_color = "#39FF14"
 
     for k in range(n_plot):
         ax = axs[k]
@@ -872,7 +871,7 @@ def plot_pod_first_three_spatial_modes(
             label=f"POD mode {k}",
             color=pod_mode_color,
             ls=":",
-            linewidth=4.5,
+            linewidth=4.75,
         )
 
         ax.set_xlabel(r"$x$")
