@@ -115,7 +115,7 @@ def potential_smoothness_loss(
     V_theta: torch.Tensor,
     dx: float,
     *,
-    eps: float = 1e-6,
+    eps: float = 1e-8,
 ) -> torch.Tensor:
     """
     Scale-aware smoothness regularization for the learned potential.
@@ -220,9 +220,14 @@ def _run_physics_smoke_test() -> None:
 
 def main() -> None:
     """
-    Entry-point used when the module is executed directly.
-    Calls the minimal smoke-test for verification that the file loads correctly.
+    Entry-point for ``python src/physics.py`` -> runs the minimal smoke-test.
     """
+    # Use UTF-8 for output to support emojis on Windows
+    import sys
+    import io
+    if sys.stdout.encoding != 'utf-8':
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
     _run_physics_smoke_test()
 
 if __name__ == "__main__":

@@ -111,18 +111,18 @@ class SimpleLogger:
 
     def info(self, msg: str):
         if self.verbose:
-            print(f"INFO: {msg}")
+            print(f"ℹ️  {msg}")
 
     def success(self, msg: str):
         if self.verbose:
-            print(f"SUCCESS: {msg}")
+            print(f"✅ {msg}")
 
     def warning(self, msg: str):
         if self.verbose:
-            print(f"WARNING: {msg}")
+            print(f"⚠️  {msg}")
 
     def error(self, msg: str):
-        print(f"ERROR: {msg}", file=sys.stderr)
+        print(f"❌ {msg}", file=sys.stderr)
 
 
 # ============================================================================

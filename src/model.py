@@ -257,6 +257,12 @@ def _run_smoke_test() -> None:
 # ----------------------------------------------------------------------
 def main() -> None:
     """Run the smoke test when the module is executed as a script."""
+    # Use UTF-8 for output to support emojis on Windows
+    import sys
+    import io
+    if sys.stdout.encoding != 'utf-8':
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
     _run_smoke_test()
 
 if __name__ == "__main__":

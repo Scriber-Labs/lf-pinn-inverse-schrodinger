@@ -93,9 +93,10 @@ def train_step(
     # ------------------- Data‑fit loss ----------------------------
     loss_data = data_mismatch_loss(
         psi_list,  # learned psi_n(theta, x)
-        E_theta,         # learned energies
+        E_theta,   # learned energies
         rho_obs,   # observed probability densities
         E_obs,     # observed energies
+        dx,
     )
 
     # ------------------- Orthogonalization penalty -------------------
@@ -256,6 +257,12 @@ def _run_train_smoke_test() -> None:
 
 def main() -> None:
     """Entry point for ``python -m src.train`` -> runs the smoke test."""
+    # Use UTF-8 for output to support emojis on Windows
+    import sys
+    import io
+    if sys.stdout.encoding != 'utf-8':
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
     _run_train_smoke_test()
 
     parser = argparse.ArgumentParser()

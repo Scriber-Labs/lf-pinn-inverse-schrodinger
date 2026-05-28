@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import torch
 from typing import Tuple
-from utils import l2_inner_product
+from utils import l2_inner_product, get_trapezoidal_weights
 
 __all__: list[str] = [
     "pod_decomposition",
@@ -89,9 +89,7 @@ def weight_snapshot_matrix(
         raise ValueError(f"❌ dx must be positive, got {dx}.")
 
     N = psi_matrix.shape[0]
-    weights = torch.ones(N, device=psi_matrix.device, dtype=psi_matrix.dtype)
-    weights[0] = 0.5
-    weights[-1] = 0.5
+    weights = get_trapezoidal_weights(N, device=psi_matrix.device, dtype=psi_matrix.dtype)
 
     # Scale snapshot matrix such that Euclidean SVD corresponds to physical inner product
     # <psi|phi>_phys = sum(psi * phi * weights) * dx
@@ -128,9 +126,7 @@ def scale_pod_modes_to_physical(
         raise ValueError(f"❌ dx must be positive, got {dx}.")
 
     N = pod_modes_euclidean.shape[0]
-    weights = torch.ones(N, device=pod_modes_euclidean.device, dtype=pod_modes_euclidean.dtype)
-    weights[0] = 0.5
-    weights[-1] = 0.5
+    weights = get_trapezoidal_weights(N, device=pod_modes_euclidean.device, dtype=pod_modes_euclidean.dtype)
 
     return pod_modes_euclidean / torch.sqrt(weights.unsqueeze(1) * dx)
 
@@ -282,9 +278,7 @@ def mode_overlap_matrix(
     """
     N = psi_matrix.shape[0]
 
-    weights = torch.ones(N, device=psi_matrix.device)
-    weights[0] = 0.5
-    weights[-1] = 0.5
+    weights = get_trapezoidal_weights(N, device=psi_matrix.device, dtype=psi_matrix.dtype)
 
     weighted = psi_matrix * weights.unsqueeze(1)
 
@@ -374,6 +368,12 @@ def _run_pod_smoke_test() -> None:
 
 def main() -> None:
     """Entry point used when the module is directly executed."""
+    # Use UTF-8 for output to support emojis on Windows
+    import sys
+    import io
+    if sys.stdout.encoding != 'utf-8':
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
     _run_pod_smoke_test()
 
 if __name__ == "__main__":

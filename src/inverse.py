@@ -19,6 +19,8 @@ from typing import List
 
 import torch
 
+from utils import make_grid, set_global_seed, l2_inner_product
+
 __all__: list[str] = [
     "data_mismatch_loss",
 ]
@@ -32,6 +34,7 @@ def data_mismatch_loss(
     energies_theta: torch.Tensor,
     rho_obs: List[torch.Tensor],
     E_obs: torch.Tensor,
+    dx: float,
 ) -> torch.Tensor:
     """
     Supervised loss term for data mismatching.
@@ -43,23 +46,27 @@ def data_mismatch_loss(
     energies_theta : torch.Tensor, shape ``(n_states,)``
         Tensor of learned energies ``[E0, E1, ... ]```.
     rho_obs : List[torch.Tensor], each shape ``(M, 1)``
-        List of observed probability-density tensors (same shape as corresponding ``psi`` entries). Typically obtained from experiment or high-fidelity simulation.
+        List of observed probability-density tensors (same shape as corresponding ``psi`` entries).
     E_obs : torch.Tensor, shape ``(n_states,)``
         Tensor of observed energies.
+    dx : float
+        Spatial grid spacing.
 
     Returns
     -------
     torch.Tensor (scalar)
-        Mean squared mismatch across all states.
+        Mean squared mismatch across all states using the physical L2 norm.
     """
     # Energy term: simple MSE across the energy vector.
     energy_loss = torch.mean((energies_theta - E_obs) ** 2)
 
     # Density term: compare |psi|^2 to the observed density for each state.
-    density_losses = [
-        torch.mean((psi.squeeze() ** 2 - rho.squeeze()) ** 2)
-        for psi, rho in zip(multi_psi_theta, rho_obs)
-    ]
+    # We use the physical L2 norm of the difference: int( (|psi|^2 - rho)^2 dx )
+    density_losses = []
+    for psi, rho in zip(multi_psi_theta, rho_obs):
+        diff = psi.squeeze()**2 - rho.squeeze()
+        # L2 inner product of diff with itself
+        density_losses.append(l2_inner_product(diff, diff, dx))
 
     density_loss = torch.mean(torch.stack(density_losses))
     return energy_loss + density_loss
@@ -72,7 +79,7 @@ def _run_inverse_smoke_test() -> None:
     """
     Minimal sanity check that the loss accepts realistic shapes (same style as used in `src/physics.py`).
     """
-    from utils import make_grid, set_global_seed
+    from utils import make_grid, set_global_seed, l2_inner_product
 
     set_global_seed(27)
 
@@ -88,14 +95,21 @@ def _run_inverse_smoke_test() -> None:
     # Energies (learned vs. observed)
     energies_theta = torch.tensor([0.45, 1.55])
     E_obs = torch.tensor([0.5, 1.5])
+    dx = float(x[1] - x[0])
 
-    loss = data_mismatch_loss([psi0, psi1], energies_theta, [rho0, rho1], E_obs)
+    loss = data_mismatch_loss([psi0, psi1], energies_theta, [rho0, rho1], E_obs, dx)
 
     print("✔️ inverse.pyl smoke test:")
     print(f"  loss value = {loss.item():.6f}")
 
 def main() -> None:
     """Entry-point for ``python src/inverse.py`` -> runs the minimal smoke test."""
+    # Use UTF-8 for output to support emojis on Windows
+    import sys
+    import io
+    if sys.stdout.encoding != 'utf-8':
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
     _run_inverse_smoke_test()
 
 if __name__ == "__main__":

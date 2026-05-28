@@ -159,13 +159,37 @@ def l2_inner_product(
     f = f.squeeze()
     g = g.squeeze()
     
-    # Trapezoidal rule: (f0*g0 + fn*gn)/2 + sum(fi*gi for i in 1 to n-1)
-    # This can be implemented by weighting the endpoints by 0.5
-    weights = torch.ones_like(f)
-    weights[0] = 0.5
-    weights[-1] = 0.5
+    weights = get_trapezoidal_weights(f.shape[0], device=f.device, dtype=f.dtype)
     
     return torch.sum(f * g * weights) * dx
+
+def get_trapezoidal_weights(
+    n: int,
+    device: torch.device | str | None = None,
+    dtype: torch.dtype | None = None,
+) -> torch.Tensor:
+    """
+    Return the trapezoidal rule weights [0.5, 1, 1, ..., 1, 0.5].
+
+    Parameters
+    ----------
+    n : int
+        Number of points.
+    device : torch.device | str | None, optional
+        Target device.
+    dtype : torch.dtype | None, optional
+        Target dtype.
+
+    Returns
+    -------
+    torch.Tensor, shape (n,)
+        Trapezoidal weights.
+    """
+    weights = torch.ones(n, device=device, dtype=dtype)
+    if n > 1:
+        weights[0] = 0.5
+        weights[-1] = 0.5
+    return weights
 
 def grid_spacing(grid: torch.Tensor) -> float:
     """
@@ -248,4 +272,10 @@ def _smoke_test() -> None:
     print("✔️ utils.py sanity check passed")
 
 if __name__ == "__main__":
+    # Use UTF-8 for output to support emojis on Windows
+    import sys
+    import io
+    if sys.stdout.encoding != 'utf-8':
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    
     _smoke_test()
