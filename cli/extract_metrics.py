@@ -48,13 +48,13 @@ from src.utils import l2_inner_product
 
 
 # ============================================================================
-# POD UTILITIES (refactored to use shared l2_inner_product)
+# POD UTILITIES (refactored to use shared src/pod.py)
 # ============================================================================
 
 def mode_overlap_matrix(psi_matrix: np.ndarray, dx: float) -> np.ndarray:
     """
     Compute the discrete overlap matrix <psi_m | psi_n> on a uniform grid.
-    Uses l2_inner_product from src.utils for consistency.
+    Uses src.pod.mode_overlap_matrix for consistency with the architecture diagram.
 
     Parameters
     ----------
@@ -68,25 +68,15 @@ def mode_overlap_matrix(psi_matrix: np.ndarray, dx: float) -> np.ndarray:
     np.ndarray, shape (n_modes, n_modes)
         Overlap matrix with <psi_i | psi_j> entries.
     """
-    n_modes = psi_matrix.shape[1]
-    overlap = np.zeros((n_modes, n_modes))
-
-    # Convert to torch for l2_inner_product
-    psi_torch = torch.from_numpy(psi_matrix).float()
-
-    for i in range(n_modes):
-        for j in range(n_modes):
-            # l2_inner_product expects shape (N, 1)
-            f = psi_torch[:, i:i + 1]
-            g = psi_torch[:, j:j + 1]
-            overlap[i, j] = l2_inner_product(f, g, dx).item()
-
-    return overlap
+    from src.pod import mode_overlap_matrix as src_mode_overlap_matrix
+    psi_torch = torch.from_numpy(psi_matrix).to(dtype=torch.float64)
+    overlap = src_mode_overlap_matrix(psi_torch, dx)
+    return overlap.numpy()
 
 
 def cross_overlap_matrix(psi_A: np.ndarray, psi_B: np.ndarray, dx: float) -> np.ndarray:
     """
-    Compute <psi_A_m | psi_B_n> using l2_inner_product.
+    Compute <psi_A_m | psi_B_n> using src.pod.cross_overlap_matrix.
 
     Parameters
     ----------
@@ -102,21 +92,11 @@ def cross_overlap_matrix(psi_A: np.ndarray, psi_B: np.ndarray, dx: float) -> np.
     np.ndarray, shape (n_modes_A, n_modes_B)
         Cross-overlap matrix.
     """
-    n_modes_A = psi_A.shape[1]
-    n_modes_B = psi_B.shape[1]
-    cross_overlap = np.zeros((n_modes_A, n_modes_B))
-
-    # Convert to torch
-    psi_A_torch = torch.from_numpy(psi_A).float()
-    psi_B_torch = torch.from_numpy(psi_B).float()
-
-    for i in range(n_modes_A):
-        for j in range(n_modes_B):
-            f = psi_A_torch[:, i:i + 1]
-            g = psi_B_torch[:, j:j + 1]
-            cross_overlap[i, j] = l2_inner_product(f, g, dx).item()
-
-    return cross_overlap
+    from src.pod import cross_overlap_matrix as src_cross_overlap_matrix
+    psi_A_torch = torch.from_numpy(psi_A).to(dtype=torch.float64)
+    psi_B_torch = torch.from_numpy(psi_B).to(dtype=torch.float64)
+    cross_overlap = src_cross_overlap_matrix(psi_A_torch, psi_B_torch, dx)
+    return cross_overlap.numpy()
 
 
 # ============================================================================
@@ -131,18 +111,18 @@ class SimpleLogger:
 
     def info(self, msg: str):
         if self.verbose:
-            print(f"ℹ️  {msg}")
+            print(f"INFO: {msg}")
 
     def success(self, msg: str):
         if self.verbose:
-            print(f"✅ {msg}")
+            print(f"SUCCESS: {msg}")
 
     def warning(self, msg: str):
         if self.verbose:
-            print(f"⚠️  {msg}")
+            print(f"WARNING: {msg}")
 
     def error(self, msg: str):
-        print(f"❌ {msg}", file=sys.stderr)
+        print(f"ERROR: {msg}", file=sys.stderr)
 
 
 # ============================================================================
@@ -168,12 +148,16 @@ def extract_pod_metrics(
     if isinstance(psi_learned, list):
         psi_learned = np.array(psi_learned)
 
-    # Convert to torch for SVD
-    psi_learned_torch = torch.from_numpy(psi_learned).float()
-
     # ===== POD DECOMPOSITION =====
-    U, S, Vh = torch.linalg.svd(psi_learned_torch, full_matrices=False)
-    U_np = U.numpy()
+    from src.pod import physical_pod_decomposition
+    # Note: psi_learned is shape (n_states, N_points). physical_pod_decomposition expects (N_points, n_states)
+    psi_matrix = torch.from_numpy(psi_learned).T.to(dtype=torch.float64)
+    U_phys, S, Vh, U_euclidean = physical_pod_decomposition(
+        psi_matrix,
+        dx,
+        align_signs=True
+    )
+    U_np = U_phys.numpy()
     S_np = S.numpy()
     Vh_np = Vh.numpy()
 
@@ -216,7 +200,7 @@ def extract_pod_metrics(
          "Type": "float"})
 
     # ===== MODE OVERLAP MATRIX =====
-    overlap_learned = mode_overlap_matrix(psi_learned, dx)
+    overlap_learned = mode_overlap_matrix(psi_learned.T, dx)
     data.append(
         {"Category": "Mode Overlap", "Parameter": "Learned Overlap Matrix Shape", "Value": str(overlap_learned.shape),
          "Type": "array"})
@@ -241,7 +225,7 @@ def extract_pod_metrics(
          "Type": "float"})
 
     # ===== CROSS OVERLAP =====
-    cross_overlap = cross_overlap_matrix(U_np, psi_learned, dx)
+    cross_overlap = cross_overlap_matrix(U_np, psi_learned.T, dx)
     data.append({"Category": "Cross Overlap", "Parameter": "POD Modes vs Learned Wavefunctions Shape",
                  "Value": str(cross_overlap.shape), "Type": "array"})
 
@@ -263,9 +247,9 @@ def extract_pod_metrics(
     if isinstance(psi_true, torch.Tensor):
         psi_true = psi_true.numpy()
     elif isinstance(psi_true, list):
-        psi_true = np.array(psi_true)
+        psi_true = torch.stack(psi_true).numpy()
 
-    overlap_true_learned = cross_overlap_matrix(psi_true, psi_learned, dx)
+    overlap_true_learned = cross_overlap_matrix(psi_true.T, psi_learned.T, dx)
     data.append({"Category": "Ground Truth Comparison", "Parameter": "True vs Learned Overlap Shape",
                  "Value": str(overlap_true_learned.shape), "Type": "array"})
 
