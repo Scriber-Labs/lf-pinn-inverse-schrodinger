@@ -26,10 +26,126 @@
 
 ## Figure 2
 ![learned_potential.png](demo_visuals/learned_potential.png)
-> 🏡 The learned potential $V_\theta(x)$ differes significantly from the ground truth $V(x)=\frac{1}{2}x^2$. However, $V_\theta(x)$ gives a $H_\theta$ with comparable spectra to the ground truth spectra for the harmonic oscillator.  
+> 🏡 The learned potential $V_\theta(x)$ differs significantly from the ground truth $V(x)=\frac{1}{2}x^2$. However, $V_\theta(x)$ gives a $H_\theta$ with comparable spectra to the ground truth spectra for the harmonic oscillator.  
 
 > 🔑**Key Insights**
 > 1. The central regions of the learned eigenfunctions (Figure 3) and associated densities (Figure 5) match the ground truth remarkably well compared to the peripheral regions.
 > 2. Errors are concentrated in the peripheral regions / tails of learned curves in Figures 3 and 5.
 > 3. The first two observations suggest that the model primarily learned the portion of $H_\theta$ needed to reproduce the observed probability density in regions where the data contain large amplitude. To put it simply, the inverse problem appears to be underdetermined.
 
+> ❌ **Failure Modes**
+> 
+> 
+
+## Figure 3
+![learned_wavefunctions.png](demo_visuals/learned_wavefunctions.png)
+> 🏡 
+
+> 🔑**Key Insights**
+> 
+
+> ❌ **Failure Modes**
+> 
+> 
+
+
+## Figure 4
+![learned_energies.png](demo_visuals/learned_energies.png)
+> 🏡 
+
+> 🔑**Key Insights**
+> 
+
+> ❌ **Failure Modes**
+> 
+> 
+
+
+## Figure 5
+![density.png](demo_visuals/density.png)
+> 🏡 
+
+> 🔑**Key Insights**
+> 
+
+> ❌ **Failure Modes**
+> 
+> 
+
+
+## Figure 6
+![pod_singular_values.png](demo_visuals/pod_singular_values.png)
+> 🏡 
+
+> 🔑**Key Insights**
+> 
+
+> ❌ **Failure Modes**
+> 
+> 
+
+## Figure 7
+![overlap_heatmap.png](demo_visuals/overlap_heatmap.png)
+> 🏡 
+
+> 🔑**Key Insights**
+> 
+
+> ❌ **Failure Modes**
+> 
+> 
+
+## Figure 8
+![pod_modes.png](demo_visuals/pod_modes.png)
+> 🏡 
+
+> 🔑**Key Insights**
+> 
+
+> ❌ **Failure Modes**
+> 
+> 
+
+## Figure 9
+![cross_overlap_heatmap.png](demo_visuals/cross_overlap_heatmap.png)
+> 🏡 
+
+> 🔑**Key Insights**
+> 
+
+> ❌ **Failure Modes**
+> 
+> 
+
+## Figure 10
+![pod_temporal_modes.png](demo_visuals/pod_temporal_modes.png)
+> 🏡 
+
+> 🔑**Key Insights**
+> 
+
+> ❌ **Failure Modes**
+> 
+> 
+
+## Figure 11
+![pod_temporal_overlap.png](demo_visuals/pod_temporal_overlap.png)
+> 🏡 
+
+> 🔑**Key Insights**
+> 
+
+> ❌ **Failure Modes**
+> 
+> 
+
+## Figure 12
+![pod_temporal_cross_overlap.png](demo_visuals/pod_temporal_cross_overlap.png)
+> 🏡 
+
+> 🔑**Key Insights**
+> 
+
+> ❌ **Failure Modes**
+> 
+> 
