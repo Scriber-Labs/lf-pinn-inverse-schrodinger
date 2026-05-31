@@ -86,3 +86,4 @@ lf-pinn-inverse-schrodinger/
 └── requirements.txt
  
 ```
+

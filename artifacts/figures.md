@@ -1,7 +1,7 @@
 # Figure Analysis (Windows Computer)
 
 
-## Figure 1
+## Figure 1 : Training Curves
 ![training_curves](demo_visuals/training_curves.png)
 > 🏡 The optimizer undergoes multiple regime transitions before setting into a stable solution.
 
@@ -34,8 +34,8 @@
 > 3. The first two observations suggest that the model primarily learned the portion of $H_\theta$ needed to reproduce the observed probability density in regions where the data contain large amplitude. To put it simply, the inverse problem appears to be underdetermined.
 
 > ❌ **Failure Modes**
-> 
-> 
+> - Spectrally consistent, but geometrically incorrect operators.
+> - Boundary under-constraint.
 
 ## Figure 3
 ![learned_wavefunctions.png](demo_visuals/learned_wavefunctions.png)
@@ -49,17 +49,15 @@
 > 
 
 
-## Figure 4
+## Figure 4 : Ground Truth vs. Learned Energy Eigenvalues
 ![learned_energies.png](demo_visuals/learned_energies.png)
-> 🏡 
+> 🏡 The learned energy spectrum $\{E_n^\theta\}$ matches the observed energy values and closely follows the ground truth spectrum for the harmonic oscillator, $E_n = n + 0.5$.
 
 > 🔑**Key Insights**
-> 
+> 1. The recovered spectrum remains correctly ordered throughout the final solution, indicating that the $\mathcal{L}_\text{order}$ was effective.
+> 2. The model successfully generalized a consistent spectrum, despite training on noisy data.
 
-> ❌ **Failure Modes**
-> 
-> 
-
+> ❌ **Failure Mode**: The learned energies match the observed spectrum while the reconstructed potential differs substantially from the true potential. This indicates successful spectral fitting but incomplete recovery of the underlying operator.
 
 ## Figure 5
 ![density.png](demo_visuals/density.png)
@@ -149,3 +147,8 @@
 > ❌ **Failure Modes**
 > 
 > 
+> 
+
+## Conclusions
+- Figures 2, 3, 4, and 5 all together suggest accurate recovery of low-energy spectral information does not necessarily require accurate recovery of the underlying potential.
+- 
