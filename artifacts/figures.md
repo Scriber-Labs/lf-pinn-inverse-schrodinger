@@ -26,7 +26,7 @@
 
 ## Figure 2
 ![learned_potential.png](demo_visuals/learned_potential.png)
-> 🏡 The learned potential $V_\theta(x)$ differs significantly from the ground truth $V(x)=\frac{1}{2}x^2$. However, $V_\theta(x)$ gives a $H_\theta$ with comparable spectra to the ground truth spectra for the harmonic oscillator.  
+> 🏡 The learned potential $V_\theta(x)$ (a sigmoidal-like shapae) differs significantly from the ground truth $V(x)=\frac{1}{2}x^2$.
 
 > 🔑**Key Insights**
 > 1. The central regions of the learned eigenfunctions (Figure 3) and associated densities (Figure 5) match the ground truth remarkably well compared to the peripheral regions.
