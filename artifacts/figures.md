@@ -7,14 +7,15 @@
 
 > 🔑 **Key Insights**
 > 1. **Spike 1 (~0-50 epochs):** To be expected if it is initial transient behavior (recall the network begins with random loss weights).
-> 2. **Spike 2 (~800 epochs):** Likely the model discovered a new potential configuration that dramatically increased curvature. Evidence comes from
->    - smoothness loss curve spikes
->    - total loss curve spikes
->    - relatively moderate increase in physics and data-mismatch losses
+> 2. **Spike 2 (~800 epochs):** Likely the model discovered a new potential configuration that dramatically increased curvature. Evidence comes from:
+>    - Smoothness loss curve spikes.
+>    - Total loss curve spikes.
+>    - Relatively moderate increase in physics and data-mismatch losses.
 > 3. **Spike 3 (~2000 epochs)**: Smoothness term spikes many orders of magnitude, then:
->    - physics loss curve increases
->    - total loss increases
->    - all curves settle on a different plateau than before the spike
+>    - Physics loss curve increases.
+>    - Total loss increases.
+>    - All curves settle on a different plateau than before the spike.
+>    
 >    This suggests the optimizer discovered a qualitatively different potential that better matched the observed wavefuncitons while sacrificing smoothness and physical fidelity.
 
 > ❌ **Failure Modes**

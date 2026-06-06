@@ -636,7 +636,7 @@ def plot_density_vs_observed(
 
 
 # ----------------------------------------------------------------------
-# 📊6️⃣a) POD singular values (log plot, all values)
+# 📊 6️⃣ POD singular values (log plot, all values)
 # ----------------------------------------------------------------------
 def plot_pod_singular_values(
         singular_values: torch.Tensor,
@@ -764,7 +764,7 @@ def plot_pod_singular_values(
     return fig
 
 # ----------------------------------------------------------------------
-# 📊6️⃣ b) First three spatial POD modes (should resemble the true eigenmodes)
+# 📊 8️⃣ First three spatial POD modes (should resemble the true eigenmodes)
 # ----------------------------------------------------------------------
 def plot_pod_first_three_spatial_modes(
         x: torch.Tensor,
@@ -896,7 +896,7 @@ def plot_pod_first_three_spatial_modes(
     return fig
 
 # ----------------------------------------------------------------------
-# 🗺️7️⃣a) -  Overlap matrix heatmap (POD diagnostic)
+# 🗺️ 7️⃣ Overlap matrix heatmap (POD diagnostic)
 # ----------------------------------------------------------------------
 def plot_overlap_heatmap(
     psi_theta: Sequence[torch.Tensor],
@@ -989,7 +989,7 @@ def plot_overlap_heatmap(
     return fig
 
 # ----------------------------------------------------------------------
-# 📊7️⃣b) Cross-overlap matrix heatmap
+# 📊 9️⃣ Cross-overlap matrix heatmap
 # ----------------------------------------------------------------------
 def plot_cross_overlap_heatmap(
     pod_modes_physical: Sequence[torch.Tensor] | torch.Tensor,
@@ -1099,7 +1099,7 @@ def plot_cross_overlap_heatmap(
     return fig
 
 # ----------------------------------------------------------------------
-# 📊7️⃣c) POD Temporal Modes (Composition Matrix)
+# 📊 1️⃣1️⃣ POD Temporal Modes (Composition Matrix)
 # ----------------------------------------------------------------------
 def plot_pod_temporal_modes(
     Vh: torch.Tensor | np.ndarray,
@@ -1192,7 +1192,7 @@ def plot_pod_temporal_modes(
     return fig
 
 # ----------------------------------------------------------------------
-# 📊7️⃣d) POD Temporal Overlap Heatmap
+# 📊 1️⃣2️⃣ POD Temporal Overlap Heatmap
 # ----------------------------------------------------------------------
 def plot_pod_temporal_overlap_heatmap(
     Vh: torch.Tensor | np.ndarray,
@@ -1272,7 +1272,7 @@ def plot_pod_temporal_overlap_heatmap(
     return fig
 
 # ----------------------------------------------------------------------
-# 📊7️⃣e) POD Temporal Cross-Overlap Heatmap
+# 📊 1️⃣3️⃣ POD Temporal Cross-Overlap Heatmap
 # ----------------------------------------------------------------------
 def plot_pod_temporal_cross_overlap_heatmap(
     Vh: torch.Tensor | np.ndarray,
@@ -1343,7 +1343,7 @@ def plot_pod_temporal_cross_overlap_heatmap(
     return fig
 
 # ----------------------------------------------------------------------
-# 📊7️⃣f) POD–Eigenbasis Alignment Heatmap
+# 📊 🔟 POD–Eigenbasis Alignment Heatmap
 # ----------------------------------------------------------------------
 def plot_pod_eigen_alignment(
     pod_modes_physical: Sequence[torch.Tensor] | torch.Tensor,
@@ -1450,7 +1450,7 @@ def plot_pod_eigen_alignment(
     return fig
 
 # ----------------------------------------------------------------------
-# 8️⃣🫟 Hilbert Space Phase Portrait
+# 📊 1️⃣4️⃣ Hilbert Space Phase Portrait
 # ----------------------------------------------------------------------
 def plot_hilbert_phase_portrait(
     learned_wavefunctions: np.ndarray | torch.Tensor,
@@ -1627,7 +1627,7 @@ def plot_hilbert_phase_portrait(
 
 
 # ----------------------------------------------------------------------
-# 📊9️⃣ Spectral Energy Cascade
+# 📊 1️⃣5️⃣ Spectral Energy Cascade
 # ----------------------------------------------------------------------
 def plot_spectral_energy_cascade(
     learned_wavefunctions: np.ndarray | torch.Tensor,
@@ -1712,7 +1712,7 @@ def plot_spectral_energy_cascade(
 
 
 # ----------------------------------------------------------------------
-# 📊🔟 POD Partition Function Spectrum
+# 📊 1️⃣6️⃣ POD Partition Function Spectrum
 # ----------------------------------------------------------------------
 def plot_partition_function_spectrum(
     learned_wavefunctions: np.ndarray | torch.Tensor,
