@@ -96,6 +96,8 @@ from visualizations import (
     plot_pod_temporal_cross_overlap_heatmap,
     plot_pod_eigen_alignment,
     plot_hilbert_phase_portrait,
+    plot_spectral_energy_cascade,
+    plot_partition_function_spectrum,
 )
 
 # ----------------------------------------------------------------------
@@ -553,6 +555,17 @@ def main(argv: list[str] | None = None) -> None:    # noqa: D401
             out_path=figures_dir / "hilbert_portrait.png",
         ))
 
+        figures.append(plot_spectral_energy_cascade(
+            learned_wavefunctions=psi_matrix,
+            energies=E_learned,
+            out_path=figures_dir / "spectral_cascade.png",
+        ))
+
+        figures.append(plot_partition_function_spectrum(
+            learned_wavefunctions=psi_matrix,
+            out_path=figures_dir / "partition_spectrum.png",
+        ))
+
         # Also save a manifest so users can see exactly what was created.
         figure_manifest = {
             "figures_dir": str(figures_dir.resolve()),
@@ -571,6 +584,8 @@ def main(argv: list[str] | None = None) -> None:    # noqa: D401
                 "pod_temporal_overlap.png",
                 "pod_temporal_cross_overlap.png",
                 "hilbert_portrait.png",
+                "spectral_cascade.png",
+                "partition_spectrum.png",
             ],
         }
         (run_artifacts_dir / "figures_manifest.json").write_text(

@@ -1625,6 +1625,182 @@ def plot_hilbert_phase_portrait(
 
     return fig
 
+
+# ----------------------------------------------------------------------
+# 📊9️⃣ Spectral Energy Cascade
+# ----------------------------------------------------------------------
+def plot_spectral_energy_cascade(
+    learned_wavefunctions: np.ndarray | torch.Tensor,
+    energies: np.ndarray | torch.Tensor,
+    *,
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """
+    Compare POD singular values with Hamiltonian energy spectrum.
+
+    Parameters
+    ----------
+    learned_wavefunctions : np.ndarray | torch.Tensor
+        Learned wavefunctions matrix (n_grid, n_modes).
+    energies : np.ndarray | torch.Tensor
+        Learned or true energy eigenvalues.
+    out_path : pathlib.Path | None, optional
+    """
+    _apply_style()
+
+    if isinstance(learned_wavefunctions, torch.Tensor):
+        learned_wavefunctions = learned_wavefunctions.detach().cpu().numpy()
+    if isinstance(energies, torch.Tensor):
+        energies = energies.detach().cpu().numpy()
+
+    spatial_modes, singular_values, _ = pod_decomposition(learned_wavefunctions)
+
+    n = min(len(singular_values), len(energies))
+
+    fig, ax1 = plt.subplots(figsize=(7, 5), facecolor="#0d1117")
+
+    # POD spectrum
+    sns.lineplot(
+        x=np.arange(1, n + 1),
+        y=singular_values[:n],
+        marker="o",
+        ax=ax1,
+        label="POD singular values",
+        color=PROJECT_COLORS["pink"],
+    )
+
+    ax1.set_yscale("log")
+    ax1.set_xlabel("Mode index")
+    ax1.set_ylabel("Singular value", color=PROJECT_COLORS["pink"])
+    ax1.tick_params(axis='y', labelcolor=PROJECT_COLORS["pink"])
+
+    # second axis for energies
+    ax2 = ax1.twinx()
+
+    sns.lineplot(
+        x=np.arange(1, n + 1),
+        y=energies[:n],
+        marker="s",
+        ax=ax2,
+        linestyle="--",
+        label="Energy eigenvalues",
+        color=PROJECT_COLORS["cyan"],
+    )
+
+    ax2.set_ylabel("Energy", color=PROJECT_COLORS["cyan"])
+    ax2.tick_params(axis='y', labelcolor=PROJECT_COLORS["cyan"])
+    ax2.grid(False)
+
+    ax1.set_title("Spectral Energy Cascade", fontsize=14, pad=15)
+
+    # Combine legends
+    lines1, labels1 = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines1 + lines2, labels1 + labels2, loc="upper right")
+    ax2.get_legend().remove()
+
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(
+            out_path,
+            dpi=200,
+            bbox_inches="tight",
+            facecolor=fig.get_facecolor(),
+        )
+
+    return fig
+
+
+# ----------------------------------------------------------------------
+# 📊🔟 POD Partition Function Spectrum
+# ----------------------------------------------------------------------
+def plot_partition_function_spectrum(
+    learned_wavefunctions: np.ndarray | torch.Tensor,
+    *,
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """
+    Interpret POD spectrum as a thermodynamic ensemble.
+
+    Parameters
+    ----------
+    learned_wavefunctions : np.ndarray | torch.Tensor
+        Learned wavefunctions matrix (n_grid, n_modes).
+    out_path : pathlib.Path | None, optional
+    """
+    _apply_style()
+
+    if isinstance(learned_wavefunctions, torch.Tensor):
+        learned_wavefunctions = learned_wavefunctions.detach().cpu().numpy()
+
+    _, singular_values, _ = pod_decomposition(learned_wavefunctions)
+
+    if isinstance(singular_values, torch.Tensor):
+        singular_values = singular_values.detach().cpu().numpy()
+
+    # probability weights
+    p = singular_values**2
+    p = p / np.sum(p)
+
+    # effective energies
+    E_eff = -np.log(p + 1e-12)
+
+    # entropy
+    entropy = -np.sum(p * np.log(p + 1e-12))
+
+    modes = np.arange(1, len(p) + 1)
+
+    fig, ax1 = plt.subplots(figsize=(7, 5), facecolor="#0d1117")
+
+    sns.lineplot(
+        x=modes,
+        y=p,
+        marker="o",
+        ax=ax1,
+        label="Boltzmann weights",
+        color=PROJECT_COLORS["purple"],
+    )
+
+    ax1.set_ylabel("Mode probability", color=PROJECT_COLORS["purple"])
+    ax1.tick_params(axis='y', labelcolor=PROJECT_COLORS["purple"])
+    ax1.set_xlabel("Mode index")
+
+    ax2 = ax1.twinx()
+
+    sns.lineplot(
+        x=modes,
+        y=E_eff,
+        marker="s",
+        linestyle="--",
+        ax=ax2,
+        label="Effective energy",
+        color=PROJECT_COLORS["green"],
+    )
+
+    ax2.set_ylabel("Effective energy", color=PROJECT_COLORS["green"])
+    ax2.tick_params(axis='y', labelcolor=PROJECT_COLORS["green"])
+    ax2.grid(False)
+
+    ax1.set_title(f"POD Partition Function Spectrum (Entropy={entropy:.3f})", fontsize=14, pad=15)
+
+    # Combine legends
+    lines1, labels1 = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines1 + lines2, labels1 + labels2, loc="center right")
+    ax2.get_legend().remove()
+
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(
+            out_path,
+            dpi=200,
+            bbox_inches="tight",
+            facecolor=fig.get_facecolor(),
+        )
+
+    return fig
+
+
 # ----------------------------------------------------------------------
 # 🧪 Smoke test – runs when the module is executed directly
 # ----------------------------------------------------------------------
@@ -1819,6 +1995,25 @@ def _smoke_test() -> None:
         true_wavefunctions=psi_true_stacked,
         x=x,
         out_path=hilbert_path,
+    )
+
+    # --------------------------------------------------------------
+    # 9️⃣ Spectral Energy Cascade
+    # --------------------------------------------------------------
+    cascade_path = out_dir / "spectral_cascade.png"
+    plot_spectral_energy_cascade(
+        learned_wavefunctions=psi_matrix,
+        energies=E_true,
+        out_path=cascade_path,
+    )
+
+    # --------------------------------------------------------------
+    # 🔟 POD Partition Function Spectrum
+    # --------------------------------------------------------------
+    partition_path = out_dir / "partition_spectrum.png"
+    plot_partition_function_spectrum(
+        learned_wavefunctions=psi_matrix,
+        out_path=partition_path,
     )
 
     try:

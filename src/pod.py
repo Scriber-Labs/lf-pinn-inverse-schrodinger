@@ -18,6 +18,7 @@ Date: 02-2026
 from __future__ import annotations
 
 import torch
+import numpy as np
 from typing import Tuple
 from utils import l2_inner_product, get_trapezoidal_weights
 
@@ -60,6 +61,9 @@ def pod_decomposition(
     Vh : torch.Tensor, shape ``(N_modes, N_modes)``
         Unitary temporal modes (❓), orthonormal with respect to the Euclidean inner product.
     """
+    if isinstance(psi_matrix, np.ndarray):
+        psi_matrix = torch.from_numpy(psi_matrix)
+
     U, S, Vh = torch.linalg.svd(psi_matrix, full_matrices=False)
     return U, S, Vh
 
