@@ -4,6 +4,15 @@ Inverse Schrödinger solver using a low-fidelity physics-informed neural network
 
 The main command-line workflow mirrors the demo notebook: it trains the inverse Schrödinger PINN on a synthetic harmonic oscillator problem, logs metrics, saves run artifacts, and generates notebook-matching figures.
 
+## Research ARtifacts
+
+```text
+artifacts/demo_visuals/     # generated figures
+artifacts/figures.md        # figure-by-figure analysis
+notebooks/demo.ipynb        # reproducible workflow
+```
+
+
 ## Setup
 
 From the project root, create and activate a Python enviornment.
@@ -273,6 +282,54 @@ python -m cli.extract_metrics --smoke-test
 
 If no `--artifacts-dir` is provided, the metrics CLI defaults to smoke-test mode.
 
+
+## 📖 Demo Notebookk, Writeups, and Figure Analysis
+
+The primary writeup for this project is in the Scriber Labs research notebook website:
+
+🔗 https://scriber-labs.github.io/research-notebook/project_batch_1/project_2/
+
+### Figure Analysis
+
+This repository treats figure interpretation as a first-class research artifact.
+
+The file `artifacts/figures.md` containes detailesd writeups for each generated figure, including:
+- What is being shown.
+- Physical interpretation.
+- Failure modes and limitations.
+- Connections between diagnostics.
+- Interpretability insights.
+
+Rather than viewing figures as standalone plots, the goal is to use them as diagnostic tools for understanding:
+- Spectral recovery.
+- Operator consistency.
+- Eigenfunction structure.
+- Identifiability of the learned potential.
+- Emergent orthogonality and basis conditioning.
+- POD-derived geometric structure.
+
+### Writeup Philosophy
+
+This project emphasizes interpretability over benchmark performance.
+
+The write-ups going with each figure attempt to answer questions such as:
+- What aspects of the Hamiltonian were successfully recovered?
+- How do the learned eigenstates relate to the underlying operator?
+- What failure modes emerge under low-fidelity constraints?
+- What additional information is revealed by POD that are not directly enforced during training?
+
+A successful experiment is therefore not defined solely by a low loss value, but by whether the resulting diagnostics support a coherent physical interpretation.
+
+### Related Research Notes
+
+Additional project notes and exploratory write-ups can be found in:
+```text
+artifacts/figures.md 
+artifacts/interpretability.md 
+artifacts/project_1_followup.md
+```
+
+These documents contain ongoing analysis, interpretability discussions, and connections between the inverse Schrödinger problem, operator learning, spectral geometry, and low-fidelity PINN behavior.
 
 ## 🦴 Repository Skeleton
 
