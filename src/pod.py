@@ -299,22 +299,35 @@ def cross_overlap_matrix(
     Parameters
     ----------
     psi_A : torch.Tensor, shape ``(N_x, n_modes)``
-        POD eigenmode.
+        First wavefunction/mode matrix.
     psi_B : torch.Tensor, shape ``(N_x, n_modes)``
-        Learned wavefunction.
+        Second wavefunction/mode matrix.
     dx : float
         Spatial grid spacing.
 
     Returns
     -------
-    torch.Tensor, shape ``(n_modes, n_modes)``
+    torch.Tensor, shape ``(n_modes_A, n_modes_B)``
         Overlap matrix of <psi_A_m | psi_B_n>.
     """
-    N = psi_A.shape[0]
+    if dx <= 0:
+        raise ValueError(f"❌ dx must be positive, got {dx}.")
 
-    weights = torch.ones(N, device=psi_A.device)
-    weights[0] = 0.5
-    weights[-1] = 0.5
+    if psi_A.ndim != 2 or psi_B.ndim != 2:
+        raise ValueError("❌ psi_A and psi_B must both be 2-D matrices.")
+
+    if psi_A.shape[0] != psi_B.shape[0]:
+        raise ValueError(
+            f"❌ Grid mismatch: psi_A has {psi_A.shape[0]} rows, "
+            f"psi_B has {psi_B.shape[0]} rows."
+        )
+
+    N = psi_A.shape[0]
+    weights = get_trapezoidal_weights(
+        N,
+        device=psi_A.device,
+        dtype=psi_A.dtype,
+    )
 
     weighted_A = psi_A * weights.unsqueeze(1)
     return weighted_A.T @ psi_B * dx
