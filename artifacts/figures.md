@@ -153,55 +153,58 @@
 ## Figure 10: POD Eigen-Alignment
 ![POD Eigen-Alignment](demo_visuals/pod_eigen_alignment.png)
 
-> 🏡
+> 🏡 Cross-overlap $\langle u_k | \hat{\psi}_n\rangle$ between physical POD modes and analytic ground-truth eigenfunctions.
 
 > 🔑 **Key Insights**
-> 1. 
+> 1. **Absolute consistency** - High diagonal elements validate that the POD basis can recover the true physical basis.
+> 2. **Spectral recovery** - Confirms operator structure even when $V_\theta$ differs.
 
 > ❌ **Failure Modes**
 > 
 > | **Verdict** | **Failure Mode** | **Description** | **Explanation** |
 > | :---------- | :--------------- | :-------------- | :-------------- |
-> 
+> | ❌ | Mis-alignment | Off-diagonal $> 0.2$ indicates POD not yet physical | Here $\rangle u_0, \hat{\psi}_1 \rangle \approx 0.3 \Rightarrow $ Fix via rescaling (see text). 
 
 ## Figure 11: POD Temporal Modes
 ![POD temporal modes](demo_visuals/pod_temporal_modes.png)
 
-> 🏡
+> 🏡 Columns of $V$ from $\Psi=U\Sigma V^T$: modal composition per state.
 
 > 🔑 **Key Insights**
-> 1. 
+> 1. **Coefficient distribution** - Shows how each POD mode contributes to each learned state.
 
 > ❌ **Failure Modes**
 > 
 > | **Verdict** | **Failure Mode** | **Description** | **Explanation** |
 > | :---------- | :--------------- | :-------------- | :-------------- |
+> | ❌ | Incoherent coefficients | Random sign / magnitude pattern across rows of $V$. | Magnitudes scatter (cf. Fig. 13) $\Rightarrow$ indicates prior mis-alignment. |
 > 
 
 ## Figure 12: Temporal overlap heatmap
 ![POD temporal overlap heatmap](demo_visuals/pod_temporal_overlap.png)
 
-> 🏡
+> 🏡 Overlap $\langle v_m | v_n \rangle  \approx I$, as expected. 
 
 > 🔑 **Key Insights**
-> 1. 
+> 1. **Unitary property** - Diagonals $\approx 1$, off-diagonals $\approx 0$ verifies numerical stability of SVD.
 
 > ❌ **Failure Modes**
 > 
-> | **Verdict** | **Failure Mode** | **Description** | **Explanation** |
-> | :---------- | :--------------- | :-------------- | :-------------- |
-> 
+> | **Verdict** | **Failure Mode** | **Description**                                                                                  | **Explanation**                                                                                |
+> | :---------- | :--------------- |:-------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------|
+> | ✔️ | Identity deviation | Large off-diagonals | Largest off-diagonal $\approx 3\times 10^{-3} \Rightarrow$ within tolerance $\therefore$ pass. | 
 
 ## Figure 13: Temporal cross-overlap
 ![POD temporal overlap heatmap](demo_visuals/pod_temporal_cross_overlap.png)
 
-> 🏡
+> 🏡 Absolute coefficients $|V_{nk}| = |\langle \mathbf{e}_n | v_k \rangle|$ (basis vector vs. temporal mode).
 
 > 🔑 **Key Insights**
-> 1. 
+> 1. **Modal dominance** - Ideally sparse with a bright diagonal; here large off-diagonals repeat the spatial misalignment story.
 
 > ❌ **Failure Modes**
 > 
 > | **Verdict** | **Failure Mode** | **Description** | **Explanation** |
 > | :---------- | :--------------- | :-------------- | :-------------- |
+> | ❌ | Spread dominance | No clear diagonal; each state draws from several $v_k$. | Reflects same weighting bug; correcting $\psi_n^\theta$-scaling collapses to identity. |
 > 
