@@ -88,59 +88,67 @@
 ## Figure 6: POD singular values 
 ![POD singular values](demo_visuals/pod_singular_values.png)
 
-> 🏡
+> 🏡 Singular values from the POD of the learned wavefunction matrix decrease (log scale) from $\approx 1$.
 
 > 🔑 **Key Insights**
-> 1. 
+> 1. **Rank efficiency** - Rapid two-decade decay indicates a low-dimensional basis.
+> 2. **Basis conditioning** - Separation between $\sigma_0$, $\sigma_1$, and $\sigma_2$ quantifies how much "physics" each node carries.
 
 > ❌ **Failure Modes**
 > 
-> | **Verdict** | **Failure Mode** | **Description** | **Explanation** |
-> | :---------- | :--------------- | :-------------- | :-------------- |
+> | **Verdict** | **Failure Mode** | **Description** | **Explanation**                                            |
+> | :---------- | :--------------- | :-------------- |:-----------------------------------------------------------|
+> | ❌ | Flat spectrum | All $\sigma_i$ nearly equal $\Rightarrow$ modes are independent, but unphysical. | Would signal noise-dominated snapshots (❓).                |
+> | ❌ | Slow decay | $\tfrac{\sigma_{2}}{\sigma_{0}} \geq 0.3 \Rightarrow$ redundant or correlated modes. | Implies over-fitting or aliasing in $\hat{\psi}_n^\theta$. |
 > 
 
 ## Figure 7: Spatial overlap heatmap
-![POD singular values](demo_visuals/pod_singular_values.png)
+![Wavefunction overlap heatmap](demo_visuals/overlap_heatmap.png)
 
-> 🏡
+> 🏡 Overlap matrix $\langle \hat{\psi}_i^\theta | \hat{\psi}_j^\theta \rangle$ confirms orthogonality of learned eigenfunctions.
 
 > 🔑 **Key Insights**
-> 1. 
+> 1. **Orthogonality:** - Diagonals are $\approx 1$, off-diagonals are $\approx 0$ confirms Hermitian structure.
+> 2. **Basis consistency** - Any bright off-diagonal would expose weak $\mathcal{L}_\text{physics}$.
 
 > ❌ **Failure Modes**
 > 
 > | **Verdict** | **Failure Mode** | **Description** | **Explanation** |
 > | :---------- | :--------------- | :-------------- | :-------------- |
-> 
+> | ✔️ | Non-orthogonality | Off-diagonal $> 0.1$ indicates incomplete convergence | Here, max off-diagonal is $\ge 0.02$ $\Rightarrow$ passes. | 
+
 
 ## Figure 8: POD spatial modes
 ![POD spatial modes](demo_visuals/pod_modes.png)
 
-> 🏡
+> 🏡 First three POD modes (blue) compared with learned $\hat{\psi}_i^\theta$ (green) and ground truth $\hat{\psi}_i$ (red).
 
 > 🔑 **Key Insights**
-> 1. 
+> 1. **Geometric structure** – Similarity to $\hat{\psi}_n$ indicates a stable, data-driven basis.
+> 2. **Feature extraction** - POD isolates the most persistent spatial patterns.
 
 > ❌ **Failure Modes**
 > 
 > | **Verdict** | **Failure Mode** | **Description** | **Explanation** |
 > | :---------- | :--------------- | :-------------- | :-------------- |
+> | ❌ | Mode mixing | Pod modes do not resemble any physical eigenfunction. | Blue curves visibly shifted (see Sec. A.6); fix requires re-weighting. |
 > 
-
 
 ## Figure 9: Cross-overlap heatmap (POD vs. learned)
 ![Cross overlap: POD vs. learned](demo_visuals/cross_overlap_heatmap.png)
 
-> 🏡
+> 🏡 Overlaps $\langle u_k | \hat{\psi}_n^\theta \rangle$ between POD spatial modes and learned wavefunctions.
 
 > 🔑 **Key Insights**
-> 1. 
+> 1. **Alignment** - Ideal result is $\pm$ identity; here large off-diagonals show mis-alignment.
+> 2. **Energy concentration** – Color magnitude reveals how energy distributes across modes.
+
 
 > ❌ **Failure Modes**
 > 
-> | **Verdict** | **Failure Mode** | **Description** | **Explanation** |
-> | :---------- | :--------------- | :-------------- | :-------------- |
-> 
+> | **Verdict** | **Failure Mode** | **Description**                                           | **Explanation** |
+> | :---------- | :--------------- |:----------------------------------------------------------| :-------------- |
+> | ❌ | Distributed overlap | Single $u_k$ projects onto several $\hat{\psi}_n^\theta$. | Caused by missing $\sqrt{w\Delta x}.$
 
 ## Figure 10: POD Eigen-Alignment
 ![POD Eigen-Alignment](demo_visuals/pod_eigen_alignment.png)
