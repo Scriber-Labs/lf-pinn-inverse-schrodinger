@@ -30,6 +30,7 @@ __all__: list[str] = [
     "align_modes_by_reference",
     "mode_overlap_matrix",
     "cross_overlap_matrix",
+    "pod_diagnostics",
 ]
 
 # ----------------------------------------------------------------------
@@ -331,6 +332,50 @@ def cross_overlap_matrix(
 
     weighted_A = psi_A * weights.unsqueeze(1)
     return weighted_A.T @ psi_B * dx
+
+def pod_diagnostics(
+    psi_matrix: torch.Tensor,
+    pod_modes_physical: torch.Tensor,
+    S: torch.Tensor,
+    Vh: torch.Tensor,
+    dx: float,
+) -> dict[str, torch.Tensor]:
+    """
+    Return numerical diagnostics for a physical POD decomposition.
+
+    The key checks are:
+    - physical orthonormality of POD modes,
+    - reconstruction error of the snapshot matrix,
+    - cross-overlap between POD modes and snapshots.
+
+    Note that cross-overlap is not expected to be the identity in general.
+    For a valid POD, it equals the modal coefficient matrix structure.
+    """
+    if dx <= 0:
+        raise ValueError(f"❌ dx must be positive, got {dx}.")
+
+    pod_overlap = mode_overlap_matrix(pod_modes_physical, dx)
+    eye = torch.eye(
+        pod_overlap.shape[0],
+        device=pod_overlap.device,
+        dtype=pod_overlap.dtype,
+    )
+
+    reconstruction = pod_modes_physical @ torch.diag(S) @ Vh
+    reconstruction_error = torch.linalg.norm(psi_matrix - reconstruction) / (
+        torch.linalg.norm(psi_matrix) + torch.finfo(psi_matrix.dtype).eps
+    )
+
+    cross_overlap = cross_overlap_matrix(pod_modes_physical, psi_matrix, dx)
+
+    return {
+        "pod_overlap": pod_overlap,
+        "pod_orthonormality_error": torch.linalg.norm(pod_overlap - eye),
+        "reconstruction_error": reconstruction_error,
+        "cross_overlap": cross_overlap,
+        "singular_values": S,
+        "singular_value_gaps": S[:-1] - S[1:] if S.numel() > 1 else torch.empty(0, device=S.device, dtype=S.dtype),
+    }
 
 
 # ----------------------------------------------------------------------

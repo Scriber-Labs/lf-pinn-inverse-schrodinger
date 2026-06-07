@@ -20,7 +20,7 @@
 }%%
 %%====================================================================
 
-flowchart TB
+flowchart LR
 
 %% ==============================
 %% COLOR CLASSES & STYLES
@@ -42,8 +42,8 @@ classDef energy fill:#0d2238,stroke:#3b9eff,stroke-width:4px,color:#ffffff,rx:12
 classDef loss_terms fill:#0b1326,stroke:#22d3ee,stroke-width:2px,color:#ffffff,rx:12px, ry:12px;
 
 %% Styles from architecture_normalization.mmd (for normalization elements)
-style synthetic_data fill:#040b30,stroke:#5D3FD3,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-style domain_norm fill:#1E0026,stroke:#750071,stroke-width:2px,color:#ffffff,rx:12,ry:12,stroke-dasharray:6 6,rx:12,ry:12;
+style synthetic_data fill:#010209,stroke:#5D3FD3,stroke-width:2px,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
+style domain_norm fill:#0c0010,stroke:#750071,stroke-width:2px,color:#ffffff,rx:12,ry:12,stroke-dasharray:6 6,rx:12,ry:12;
 style observed_data fill:#142034,stroke:#5280ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
 style trap fill:#023e00,stroke:#57ffbc,color:#ffffff,stroke-width:2px,rx:12,ry:12;
 style raw_wavefunctions fill:#224261,stroke:#14B5FF,stroke-width:2px,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
@@ -52,7 +52,7 @@ style normalized_wavefunctions fill:#112230,color:#ffffff,stroke:#4b54ff,stroke-
 style finite_difference fill:#011e00,stroke:#31ff48,color:#ffffff,stroke-width:2px,stroke-dasharray:6 6,rx:12,ry:12;
 style residual fill:#0d2827,stroke:#03E8BD,stroke-width:2px,color:#ffffff,stroke-dasharray:6 6,rx:12px,ry:12px;
 style diagnostics fill:#161b22,stroke:#f68080,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-style pod fill:#2f1616,stroke:#FEB538,color:#ffffff,stroke-width:2px,stroke-dasharray:6 6,rx:12px,ry:12px;
+style pod fill:#0d1b2a,stroke:#00d4ff,color:#ffffff,stroke-width:2px,stroke-dasharray:6 6,rx:12px,ry:12px;
 
 classDef spatial_stencil fill:#2a0037,stroke:#750071,stroke-width:2px,color:#ffffff,rx:12,ry:12;
 classDef norm fill:#1e2b4e,stroke:#4b54ff,color:#ffffff,stroke-width:2px,rx:12px,ry:12px;
@@ -61,7 +61,7 @@ classDef psinorm fill:#224261,stroke:#4b54ff,stroke-width:2px,color:#ffffff,rx:1
 classDef stencil fill:#023e00,stroke:#31ff48,color:#ffffff,stroke-width:2px,rx:12,ry:12;
 classDef physics fill:#1c5654,stroke:#03E8BD,color:#ffffff,stroke-width:2px,rx:12,ry:12;
 classDef opt fill:#2a071b,stroke:#FE28A2,color:#ffffff,stroke-width:2px,stroke-dasharray:6 6,rx:12,ry:12;
-classDef diag fill:#723c30,stroke:#FEB538,color:#ffffff,stroke-width:2px,rx:12,ry:12;
+classDef diag fill:#2f1616,stroke:#FEB538,color:#ffffff,stroke-width:2px,stroke-dasharray:6 6,rx:12px,ry:12px;
 
 %% ==============================
 %% NODES (Information from architecture_2_normalization_and_diagnostics.mmd)
@@ -87,19 +87,19 @@ subgraph PIML["PIML Framework"]
 direction LR
 
     subgraph synthetic_data["1️⃣ Synthetic Data"]
-    direction TB
-        subgraph domain_norm["Uniform Grid / Trapezoidal Rule"]
+    direction LR
+        subgraph domain_norm["Uniform Grid"]
             spatial_grid["$$x\in[-5, 5]$$"]:::spatial_stencil
             deltax["$$\Delta x$$"]:::spatial_stencil
-            trap["Trapezoidal weights"]
         end
 
+        trap["Trapezoidal weights"]
         observed_data("$$\rho_n^\text{obs}, \ E_n^\text{obs}$$")
     end
 
     subgraph neural_ansatz["2️⃣ Neural Ansatz"]
     direction TB
-        subgraph energy_init["Linear Energy Initialization"]
+        subgraph energy_init["Linear Energy Initialization (linspace 0.5...n-0.5)"]
             E_init["$$E_n = \text{linspace}(0.5, n-0.5, n)$$"]:::energy
         end
 
@@ -112,7 +112,7 @@ direction LR
         E_init --> energy_eigenvalues
 
         subgraph PINN["2️⃣ PINN"]
-        direction TB
+        direction LR
 
             subgraph raw_wavefunctions["Raw Learned Wavefunctions"]
             direction TB
@@ -121,20 +121,20 @@ direction LR
                 psi2_raw
             end
 
-            MLP1("MLP for V"):::MLP --> potential
-            MLP2("MLP for ψ0"):::MLP --> psi0_raw
-            MLP3("MLP for ψ1"):::MLP --> psi1_raw
-            MLP4("MLP for ψ2"):::MLP --> psi2_raw
+            MLP1("MLP"):::MLP --> potential
+            MLP2("MLP"):::MLP --> psi0_raw
+            MLP3("MLP"):::MLP --> psi1_raw
+            MLP4("MLP"):::MLP --> psi2_raw
         end
     end
 
-    subgraph normalization["3️⃣ Wavefunction Orthonormalization"]
-    direction LR
+    subgraph normalization["3️⃣A Orthonormalization"]
+    direction TB
         apply_trapezoidal_weights["$$\int|\psi_n^\theta |^2\, dx=\sum{w_i |\psi_n^\theta |^2 \Delta x}$$"]:::norm
-        norm1("Per-state L2 Normalize"):::norm
-        gs["Sequential Gram-Schmidt<br/>and re-normalize"]:::norm
+        gs["GS+re-norm"]:::norm
         eps("$$+\epsilon \ \text{stability}$$"):::norm
     end
+    click gs "callback" "Gram-Schmidt Orthonormalization"
 
     subgraph normalized_wavefunctions["Normalized Wavefunctions"]
     direction TB
@@ -143,19 +143,20 @@ direction LR
         psi2
     end
 
-    subgraph finite_difference["3️⃣ Finite difference"]
-    direction LR
-        eigenfunction_stencil("$$\frac{\partial^2}{\partial x^2}\hat{\psi}_n^\theta$$ via stencil"):::stencil
-        potential_stencil("$$\frac{\partial^2}{\partial x^2}V_\theta(x)$$ via stencil"):::stencil
+    subgraph finite_difference["3️⃣B Finite difference"]
+    direction TB
+        eigenfunction_stencil("$$\frac{\partial^2}{dx^2}\hat{\psi}_n^\theta$$ via stencil"):::stencil
+        potential_stencil("$$V_\theta''(x)$$ via stencil"):::stencil
     end
 
     subgraph residual["4️⃣ Physics Residual"]
     direction LR
-        H("$$\bar{H}_\theta\hat{\psi}_n^\theta$$"):::physics
         R["$$R_n(x)=-\frac{1}{2}\frac{\partial^2}{\partial x^2}\hat{\psi}_n^\theta + V_\theta\hat{\psi}_n^\theta-E_n^\theta\hat{\psi}_n^\theta $$"]:::physics
+        style R stroke-width:5px;
     end
 
     subgraph loss["5️⃣  Total Loss"]
+    direction TB
         Lp["Physics loss"]:::loss_terms
         Ln["Order"]:::loss_terms
         Ls["Smoothness"]:::loss_terms
@@ -173,15 +174,13 @@ direction LR
     deltax --> apply_trapezoidal_weights
     trap --> apply_trapezoidal_weights
 
-    psi0_raw --> norm1
-    psi1_raw --> norm1
-    psi2_raw --> norm1
+    psi0_raw --> gs
+    psi1_raw --> gs
+    psi2_raw --> gs
 
-    apply_trapezoidal_weights --> norm1
+    apply_trapezoidal_weights --> gs
 
-    eps --> norm1
-
-    norm1 --> gs
+    eps --> gs
 
     gs --> psi0
     gs --> psi1
@@ -192,19 +191,18 @@ direction LR
     psi1 --> eigenfunction_stencil
     psi2 --> eigenfunction_stencil
 
-    psi0 --> H
-    psi1 --> H
-    psi2 --> H
+    psi0 --> R
+    psi1 --> R
+    psi2 --> R
 
     potential --> potential_stencil
 
-    eigenfunction_stencil --> H
-    potential --> H
-    E0 --> H
-    E1 --> H
-    E2 --> H
+    eigenfunction_stencil --> R
+    potential --> R
+    E0 --> R
+    E1 --> R
+    E2 --> R
 
-    H --> R
     R --> Lp
 
     E0 --> Ln
@@ -213,6 +211,9 @@ direction LR
 
     potential --> Ls
     potential_stencil --> Ls
+    psi0 --> Ls
+    psi1 --> Ls
+    psi2 --> Ls
 
     psi0 --> Ld
     psi1 --> Ld
@@ -227,25 +228,25 @@ direction LR
     Ls --> opt
     Ld --> opt
 
-    opt --> MLP1
-    opt --> MLP2
-    opt --> MLP3
-    opt --> MLP4
-    opt --> E0
-    opt --> E1
-    opt --> E2
+    opt ==> MLP1
+    opt ==> MLP2
+    opt ==> MLP3
+    opt ==> MLP4
+    opt ==> E0
+    opt ==> E1
+    opt ==> E2
 
 end
 
 %% ==============================
 %% DIAGNOSTICS
 %% ==============================
-    subgraph diagnostics["Diagnostics"]
+subgraph diagnostics["7️⃣ Diagnostics"]
 direction TB
 
     sanity["sanity checks"]:::diag
 
-    pod["7️⃣ POD analysis"]
+    pod["7️⃣ POD analysis"]:::pod
 
     sanity ~~~ pod
 

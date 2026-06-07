@@ -24,12 +24,11 @@ flowchart TB
 %% ==============================
 %% COLOR CLASSES (your palette)
 %% ==============================
-style synthetic_data fill:#040b30,stroke:#5D3FD3,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-style domain_norm fill:#1E0026,stroke:#750071,stroke-width:2px,color:#ffffff,rx:12,ry:12,stroke-dasharray:6 6;
-style normalized_wavefunctions fill:#112230,color:#ffffff,stroke:#4b54ff,stroke-width:2px,stroke-dasharray:6 6,rx:12,ry:12;
-style pod fill:#2f1616,stroke:#FEB538,color:#ffffff,stroke-width:2px,stroke-dasharray:6 6,rx:12px,ry:12px;
+style synthetic_data fill:#010209,stroke:#5D3FD3,stroke-width:2px,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
+style domain_norm fill:#0c0010,stroke:#750071,stroke-width:2px,color:#ffffff,rx:12,ry:12,stroke-dasharray:6 6,rx:12,ry:12;
+style pod fill:#0d1b2a,stroke:#00d4ff,color:#ffffff,stroke-width:2px,stroke-dasharray:6 6,rx:12px,ry:12px;
 style trap fill:#023e00,stroke:#57ffbc,color:#ffffff,stroke-width:2px,rx:12,ry:12;
-
+style normalized_wavefunctions fill:#112230,color:#ffffff,stroke:#4b54ff,stroke-width:2px,stroke-dasharray:6 6,rx:12,ry:12;
 style PsiMat fill:#112230,stroke:#4b54ff,color:#ffffff,stroke-width:2px,rx:12,ry:12;
 style trap_pod fill:#1f4e5f,stroke:#f78166,stroke-width:2px,color:#ffffff,rx:12,ry:12;
 
@@ -37,7 +36,7 @@ classDef spatial_modes fill:#5c2c6d,stroke:#ff66b3,stroke-width:2px,color:#fffff
 classDef temporal_modes fill:#1a6b63,stroke:#00f5db,stroke-width:2px,color:#ffffff,rx:12,ry:12;
 classDef spatial_stencil fill:#2a0037,stroke:#750071,stroke-width:2px,color:#ffffff,rx:12,ry:12;
 classDef psinorm fill:#224261,stroke:#4b54ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-classDef diag fill:#723c30,stroke:#FEB538,color:#ffffff,stroke-width:2px,rx:12,ry:12;
+classDef diag fill:#1b263b,stroke:#00d4ff,color:#ffffff,stroke-width:2px,rx:12,ry:12;
 
 %% ==============================
 %% INPUT BLOCKS
@@ -47,8 +46,8 @@ subgraph synthetic_data["1️⃣ Synthetic Data"]
     subgraph domain_norm["Uniform Grid / Trapezoidal Rule"]
         spatial_grid["$$x\in[-5, 5]$$"]:::spatial_stencil
         deltax["$$\Delta x$$"]:::spatial_stencil
-        trap["Trapezoidal weights"]
     end
+    trap["Trapezoidal weights"]
 end
 
 subgraph normalized_wavefunctions["Normalized Wavefunctions"]
@@ -58,24 +57,26 @@ subgraph normalized_wavefunctions["Normalized Wavefunctions"]
     psi2(("$$\hat{\psi}_2^\theta$$")):::psinorm
 end
 
+
 %% ==============================
 %% POD DIAGRAM
 %% ==============================
-subgraph pod["7️⃣ POD"]
-    PsiMat("Snapshot matrix<br/>$$\mathbf{\Psi}^\theta=[\hat{\psi}_0^\theta,\hat{\psi}_1^\theta,\hat{\psi}_2^\theta]$$")
-    trap_pod("Trapezoidal spatial-measure weighting<br/>$$\mathbf{\Psi}_w^\theta(x_i)=\sqrt{w_i\Delta x}\,\mathbf{\Psi}^\theta(x_i)$$")
-    SVD("Euclidean SVD<br/>$$\mathbf{\Psi}_w^\theta=U\Sigma V^T$$"):::diag
-    podscale("POD physical scaling<br/>$$u_k^\mathrm{phys}(x_i)=u_k(x_i)/\sqrt{w_i\Delta x}$$"):::spatial_modes
-    align("Physical POD phase / sign alignment"):::spatial_modes
-    spec("Singular values<br/>$$\sigma_k$$"):::diag
-    modes("Physical POD modes<br/>$$u_k^\mathrm{phys}$$"):::spatial_modes
-    overlaps("POD overlaps<br/>$$\langle u_k^\mathrm{phys},\hat{\psi}_n^\theta\rangle_{\Delta x,w}$$"):::spatial_modes
-    temporal_scaling("Temporal mode extraction from SVD<br/>$$\mathbf{V}^T$$"):::temporal_modes
-    temporal_alignment("Phase/sign alignment<br/>(Inherited from $$\mathbf{U}$$)"):::temporal_modes
-    temporal_mode_heatmap("Temporal POD modes<br/>(Composition Matrix $$V_{nk}$$)"):::temporal_modes
-    temporal_overlap("POD temporal overlap<br/>$$\langle v_m, v_n \rangle = \delta_{mn}$$"):::temporal_modes
-    cross_temporal("Temporal cross-overlap<br/>$$|\langle \mathbf{e}_n, v_k \rangle|$$"):::temporal_modes
+subgraph pod["7️⃣ POD Diagnostics"]
+    PsiMat("Snapshot matrix construction<br/>$$\mathbf{\Psi}^\theta = [\hat{\psi}_0, \hat{\psi}_1, \hat{\psi}_2]$$")
+    trap_pod("L² spatial weighting<br/>$$\mathbf{\Psi}_w = \sqrt{w \Delta x} \odot \mathbf{\Psi}$$")
+    SVD("Euclidean SVD<br/>$$\mathbf{\Psi}_w = U \Sigma V^T$$"):::diag
+    podscale("Physical mode recovery<br/>$$u_k^\text{phys} = u_k / \sqrt{w \Delta x}$$"):::spatial_modes
+    align("Phase/Sign Alignment<br/>(Relative to Ground Truth)"):::spatial_modes
+    spec("Singular values spectrum $$\sigma_k$$"):::diag
+    modes("Physical Basis Functions $$u_k^\text{phys}$$"):::spatial_modes
+    overlaps("Overlap matrix $$C_{kn}$$<br/>$$\langle u_k^\text{phys}, \hat{\psi}_n \rangle$$"):::spatial_modes
+    temporal_scaling("Temporal mode projection from $$V^T$$"):::temporal_modes
+    temporal_alignment("Global U(1) Phase Alignment"):::temporal_modes
+    temporal_mode_heatmap("Composition Heatmap (Matrix $$V_{nk}$$)"):::temporal_modes
+    temporal_overlap("Orthogonality Check $$\langle v_m, v_n \rangle = \delta_{mn}$$"):::temporal_modes
+    cross_temporal("Cross-State Projections $$|\langle \mathbf{e}_n, v_k \rangle|$$"):::temporal_modes
 
+    %% POD Companion Panels
     PsiMat --> trap_pod
     trap_pod --> SVD
     SVD --> spec
@@ -83,7 +84,6 @@ subgraph pod["7️⃣ POD"]
     SVD --> temporal_scaling
     podscale --> align
     align --> modes
-    align --> overlaps
     PsiMat --> overlaps
 
     temporal_scaling --> temporal_alignment
