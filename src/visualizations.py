@@ -22,7 +22,7 @@ Review status: Reviewed and maintained.
 from __future__ import annotations
 
 import pathlib
-from typing import Dict, List, Sequence, Tuple
+from typing import Dict, Final, List, Sequence, Tuple
 
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
@@ -62,39 +62,120 @@ TEXT_MUTED = "#8b949e"      # Muted labels, secondary notes, and ticks
 PROJECT_COLORS = {
     # Core brand palette
     "cyan_light": "#00FFEE",
-    "cyan": "#00E8FF",
+    "cyan_blue": "#00E8FF",
     "blue_light": "#14B5FF",
     "blue_mid": "#0A95EB",
     "blue_deep": "#0070EB",
     "indigo": "#5280FF",
+    "indigo_blue": "#5280FF",
     "purple_deep": "#A855F7",
-    "purple": "#7952F5",
+    "purple_light": "#7952F5",
+    "purple_dark": "#7C5CFF",
+    "purple_lavender": "#D8B4FE",
     "pink_vibrant": "#FF66B3",
-    "pink": "#F72585",
+    "pink_pink": "#F72585",
+    "pink_dark": "#AD1457",
+    "pink_light": "#FFB4F6",
     "pink_alt": "#FF40A1",
     "orange_warm": "#FF9D57",
     "orange_soft": "#F78166",
-    "green_neon": "#70E000",
+    "green_neon": "#31FF48",
+    "green_lime": "#70E000",
+    "green_light": "#57FFBC",
+    "green_emerald": "#059669",
+    "green_dark": "#035100",
     "green_jade": "#00FF7F",
-    "yellow": "#FFD166",
+    "yellow_orange": "#FFD166",
 }
 
-# Constant semantic variable mappings across ALL plots:
-COLOR_TRUE = "#FF5376"        # Vibrant Rose/Coral for Ground Truth (Analytic / Exact)
-COLOR_LEARNED = "#00E8FF"     # Electric Cyan for Learned PINN solutions
-COLOR_OBSERVED = "#FF9D57"    # Warm Orange/Amber for Observed / Noisy Training Data
-COLOR_POD_MODE = "#5280FF"    # Royal Electric Indigo/Blue for POD spatial modes
-COLOR_POD_ALT = "#A855F7"     # Deep Purple for secondary POD / partition weights
+# ======================================================================
+# 🎯 Quantity-Specific Comparison Palette (Learned vs. Ground Truth)
+# ======================================================================
+# Visual semantic rule:
+# - Ground Truth / Observed = darker, saturated color (anchored base truth)
+# - Learned (PINN) = lighter, luminous tint (high contrast against GT & dark bg)
+#
+# Quantity mapping:
+#   - Potential            -> Purple (Dark Violet vs. Light Lavender)
+#   - Wavefunctions        -> Pink   (Vibrant Eigenscribe Neon Pink vs. Luminous Pale Pink)
+#   - Energy Eigenvalues   -> Blue   (Deep Royal Blue vs. Vivid Sky/Cyan Blue)
+#   - Probability Densities-> Green  (Vivid Emerald Green vs. Bright Glowing Mint)
+
+COMPARISON_PALETTE: Final[Dict[str, Dict[str, str]]] = {
+    "potential": {
+        "true": "#7952F5",       # Vibrant Dark Purple / Violet (Ground Truth)
+        "learned": "#D8B4FE",    # Light Lavender / Lilac (Learned PINN)
+    },
+    "wavefunctions": {
+        "true": "#F72585",       # Vibrant Eigenscribe Neon Magenta/Pink (Ground Truth)
+        "learned": "#FFB4F6",    # Luminous Pastel / Pale Pink (Learned PINN)
+    },
+    "energy": {
+        "true": "#0070EB",       # Deep Royal Blue (Ground Truth)
+        "learned": "#38BDF8",    # Light Vivid Sky / Cyan Blue (Learned PINN)
+    },
+    "density": {
+        "true": "#059669",       # Vivid Emerald Green (Observed / Ground Truth)
+        "observed": "#059669",   # Alias for observed data
+        "learned": "#57FFBC",    # Bright Luminous Mint / Glowing Green (Learned PINN)
+    },
+}
+
+# Quantity-specific semantic color constants for direct access:
+COLOR_POTENTIAL_TRUE: Final[str] = COMPARISON_PALETTE["potential"]["true"]
+COLOR_POTENTIAL_LEARNED: Final[str] = COMPARISON_PALETTE["potential"]["learned"]
+
+COLOR_WAVEFUNCTION_TRUE: Final[str] = COMPARISON_PALETTE["wavefunctions"]["true"]
+COLOR_WAVEFUNCTION_LEARNED: Final[str] = COMPARISON_PALETTE["wavefunctions"]["learned"]
+
+COLOR_ENERGY_TRUE: Final[str] = COMPARISON_PALETTE["energy"]["true"]
+COLOR_ENERGY_LEARNED: Final[str] = COMPARISON_PALETTE["energy"]["learned"]
+
+COLOR_DENSITY_TRUE: Final[str] = COMPARISON_PALETTE["density"]["true"]
+COLOR_DENSITY_OBSERVED: Final[str] = COMPARISON_PALETTE["density"]["observed"]
+COLOR_DENSITY_LEARNED: Final[str] = COMPARISON_PALETTE["density"]["learned"]
+
+# General semantic fallbacks & POD design tokens:
+COLOR_TRUE: Final[str] = "#FF5376"        # Vibrant Rose/Coral (Default ground truth fallback)
+COLOR_LEARNED: Final[str] = "#00E8FF"     # Electric Cyan (Default learned PINN fallback)
+COLOR_OBSERVED: Final[str] = "#FF9D57"    # Warm Orange/Amber (Default observed data fallback)
+COLOR_POD_MODE: Final[str] = "#5280FF"    # Royal Electric Indigo/Blue for POD spatial modes
+COLOR_POD_ALT: Final[str] = "#A855F7"     # Deep Purple for secondary POD / partition weights
 
 # Training Loss Components Palette:
-LOSS_COLORS = {
-    "Total": PROJECT_COLORS["purple_deep"],    # #A855F7
-    "Physics": PROJECT_COLORS["blue_light"],   # #14B5FF
-    "Data-fit": PROJECT_COLORS["pink_vibrant"],# #FF66B3
-    "Smoothness": PROJECT_COLORS["green_jade"],# #00FF7F
-    "Ordered": PROJECT_COLORS["orange_warm"],  # #FF9D57
+LOSS_COLORS: Final[Dict[str, str]] = {
+    "Total": PROJECT_COLORS["purple_deep"],     # #A855F7
+    "Physics": PROJECT_COLORS["blue_light"],    # #14B5FF
+    "Data-fit": PROJECT_COLORS["pink_vibrant"],  # #FF66B3
+    "Smoothness": PROJECT_COLORS["green_jade"], # #00FF7F
+    "Ordered": PROJECT_COLORS["orange_warm"],   # #FF9D57
 }
 
+# Backwards compatibility / convenient alias for Figure 2 potential styling
+FIGURE_2: Final[Dict[str, str]] = {
+    "Ground_Truth_Potential": COLOR_POTENTIAL_TRUE,
+    "Learned_Potential": COLOR_POTENTIAL_LEARNED,
+}
+
+
+def get_comparison_colors(quantity: str) -> Tuple[str, str]:
+    """Return (true_color, learned_color) for a given physical quantity.
+
+    Supported quantities: 'potential', 'wavefunctions' (or 'psi'),
+    'energy' (or 'eigenvalues'), 'density' (or 'probability_density').
+    """
+    key = quantity.lower().strip()
+    if key in ("psi", "wavefunction", "wavefunctions", "eigenfunctions"):
+        key = "wavefunctions"
+    elif key in ("energy", "energies", "eigenvalues", "energy_eigenvalues"):
+        key = "energy"
+    elif key in ("density", "densities", "prob_density", "probability_density", "probability_densities"):
+        key = "density"
+    elif key in ("potential", "v"):
+        key = "potential"
+
+    palette = COMPARISON_PALETTE.get(key, {"true": COLOR_TRUE, "learned": COLOR_LEARNED})
+    return palette["true"], palette["learned"]
 
 # ======================================================================
 # 🌈 Perceptually Smooth, Intuitive Colormaps
@@ -339,7 +420,7 @@ def plot_potential(
         x_np,
         Vt_np,
         label=r"True $V(x)$",
-        color=COLOR_TRUE,
+        color=COLOR_POTENTIAL_TRUE,
         linewidth=2.8,
         linestyle="-",
     )
@@ -347,7 +428,7 @@ def plot_potential(
         x_np,
         Vl_np,
         label=r"Learned $V_\theta(x)$",
-        color=COLOR_LEARNED,
+        color=COLOR_POTENTIAL_LEARNED,
         linewidth=2.8,
         linestyle="--",
     )
@@ -401,7 +482,7 @@ def plot_wavefunctions(
             x_np,
             pt.squeeze().detach().cpu().numpy(),
             label=rf"True $\psi_{idx}(x)$",
-            color=COLOR_TRUE,
+            color=COLOR_WAVEFUNCTION_TRUE,
             linewidth=2.8,
             linestyle="-",
         )
@@ -409,7 +490,7 @@ def plot_wavefunctions(
             x_np,
             pl.squeeze().detach().cpu().numpy(),
             label=rf"Learned $\psi_{idx}^\theta(x)$",
-            color=COLOR_LEARNED,
+            color=COLOR_WAVEFUNCTION_LEARNED,
             linewidth=2.8,
             linestyle="--",
         )
@@ -467,7 +548,7 @@ def plot_energy_spectrum(
         indices - bar_width / 2,
         E_true_np,
         width=bar_width,
-        color=COLOR_TRUE,
+        color=COLOR_ENERGY_TRUE,
         edgecolor=BORDER_COLOR,
         linewidth=1.0,
         label="True $E_n$",
@@ -478,7 +559,7 @@ def plot_energy_spectrum(
         indices + bar_width / 2,
         E_learn_np,
         width=bar_width,
-        color=COLOR_LEARNED,
+        color=COLOR_ENERGY_LEARNED,
         edgecolor=BORDER_COLOR,
         linewidth=1.0,
         label=r"Learned $E_n^\theta$",
@@ -556,7 +637,7 @@ def plot_density_vs_observed(
             x_np,
             obs_density,
             label=r"Observed $\rho_n^{\text{obs}}(x)$",
-            color=COLOR_OBSERVED,
+            color=COLOR_DENSITY_OBSERVED,
             linewidth=2.8,
             linestyle="-",
         )
@@ -564,7 +645,7 @@ def plot_density_vs_observed(
             x_np,
             prob_density,
             label=r"Learned $|\hat{\psi}_n^{\theta}(x)|^2$",
-            color=COLOR_LEARNED,
+            color=COLOR_DENSITY_LEARNED,
             linewidth=2.8,
             linestyle="--",
         )
@@ -805,7 +886,7 @@ def plot_pod_first_three_spatial_modes(
                 x_np,
                 gt_np[k],
                 label=rf"True $\psi_{k}$",
-                color=COLOR_TRUE,
+                color=COLOR_WAVEFUNCTION_TRUE,
                 linewidth=2.8,
                 linestyle="-",
             )
@@ -815,7 +896,7 @@ def plot_pod_first_three_spatial_modes(
                 x_np,
                 psi_learned_np[k],
                 label=rf"Learned $\hat{{\psi}}_{k}^\theta$",
-                color=COLOR_LEARNED,
+                color=COLOR_WAVEFUNCTION_LEARNED,
                 linewidth=2.8,
                 linestyle="--",
             )
@@ -1359,12 +1440,12 @@ def plot_spectral_energy_cascade(
         ax=ax2,
         linestyle="--",
         label=r"Energy $E_k$",
-        color=COLOR_LEARNED,
+        color=COLOR_ENERGY_LEARNED,
         linewidth=2.5,
     )
 
-    ax2.set_ylabel("Energy (eigenvalues)", color=COLOR_LEARNED, fontsize=11)
-    ax2.tick_params(axis="y", labelcolor=COLOR_LEARNED)
+    ax2.set_ylabel("Energy (eigenvalues)", color=COLOR_ENERGY_LEARNED, fontsize=11)
+    ax2.tick_params(axis="y", labelcolor=COLOR_ENERGY_LEARNED)
     ax2.grid(False)
 
     ax1.set_title("Spectral Energy Cascade", fontsize=13, pad=12)
