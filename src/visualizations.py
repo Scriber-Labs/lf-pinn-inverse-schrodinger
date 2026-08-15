@@ -2,18 +2,21 @@
 """
 🖼️ Visualization utilities for the inverse Schrödinger demo.
 
-All functions accept plain NumPy / PyTorch objects are return the matplotlib Figure they create -> they are easy to unit test and reuse from notebooks or scripts.
+All functions accept plain NumPy / PyTorch objects and return the matplotlib Figure
+they create -> easy to unit test and reuse from notebooks, CLI, or scripts.
 
-✨ Features
-    - type-annotated
-    - emoji section dividers for readability
-    - list-comprehensions wherever relevant
-    - a minimal smoke-test
+Consistent styling adhering to the design tokens and palettes of
+`there-and-back-again` and `research-notebook-1`.
+
+✨ Features:
+    - Unified dark slate theme with glassmorphic accents
+    - High-contrast, perceptually smooth colormaps for overlap diagnostics
+    - Standardized typography and font sizing across all figures
+    - Constant semantic variable colors (True vs Learned vs Observed vs POD)
+    - Full type annotations and self-contained smoke test
 
 Author: Eigenscribe
-Development note: LLM assistance was used during construction; implementation has been reviewed and adapted for this project.
-Review status: Reviewed and maintained by Eigenscribe.
-Date: 02-2026
+Review status: Reviewed and maintained.
 """
 
 from __future__ import annotations
@@ -21,143 +24,202 @@ from __future__ import annotations
 import pathlib
 from typing import Dict, List, Sequence, Tuple
 
-import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-import seaborn as sns
-
+import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 import numpy as np
+import seaborn as sns
 import torch
 
-from pod import pod_decomposition, physical_pod_decomposition, cross_overlap_matrix
+try:
+    from .pod import (
+        cross_overlap_matrix,
+        mode_overlap_matrix,
+        physical_pod_decomposition,
+        pod_decomposition,
+    )
+except (ImportError, ValueError):
+    from pod import (
+        cross_overlap_matrix,
+        mode_overlap_matrix,
+        physical_pod_decomposition,
+        pod_decomposition,
+    )
 
-# ----------------------------------------------------------------------
-# 🌍 Global style helper
-# ----------------------------------------------------------------------
+
+# ======================================================================
+# 🎨 Design Tokens & Color Palette (from research-notebook-1 & there-and-back-again)
+# ======================================================================
+
+# Core Design Tokens
+THEME_BG = "#0d1117"        # Dark slate background
+CARD_BG = "#161b22"         # Glassmorphic card / panel background
+BORDER_COLOR = "#30363d"    # Structural borders and spines
+GRID_COLOR = "#21262d"      # Subtle grid lines
+TEXT_PRIMARY = "#e6edf3"    # High-contrast primary text
+TEXT_MUTED = "#8b949e"      # Muted labels, secondary notes, and ticks
+
+PROJECT_COLORS = {
+    # Core brand palette
+    "cyan_light": "#00FFEE",
+    "cyan": "#00E8FF",
+    "blue_light": "#14B5FF",
+    "blue_mid": "#0A95EB",
+    "blue_deep": "#0070EB",
+    "indigo": "#5280FF",
+    "purple_deep": "#A855F7",
+    "purple": "#7952F5",
+    "pink_vibrant": "#FF66B3",
+    "pink": "#F72585",
+    "pink_alt": "#FF40A1",
+    "orange_warm": "#FF9D57",
+    "orange_soft": "#F78166",
+    "green_neon": "#70E000",
+    "green_jade": "#00FF7F",
+    "yellow": "#FFD166",
+}
+
+# Constant semantic variable mappings across ALL plots:
+COLOR_TRUE = "#FF5376"        # Vibrant Rose/Coral for Ground Truth (Analytic / Exact)
+COLOR_LEARNED = "#00E8FF"     # Electric Cyan for Learned PINN solutions
+COLOR_OBSERVED = "#FF9D57"    # Warm Orange/Amber for Observed / Noisy Training Data
+COLOR_POD_MODE = "#5280FF"    # Royal Electric Indigo/Blue for POD spatial modes
+COLOR_POD_ALT = "#A855F7"     # Deep Purple for secondary POD / partition weights
+
+# Training Loss Components Palette:
+LOSS_COLORS = {
+    "Total": PROJECT_COLORS["purple_deep"],    # #A855F7
+    "Physics": PROJECT_COLORS["blue_light"],   # #14B5FF
+    "Data-fit": PROJECT_COLORS["pink_vibrant"],# #FF66B3
+    "Smoothness": PROJECT_COLORS["green_jade"],# #00FF7F
+    "Ordered": PROJECT_COLORS["orange_warm"],  # #FF9D57
+}
+
+
+# ======================================================================
+# 🌈 Perceptually Smooth, Intuitive Colormaps
+# ======================================================================
+
+# 1. Sequential Colormap for [0, 1] Overlaps (0 = Orthogonal/Quiet -> 1 = Unit Overlap/Bright Glow)
+# Off-diagonal zeros stay dark; diagonals pop in glowing cyan/rose.
+spatial_overlap_cmap = mcolors.LinearSegmentedColormap.from_list(
+    "spatial_overlap_smooth",
+    [
+        (0.00, "#0d1117"),  # Dark background (0 overlap = quiet)
+        (0.20, "#1c1445"),  # Deep navy-violet
+        (0.45, "#4361EE"),  # Royal Indigo
+        (0.70, "#7952F5"),  # Electric Purple
+        (0.88, "#FF66B3"),  # Vibrant Rose Pink
+        (1.00, "#00FFEE"),  # Glowing Electric Cyan (1.0 peak)
+    ],
+)
+
+# 2. Symmetric Diverging Colormap for [-1, 1] Cross-Overlaps & Modal Matrices
+# -1.0 = Vibrant Pink/Rose, 0.0 = Dark Slate Neutral, +1.0 = Electric Cyan
+cross_overlap_cmap = mcolors.LinearSegmentedColormap.from_list(
+    "cross_overlap_diverging",
+    [
+        (0.00, "#F72585"),  # -1.0 : Neon Rose Pink
+        (0.25, "#7952F5"),  # -0.5 : Electric Purple
+        (0.50, "#161b22"),  #  0.0 : Neutral Dark Slate
+        (0.75, "#0A95EB"),  # +0.5 : Vivid Sky Blue
+        (1.00, "#00FFEE"),  # +1.0 : Bright Electric Cyan
+    ],
+)
+
+BLUE_TO_PINK = cross_overlap_cmap
+
+# 3. Temporal Modal Composition Colormap
+temporal_cmap = cross_overlap_cmap
+
+# 4. Temporal Unitary Overlap Colormap [0, 1]
+temporal_overlap_cmap = spatial_overlap_cmap
+
+
+# ======================================================================
+# 🌍 Global Style & Typography Helper
+# ======================================================================
 def _apply_style() -> None:
-    """Set global plotting style (Seaborn + custom rcParams)."""
-
-    palette = ["#FE28A2", "#845CCC", "#4361EE", "#2CA9E6", "#309592"]
+    """Set global plotting style with unified fonts, sizing, and colors."""
+    font_family = ["Aclonica", "DejaVu Sans", "Helvetica Neue", "Arial", "sans-serif"]
 
     sns.set_theme(
         style="darkgrid",
         context="notebook",
-        palette=palette,
-        font_scale=0.8,
+        font_scale=0.9,
         rc={
-            "axes.facecolor": "#0d1117",
-            "figure.facecolor": "#0d1117",
-            "savefig.facecolor": "#0d1117",
-            "grid.color": "#444444",
-            "text.color": "#E6E6E6",
-            "axes.labelcolor": "#E6E6E6",
-            "xtick.color": "#DDDDDD",
-            "ytick.color": "#DDDDDD",
-            "axes.edgecolor": "#DDDDDD",
-        }
+            "axes.facecolor": THEME_BG,
+            "figure.facecolor": THEME_BG,
+            "savefig.facecolor": THEME_BG,
+            "grid.color": GRID_COLOR,
+            "grid.linestyle": ":",
+            "grid.alpha": 0.6,
+            "text.color": TEXT_PRIMARY,
+            "axes.labelcolor": TEXT_PRIMARY,
+            "xtick.color": TEXT_MUTED,
+            "ytick.color": TEXT_MUTED,
+            "axes.edgecolor": BORDER_COLOR,
+            "font.family": "sans-serif",
+            "font.sans-serif": font_family,
+        },
     )
-    sns.set_palette(sns.color_palette(palette, desat=1.0))
-
-    #plt.rcParams.update(
-    #    {
-    #        "figure.figsize": (9, 5),
-    #        "figure.dpi": 120,
-    #        "axes.labelsize": 13,
-    #        "axes.titlesize": 14,
-    #        "legend.fontsize": 11,
-    #        "lines.linewidth": 2,
-    #    }
-    #)
 
     plt.rcParams.update(
         {
             "figure.figsize": (9, 5),
-            "figure.dpi": 120,
-            "axes.labelsize": 13,
-            "axes.titlesize": 14,
-            "legend.fontsize": 11,
-            "lines.linewidth": 2,
+            "figure.dpi": 150,
+            "savefig.dpi": 200,
+            "font.family": "sans-serif",
+            "font.sans-serif": font_family,
+            "axes.titlesize": 13,
+            "axes.titleweight": "bold",
+            "axes.titlepad": 10,
+            "axes.labelsize": 11,
+            "axes.labelweight": "normal",
+            "xtick.labelsize": 9.5,
+            "ytick.labelsize": 9.5,
+            "legend.fontsize": 9.5,
+            "legend.title_fontsize": 10,
+            "legend.frameon": True,
+            "legend.facecolor": CARD_BG,
+            "legend.edgecolor": BORDER_COLOR,
+            "legend.framealpha": 0.85,
+            "lines.linewidth": 2.5,
         }
     )
+
+
 _apply_style()
 
-PROJECT_COLORS = {
-    "purple": "#845CCC",
-    "pink": "#FE28A2",
-    "green": "#39FF14",
-    "cyan": "#0FFFFE",
-    "blue": "#007FFF",
-}
 
-spatial_overlap_cmap = mcolors.LinearSegmentedColormap.from_list("spatial_overlap", [
-    (0.00, "#00F0FF"),  # Neon Cyan
-    (0.25, "#007BFF"),  # Royal Blue
-    (0.50, "#5E17EB"),  # Electric Purple
-    (0.75, "#F72585"),  # Neon Pink
-    (1.00, "#FFBD00"),  # Bright Goldenrod (for max overlap pop)
-])
-
-BLUE_TO_PINK = mcolors.LinearSegmentedColormap.from_list("blue_to_pink_fancy", [
-    (0.00, "#00BFFF"),  # Deep Sky Blue
-    (0.35, "#7000FF"),  # Vivid Violet
-    (0.65, "#FF007F"),  # Bright Rose
-    (1.00, "#FFEE00"),  # Vibrant Yellow
-])
-
-temporal_cmap = mcolors.LinearSegmentedColormap.from_list("temporal_green_polished", [
-    (0.00, "#003200"),  # Deep Jungle Green
-    (0.30, "#00A000"),  # Vivid Green
-    (0.60, "#39FF14"),  # Neon Green (Alien)
-    (0.85, "#CCFF33"),  # Electric Lime
-    (1.00, "#0FFFFE"),  # Electric Cyan
-])
-
-temporal_overlap_cmap = mcolors.LinearSegmentedColormap.from_list("temporal_overlap_polished", [
-    (0.00, "#3D34EB"),  # Intense Blue
-    (0.25, "#14B5FF"),  # Azure
-    (0.50, "#00FFC2"),  # Bright Aquamarine
-    (0.75, "#70E000"),  # Lime
-    (1.00, "#FF5400"),  # International Orange (Contrast pop)
-])
-
-
-
-# ----------------------------------------------------------------------
-# ✨ Helper: gradient bar plotting
-# ----------------------------------------------------------------------
-def _plot_gradient_bar(ax, x, height, width, cmap, label=None):
-    """
-    Draw a bar with a smooth gradient fill (lighter at bottom, darker at top).
-
-    Parameters
-    ----------
-    ax : matplotlib.axes.Axes
-        The axes to draw the bar on.
-    x : float
-        The x-position of the bar.
-    height : float
-        The height (value) of the bar.
-    width : float
-        The width of the bar.
-    cmap : matplotlib.colors.Colormap
-        The colormap to use for the gradient.
-    label : str, optional
-        Legend label (only used once per bar group).
-    """
-    n_segments = 50  # Number of thin bars to simulate gradient
+# ======================================================================
+# ✨ Helpers: Gradient Bars & Loss-Weight Badge
+# ======================================================================
+def _plot_gradient_bar(
+    ax: plt.Axes,
+    x: float,
+    height: float,
+    width: float,
+    cmap: mcolors.Colormap,
+    label: str | None = None,
+) -> None:
+    """Draw a bar with a smooth gradient fill (lighter at bottom, darker at top)."""
+    n_segments = 40
     segment_height = height / n_segments
     for i in range(n_segments):
-        # Reverse the color index so lighter colors are at bottom (i=0) and darker at top
-        color = cmap(1 - i / (n_segments - 1)) if n_segments > 1 else cmap(1)
-        ax.bar(x, segment_height, width=width, bottom=i*segment_height,
-               color=color, edgecolor='none')
-    # Add label to legend using a proxy artist (a visible patch)
+        color = cmap(1.0 - i / (n_segments - 1)) if n_segments > 1 else cmap(1.0)
+        ax.bar(
+            x,
+            segment_height,
+            width=width,
+            bottom=i * segment_height,
+            color=color,
+            edgecolor="none",
+        )
     if label:
-        from matplotlib.patches import Patch
         ax.patches[-1].set_label(label)
 
-# ----------------------------------------------------------------------
-# ✨ Helper: horizontal lambdas‑row (figure‑level)
-# ----------------------------------------------------------------------
+
 def _add_lambda_row(
     fig: plt.Figure,
     lambdas: Dict[str, float],
@@ -165,85 +227,47 @@ def _add_lambda_row(
     ax: plt.Axes | None = None,
 ) -> None:
     """
-    Render the loss-weight dictionary as a single horizontal row.
-    The row is placed **just below the title** (if it exists):
-
-    - If the figure has ``suptitle`` -> below that.
-    - Else if an ``ax`` is supplied (or can be inferred) -> below the Axes title.
-    - Otherwise fall back to safe default near the top of the canvas.
-
-    Parameters
-    ----------
-    fig : matplotlib Figure
-        The figure on which the annotation the loss weights will be rendered.
-    lambdas : dict[str, float]
-        Mapping of loss-weight names -> numeric values.
-    ax : matplotlib.axes.Axes, optional
-        The axes whose title should be used as a reference point.
-        If omitted, the function will try to locate the first Axes in ``fig.axes`.
+    Render loss-weight dictionary as a sleek glassmorphic pill badge.
+    Placed consistently below the figure suptitle or axes title.
     """
-    # Build the formatted string of loss weights (four spaces between entries)
-    lambda_str = "    ".join(
-        rf"$\lambda_{{{k}}} = {v:g}$" for k, v in lambdas.items()
-    )
+    lambda_str = "    ".join(rf"$\lambda_{{{k}}} = {v:g}$" for k, v in lambdas.items())
 
-    # Determine where the suptitle lives (if it exists)
-    # ``fig._suptitle`` is the Text object created by ``fig.suptitle``.
-    # It may be ``None`` if the user never called a ``suptitle``.
     suptitle = getattr(fig, "_suptitle", None)
-
     if suptitle is not None:
-        # Get the title's *figure* coordinates (x, y) - y is near 0.98.
         _, title_y = suptitle.get_position()
-        # Pull the text down by a modest amount (approximately 5% of the figure height).
-        # The factor 0.05 works well for the default 9x5 inch canvas.
         lambda_y = title_y - 0.05
     else:
-        # No suptitle -> fall back to an Axes title (most of the plots in this module use ax.set_title)
-        # If the caller supplied an Axes, use it; otherwise grab the first one.
         if ax is None:
-            if fig.axes:
-                ax = fig.axes[0]        # first Axes in the figure
-            else:
-                # No Axes at all -> use a generic safe default
-                lambda_y = 0.94
-                fig.text(
-                    0.5,
-                    lambda_y,
-                    lambda_str,
-                    ha="center",
-                    va="center",
-                    fontsize=11,
-                    color="black",
-                    bbox=dict(facecolor="white", edgecolor="grey", alpha=0.85, pad=3.0),
-                    transform=fig.transFigure,
-                )
-            return
+            ax = fig.axes[0] if fig.axes else None
 
-        # Convert the Axes bounding box to figure coordinates
-        # ``ax.get_position()`` returns a Bbox in *figure* coordinates already.
-        bbox = ax.get_position()
-        # ``box.y1`` is the top edge of the Axes (0-1 in figure space)
-        # Pull the text down by a small fraction for the figure height.
-        lambda_y = bbox.y1 - 0.03   # 3% of figure height works well for 9x5
+        if ax is not None:
+            bbox = ax.get_position()
+            lambda_y = bbox.y1 - 0.03
+        else:
+            lambda_y = 0.94
 
-    # Draw the annotation
     fig.text(
         0.5,
         lambda_y,
         lambda_str,
         ha="center",
         va="center",
-        fontsize=11,
-        color="black",
-        bbox=dict(facecolor="white", edgecolor="gray", alpha=0.85, pad=3.0),
+        fontsize=9.5,
+        color=TEXT_PRIMARY,
+        bbox=dict(
+            boxstyle="round,pad=0.5,rounding_size=0.3",
+            facecolor=CARD_BG,
+            edgecolor=BORDER_COLOR,
+            alpha=0.90,
+            linewidth=1.0,
+        ),
         transform=fig.transFigure,
     )
 
 
-# ----------------------------------------------------------------------
-#🩵 1️⃣ Training Curves
-# ----------------------------------------------------------------------
+# ======================================================================
+# 🩵 1️⃣ Training Curves
+# ======================================================================
 def plot_loss_history(
     epochs: Sequence[int],
     total: Sequence[float],
@@ -254,36 +278,18 @@ def plot_loss_history(
     lambdas: Dict[str, float],
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
-    """
-    Render a log-scale line plot of all loss components.
+    """Render a log-scale line plot of all loss components."""
+    _apply_style()
 
-    Parameters
-    ----------
-    epochs : Sequence[int]
-        Epoch numbers (usually ``range(1, N+1)``).
-    total, physics, data, smooth, ordered : Sequence[float]
-        Per-epoch scalar losses.
-    lambdas : dict[str, float]
-        Mapping ``{'data':..., `physics`:..., `smooth`:..., `ordered`:...}``.
-    out_path : Path or None (optional)
-        If provided, the figure is saved to this path location (PNG).
-
-    Returns
-    -------
-    matplotlib.figure.Figure
-        A 2x2 figure containing the log-scale training curves for each individual loss term.
-    """
-
-    # 🎨 color / label mapping (list comprehension keeps it tidy)
     comps: List[Tuple[str, str, Sequence[float]]] = [
-        ("Total", PROJECT_COLORS["purple"], total),
-        ("Physics", PROJECT_COLORS["blue"], physics),
-        ("Ordered", PROJECT_COLORS["cyan"], ordered),
-        ("Smoothness", PROJECT_COLORS["green"], smooth),
-        ("Data-fit", PROJECT_COLORS["pink"], data),
+        ("Total", LOSS_COLORS["Total"], total),
+        ("Physics", LOSS_COLORS["Physics"], physics),
+        ("Data-fit", LOSS_COLORS["Data-fit"], data),
+        ("Smoothness", LOSS_COLORS["Smoothness"], smooth),
+        ("Ordered", LOSS_COLORS["Ordered"], ordered),
     ]
 
-    fig, ax = plt.subplots(facecolor="#0d1117")
+    fig, ax = plt.subplots(figsize=(9, 5), facecolor=THEME_BG)
     for label, color, series in comps:
         sns.lineplot(
             x=epochs,
@@ -291,27 +297,28 @@ def plot_loss_history(
             ax=ax,
             label=label,
             color=color,
+            linewidth=2.5,
         )
 
     ax.set_yscale("log")
-    ax.set_xlabel("Epoch")
-    ax.set_ylabel("Loss")
-    ax.set_title("Training loss components")
-    ax.grid(True, which="both", alpha=0.2)
-    ax.legend()
+    ax.set_xlabel("Epoch", fontsize=11)
+    ax.set_ylabel("Loss (log scale)", fontsize=11)
+    ax.set_title("Training Loss Components", fontsize=13, pad=12)
+    ax.grid(True, which="both", color=GRID_COLOR, linestyle=":", alpha=0.6)
+    ax.legend(loc="upper right", framealpha=0.85)
 
-    # ⚖️ Horizontal lambdas row
     _add_lambda_row(fig, lambdas, ax=ax)
 
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+        fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor=THEME_BG)
 
     return fig
 
-# ----------------------------------------------------------------------
+
+# ======================================================================
 # 🌠 2️⃣ Potential plot (true vs. learned)
-# ----------------------------------------------------------------------
+# ======================================================================
 def plot_potential(
     x: torch.Tensor,
     V_true: torch.Tensor,
@@ -319,585 +326,362 @@ def plot_potential(
     lambdas: Dict[str, float],
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
-    """
-    Plot the analytic potential and the network's prediction.
+    """Plot the analytic ground truth potential and the network's prediction."""
+    _apply_style()
 
-    All tensors are expected to be a 1-D (shape ``(N,)``) and on CPU
-    """
+    x_np = x.squeeze().detach().cpu().numpy()
+    Vt_np = V_true.squeeze().detach().cpu().numpy()
+    Vl_np = V_learned.squeeze().detach().cpu().numpy()
 
-    # Ensure everything is on the CPU and NumPy for Matplotlib
-    x_np = x.squeeze().cpu().numpy()
-    Vt_np = V_true.squeeze().cpu().numpy()
-    Vl_np = V_learned.squeeze().cpu().numpy()
+    fig, ax = plt.subplots(figsize=(9, 5), facecolor=THEME_BG)
 
-    fig, ax = plt.subplots(facecolor="#0d1117")
-
-    ax.plot(x_np, Vt_np, label=r"True $V(x)$", color="#E52B50", linewidth=4)
+    ax.plot(
+        x_np,
+        Vt_np,
+        label=r"True $V(x)$",
+        color=COLOR_TRUE,
+        linewidth=2.8,
+        linestyle="-",
+    )
     ax.plot(
         x_np,
         Vl_np,
-        label=r"$V_\theta(x)$",
-        color="#39FF14",
-        linewidth=4,
-        ls="--",
+        label=r"Learned $V_\theta(x)$",
+        color=COLOR_LEARNED,
+        linewidth=2.8,
+        linestyle="--",
     )
-    # domain shapes
-    for edge in (x_np.min(), x_np.max()):
-        ax.axvline(edge, color="#A9A9A9", lw=3, ls=":", alpha=0.6)
 
-    ax.set_xlabel(r"$x$")
-    ax.set_ylabel(r"$V$")
-    ax.set_title("Learned vs. Ground Truth Potential")
-    ax.grid(True, which="both", alpha=0.2)
-    ax.legend(loc="center")
+    # Domain boundary guides
+    for edge in (x_np.min(), x_np.max()):
+        ax.axvline(edge, color=TEXT_MUTED, lw=1.5, ls=":", alpha=0.5)
+
+    ax.set_xlabel(r"Position $x$", fontsize=11)
+    ax.set_ylabel(r"Potential $V(x)$", fontsize=11)
+    ax.set_title("Learned vs. Ground Truth Potential", fontsize=13, pad=12)
+    ax.grid(True, which="both", color=GRID_COLOR, linestyle=":", alpha=0.6)
+    ax.legend(loc="upper center", framealpha=0.85)
 
     _add_lambda_row(fig, lambdas, ax=ax)
 
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+        fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor=THEME_BG)
 
     return fig
 
-# ----------------------------------------------------------------------
-# 🔱 3️⃣ Wave‑function comparison
-# ----------------------------------------------------------------------
-def plot_wavefunctions(
-        x: torch.Tensor,
-        psi_true: Sequence[torch.Tensor],
-        psi_learned: Sequence[torch.Tensor],
-        out_path: pathlib.Path | None = None,
-) -> plt.Figure:
-    """
-    Side-by-side plot of each eigenmode (learned vs. ground truth)
 
-    Parameters
-    ----------
-    x : torch.Tensor
-        1-D tensor of spatial coordinates.
-    psi_true, psi_learned : Sequence[torch.Tensor]
-        Iterables of 1-D tensors, length = number of modes.
-    out_path : pathlib.Path | None
-        Optional output path.
-    Returns
-    -------
-    matplotlib.figure.Figure
-        A 1x3 figure whose subplots compare the learned vs. ground truth wavefunctions for the first three eigenmodes.
-    """
+# ======================================================================
+# 🔱 3️⃣ Wavefunction comparison
+# ======================================================================
+def plot_wavefunctions(
+    x: torch.Tensor,
+    psi_true: Sequence[torch.Tensor],
+    psi_learned: Sequence[torch.Tensor],
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """Side-by-side plot of each eigenmode (learned vs. ground truth)."""
     _apply_style()
 
     n_modes = len(psi_true)
     fig, axes = plt.subplots(
         1,
         n_modes,
-        figsize=(15, 4),
+        figsize=(max(5 * n_modes, 12), 4.2),
         sharey=True,
         constrained_layout=True,
     )
-    # If there is only one mode, ``axes`` is not a list -> wrap it.
     if n_modes == 1:
         axes = [axes]
 
-    x_np = x.squeeze().cpu().numpy()
-    true_col, learn_col = "#E52B50", "#39FF14"
+    x_np = x.squeeze().detach().cpu().numpy()
 
-    for idx, (ax, pt, pl) in enumerate(
-            zip(axes, psi_true, psi_learned)
-    ):
+    for idx, (ax, pt, pl) in enumerate(zip(axes, psi_true, psi_learned)):
         ax.plot(
             x_np,
-            pt.squeeze().cpu().numpy(),
+            pt.squeeze().detach().cpu().numpy(),
             label=rf"True $\psi_{idx}(x)$",
-            color=true_col,
-            linewidth=4,
+            color=COLOR_TRUE,
+            linewidth=2.8,
+            linestyle="-",
         )
         ax.plot(
             x_np,
-            pl.squeeze().cpu().numpy(),
+            pl.squeeze().detach().cpu().numpy(),
             label=rf"Learned $\psi_{idx}^\theta(x)$",
-            color=learn_col,
-            ls="--",
-            linewidth=4,
+            color=COLOR_LEARNED,
+            linewidth=2.8,
+            linestyle="--",
         )
-        ax.set_xlabel(r"$x$")
-        ax.set_title(rf"Mode $n={idx}$")
-        ax.grid(True, which="both", alpha=0.2)
-        ax.legend(fontsize=9, loc="upper right")
+        ax.set_xlabel(r"Position $x$", fontsize=11)
+        ax.set_title(rf"Mode $n={idx}$", fontsize=12)
+        ax.grid(True, which="both", color=GRID_COLOR, linestyle=":", alpha=0.6)
+        ax.legend(fontsize=9, loc="upper right", framealpha=0.85)
 
-    axes[0].set_ylabel(r"$\psi(x)$")
+    axes[0].set_ylabel(r"Amplitude $\psi(x)$", fontsize=11)
     fig.suptitle(
-        f"Learned vs. Ground Truth Wavefunctions ( {n_modes} modes)",
-        fontsize=16,
+        f"Learned vs. Ground Truth Wavefunctions ({n_modes} modes)",
+        fontsize=15,
+        fontweight="bold",
+        color=TEXT_PRIMARY,
     )
 
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+        fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor=THEME_BG)
 
     return fig
 
-# ----------------------------------------------------------------------
-# 🔷 4️⃣ Energy‑spectrum histogram (ground‑truth vs. learned)
-# ----------------------------------------------------------------------
-from typing import Mapping
 
+# ======================================================================
+# 🔷 4️⃣ Energy-spectrum comparison
+# ======================================================================
 def plot_energy_spectrum(
-        E_true: torch.Tensor,
-        E_learned: torch.Tensor,
-        *,
-        out_path: pathlib.Path | None = None,
+    E_true: torch.Tensor,
+    E_learned: torch.Tensor,
+    *,
+    out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
-    """
-    Bar-chart comparison of the first ``n_states`` energy levels.
-
-    Parameters
-    ----------
-    E_true : torch.Tensor
-        Ground-truth energies, shape ``(n_states,)``.
-    E_learned : torch.Tensor
-        Learned energies from ``model.E_theta()``, same shape as ``E_true``.
-    out_path : pathlib.Path | None, optional
-        Optional output path (saved as a PNG).
-
-    Returns
-    -------
-    matplotlib.figure.Figure
-        A bar chart comparing the first ``n_states`` energy levels (learned vs. ground truth).
-    """
+    """Bar-chart comparison of the first energy levels (ground truth vs learned)."""
     _apply_style()
 
-    # Softer color pairs for better balance: warm reds to cool purples, greens to warm yellows
-    true_col_1, true_col_2 =  "#FF0090", "#E52B50"
-    learn_col_1, learn_col_2 = "#03C03C", "#39FF14"
-
-    # Ensure we are working with CPU NumPy arrays -> no gradient tracking
     E_true_np = E_true.detach().cpu().numpy()
     E_learn_np = E_learned.detach().cpu().numpy()
-
-    # Indices for the spatial grid (assumes tensors are already ordered)
     indices = np.arange(len(E_true_np))
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8.5, 4.8), facecolor=THEME_BG)
 
-    # Configure grid settings
     ax.grid(
         visible=True,
-        which='major',
-        axis='y',
-        color='grey',
-        linestyle=':',
+        which="major",
+        axis="y",
+        color=GRID_COLOR,
+        linestyle=":",
         linewidth=1.0,
         alpha=0.6,
-        zorder=0  # Place grid behind bars
+        zorder=0,
     )
 
-    # Create gradient colormaps with balanced colors
-    true_cmap = mcolors.LinearSegmentedColormap.from_list("true_grad", [true_col_1, true_col_2])
-    learn_cmap = mcolors.LinearSegmentedColormap.from_list("learn_grad", [learn_col_1, learn_col_2])
+    bar_width = 0.32
+    ax.bar(
+        indices - bar_width / 2,
+        E_true_np,
+        width=bar_width,
+        color=COLOR_TRUE,
+        edgecolor=BORDER_COLOR,
+        linewidth=1.0,
+        label="True $E_n$",
+        zorder=3,
+        alpha=0.90,
+    )
+    ax.bar(
+        indices + bar_width / 2,
+        E_learn_np,
+        width=bar_width,
+        color=COLOR_LEARNED,
+        edgecolor=BORDER_COLOR,
+        linewidth=1.0,
+        label=r"Learned $E_n^\theta$",
+        zorder=3,
+        alpha=0.90,
+    )
 
-    # Plot true energy bars with gradient
-    for i, idx in enumerate(indices - 0.15):
-        _plot_gradient_bar(ax, idx, E_true_np[i], 0.3, true_cmap,
-                           label="True" if i == 0 else None)
-
-    # Plot learned energy bars with gradient
-    for i, idx in enumerate(indices + 0.15):
-        _plot_gradient_bar(ax, idx, E_learn_np[i], 0.3, learn_cmap,
-                           label="Learned" if i == 0 else None)
+    # Numerical value annotations on top of bars
+    for i, (yt, yl) in enumerate(zip(E_true_np, E_learn_np)):
+        ax.text(
+            i - bar_width / 2,
+            yt + 0.03 * max(E_true_np.max(), 1.0),
+            f"{yt:.2f}",
+            ha="center",
+            va="bottom",
+            fontsize=8.5,
+            color=TEXT_PRIMARY,
+        )
+        ax.text(
+            i + bar_width / 2,
+            yl + 0.03 * max(E_learn_np.max(), 1.0),
+            f"{yl:.2f}",
+            ha="center",
+            va="bottom",
+            fontsize=8.5,
+            color=TEXT_PRIMARY,
+        )
 
     ax.set_xticks(indices)
-    ax.set_xticklabels([rf"$n={i}$" for i in indices])
-    ax.set_ylabel(rf"Energy ($\hbar \omega_n$ units)")
-    ax.set_title("Exact vs. Learned Energy Eigenvalues")
+    ax.set_xticklabels([rf"$n={i}$" for i in indices], fontsize=10)
+    ax.set_ylabel(r"Energy ($\hbar\omega$ units)", fontsize=11)
+    ax.set_title("Exact vs. Learned Energy Eigenvalues", fontsize=13, pad=12)
+    ax.legend(loc="upper left", framealpha=0.85)
 
-    # Create custom legend patches
-    from matplotlib.patches import Patch
-    legend_patches = [
-        Patch(facecolor=true_col_1, edgecolor='black', label='True'),
-        Patch(facecolor=learn_col_1, edgecolor='black', label='Learned')
-    ]
-    ax.legend(handles=legend_patches)
-
-    # ------------------------------------------------------------------
-    # 🗃 Save if requested
-    # ------------------------------------------------------------------
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+        fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor=THEME_BG)
 
     return fig
 
-# ----------------------------------------------------------------------
-# 🫟 5️⃣ Probability‑density comparison (|ps_theta_n|^2 vs. rho_obs_n)
-# ----------------------------------------------------------------------
+
+# ======================================================================
+# 🫟 5️⃣ Probability-density comparison (|psi|^2 vs observed)
+# ======================================================================
 def plot_density_vs_observed(
-        x: torch.Tensor,
-        psi_learned: Sequence[torch.Tensor],
-        rho_obs: Sequence[torch.Tensor],
-        *,
-        lambdas: Dict[str, float] | None = None,
-        out_path: pathlib.Path | None = None,
+    x: torch.Tensor,
+    psi_learned: Sequence[torch.Tensor],
+    rho_obs: Sequence[torch.Tensor],
+    *,
+    lambdas: Dict[str, float] | None = None,
+    out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
-    """
-    Plot the learned probability densities |psi_theta_n(x)|^2 alongside the observed densities rho_obs_n(x) for each mode n.
-
-    Parameters
-    ----------
-    x : torch.Tensor
-        1-D spatial grid, shape ``(n_modes,)``.
-    psi_learned : Sequence[torch.Tensor]
-        Learned wavefunctions psi_theta_n(x). Each tensor must be 1-D of length ``n_modes``.
-    rho_obs : Sequence[torch.Tensor]
-        Corresponding observed probability densities rho_obs_n(x). Same shape as ``psi_learned``.
-    lambdas : Dict[str, float] | None, optional
-        If supplied, the loss-weight row will be added below the title.
-    out_path : pathlib.Path | None, optional
-        Destination path (saved as a PNG). If ``None``, the figure is only returned.
-
-    Returns
-    -------
-    matplotlib.figure.Figure
-        Probability density comparison (|psi_theta_n(x)|^2 vs. rho_obs_n(x)).
-    """
+    """Plot learned probability densities |psi_n|^2 alongside observed densities rho_n."""
     _apply_style()
 
-    # ------------------------------------------------------------------
-    # 🤯 Sanity checks (will raise early if shapes mismatch)
-    # ------------------------------------------------------------------
     n_modes = len(psi_learned)
     assert n_modes == len(rho_obs), "❌ Mismatched number of modes."
-    # Convert the grid once -> everything else will be Numpy for Matplotlib
-    x_np = x.squeeze().cpu().numpy()
+    x_np = x.squeeze().detach().cpu().numpy()
 
-    # ------------------------------------------------------------------
-    # 🖼️ Create a subplot for each mode (1 × n_modes)
-    # ------------------------------------------------------------------
     fig, axes = plt.subplots(
         1,
         n_modes,
-        figsize=(max(5 * n_modes, 12), 4),    # wider for more modes
+        figsize=(max(5 * n_modes, 12), 4.2),
         sharey=True,
         constrained_layout=True,
     )
     if n_modes == 1:
-        axes = [axes]    # make the iterator uniform
+        axes = [axes]
 
-    psi_theta_col, rho_obs_col = "#38FE84", "#F78F55"
-
-    for idx, (ax, psi, rho) in enumerate(
-            zip(axes, psi_learned, rho_obs),
-    ):
-        # |psi|^2 -> detach, move to CPU, and square element-wise
+    for idx, (ax, psi, rho) in enumerate(zip(axes, psi_learned, rho_obs)):
         prob_density = (psi.squeeze().detach().cpu() ** 2).numpy()
-        obs_density  = rho.squeeze().detach().cpu().numpy()
+        obs_density = rho.squeeze().detach().cpu().numpy()
 
         ax.plot(
             x_np,
             obs_density,
             label=r"Observed $\rho_n^{\text{obs}}(x)$",
-            color=rho_obs_col,
-            linewidth=4,
+            color=COLOR_OBSERVED,
+            linewidth=2.8,
+            linestyle="-",
         )
         ax.plot(
             x_np,
             prob_density,
-            label=r"$|\hat{\psi}_n^{\theta}(x)|^2$",
-            color=psi_theta_col,
-            linewidth=4,
-            ls="--",
+            label=r"Learned $|\hat{\psi}_n^{\theta}(x)|^2$",
+            color=COLOR_LEARNED,
+            linewidth=2.8,
+            linestyle="--",
         )
-        ax.set_xlabel(r"$x$")
-        ax.set_title(rf"Mode $n={idx}$")
-        ax.grid(True, which="both", alpha=0.2)
-        ax.legend(fontsize=9, loc="upper right")
+        ax.set_xlabel(r"Position $x$", fontsize=11)
+        ax.set_title(rf"Mode $n={idx}$", fontsize=12)
+        ax.grid(True, which="both", color=GRID_COLOR, linestyle=":", alpha=0.6)
+        ax.legend(fontsize=9, loc="upper right", framealpha=0.85)
 
-    axes[0].set_ylabel(r"Probability density")
-
+    axes[0].set_ylabel(r"Probability Density $\rho(x)$", fontsize=11)
     fig.suptitle(
         "Learned vs. Observed Probability Densities",
-        fontsize=16,
+        fontsize=15,
+        fontweight="bold",
+        color=TEXT_PRIMARY,
     )
 
-    # ------------------------------------------------------------------
-    # ⚖️Optional row of loss weights
-    # ------------------------------------------------------------------
     if lambdas is not None:
-        _add_lambda_row(fig, lambdas, ax=axes[0])   # any axis works for reference
+        _add_lambda_row(fig, lambdas, ax=axes[0])
 
-    # ------------------------------------------------------------------
-    # 🗃️ Save if requested
-    # ------------------------------------------------------------------
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+        fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor=THEME_BG)
 
     return fig
 
 
-
-# ----------------------------------------------------------------------
-# 📊 6️⃣ POD singular values (log plot, all values)
-# ----------------------------------------------------------------------
+# ======================================================================
+# 📊 6️⃣ POD singular values (log plot)
+# ======================================================================
 def plot_pod_singular_values(
-        singular_values: torch.Tensor,
-        *,
-        title: str = "POD singular values",
-        ylabel: str = "Singular value (log scale)",
-        out_path: pathlib.Path | None = None,
+    singular_values: torch.Tensor,
+    *,
+    title: str = "POD Singular Value Spectrum",
+    ylabel: str = r"Singular value $\sigma_k$ (log scale)",
+    out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
-    """
-    Plot the singular values obtained from a POD decomposition on a logarithmic y-axis.
-
-    Parameters
-    ----------
-    singular_values : torch.Tensor
-        1-D tensor of singular values (sigma_k) -> typically the output of ``pod_decomposition`` (the `S` component).
-    title : str, optional
-        Figure title. Defaults to a generic POD-SV caption.
-    ylabel : str, optional
-        Y-axis label. Defaults to "Singular value (log scale)".
-    cmap : str, optional
-        Color map. Defaults to "cool". Unused but kep for backward compatibility with the previous signature.
-    out_path : pathlib.Path | None, optional
-        Destination path (saved as a PNG). If ``None``, the figure is only returned.
-
-    Returns
-    -------
-    matplotlib.figure.Figure
-        The log plot of singular values.
-    """
+    """Plot singular values from POD decomposition on a logarithmic scale."""
     _apply_style()
 
-    # ------------------------------------------------------------------
-    # 1️⃣ Convert to NumPy (detach, CPU) -> no gradients needed
-    # ------------------------------------------------------------------
     sv = singular_values.detach().cpu().numpy()
 
-    # -------------------------------------------------
-    # 2️⃣ Structured console printout
-    # -------------------------------------------------
+    # Structured console printout
     print("\nSingular Values:")
     print("-" * 30)
     print(f"{'Mode (k)':>10} | {'Sigma_k':>15}")
     print("-" * 30)
-
     for i, val in enumerate(sv, start=1):
         print(f"{i:10d} | {val:15.6e}")
-
     print("-" * 30)
 
-    # ------------------------------------------------------------------
-    # 3️⃣ Plot
-    # ------------------------------------------------------------------
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8.5, 4.8), facecolor=THEME_BG)
     indices = np.arange(1, len(sv) + 1)
 
-    # 1. Draw the connecting line
+    # Connecting line
     ax.semilogy(
         indices,
         sv,
-        color="white",
-        linewidth=2,
-        alpha=0.4,
-        zorder=1
+        color=PROJECT_COLORS["indigo"],
+        linewidth=2.2,
+        alpha=0.7,
+        zorder=1,
     )
 
-    # 2. Draw the scatter points with a colormap
+    # Scatter points with glowing markers
     sctr = ax.scatter(
         indices,
         sv,
-        c=sv,
-        cmap="cool",
-        edgecolor="white",
-        linewidth=0.5,
-        s=60,
-        zorder=2,
-        label="Singular values",
+        c=indices,
+        cmap=spatial_overlap_cmap,
+        edgecolor=TEXT_PRIMARY,
+        linewidth=1.2,
+        s=80,
+        zorder=3,
+        label=r"$\sigma_k$",
     )
 
-    # Set y-scale to log explicitly for the scatter points
     ax.set_yscale("log")
 
-    plt.colorbar(sctr, ax=ax, label="Magnitude")
-
-    # Annotate each point with its numerical value
+    # Annotate points with formatted values
     for i, val in enumerate(sv, start=1):
-        # Default alignment and offset
-        ha = "center"
-        va = "bottom"
-        xytext = (0, 7)
-        
-        # Adjust horizontal alignment for the first and last points to avoid axes overlap
-        if i == 1:
-            ha = "left"
-            va = "top"
-            xytext = (5, -7)
-        elif i == len(sv):
-            ha = "right"
-            xytext = (-5, 7)
+        ha = "left" if i == 1 else ("right" if i == len(sv) else "center")
+        xytext = (6, -6) if i == 1 else ((-6, 8) if i == len(sv) else (0, 8))
 
         ax.annotate(
-            f"{val:.4e}",
+            f"{val:.3e}",
             (i, val),
             textcoords="offset points",
             xytext=xytext,
             ha=ha,
-            va=va,
-            fontsize=10,
-            alpha=0.9,
+            va="bottom",
+            fontsize=9,
+            color=TEXT_PRIMARY,
             weight="bold",
-            bbox=dict(facecolor="black", alpha=0.4, edgecolor="none", pad=1),
+            bbox=dict(
+                boxstyle="round,pad=0.25",
+                facecolor=CARD_BG,
+                edgecolor=BORDER_COLOR,
+                alpha=0.85,
+            ),
         )
 
-    ax.set_xlabel(r"Mode index $k$", fontsize=13)
-    ax.set_ylabel(ylabel, fontsize=13)
-    ax.set_title(title, fontsize=16, pad=12)
-    ax.grid(True, which="both", alpha=0.2)
+    ax.set_xlabel(r"Mode Index $k$", fontsize=11)
+    ax.set_ylabel(ylabel, fontsize=11)
+    ax.set_title(title, fontsize=13, pad=12)
+    ax.set_xticks(indices)
+    ax.grid(True, which="both", color=GRID_COLOR, linestyle=":", alpha=0.6)
 
-    # ------------------------------------------------------------------
-    # 4️⃣ Optional save
-    # ------------------------------------------------------------------
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+        fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor=THEME_BG)
 
     return fig
 
-# ----------------------------------------------------------------------
-# 📊 8️⃣ First three spatial POD modes (should resemble the true eigenmodes)
-# ----------------------------------------------------------------------
-def plot_pod_first_three_spatial_modes(
-        x: torch.Tensor,
-        spatial_modes: torch.Tensor,
-        *,
-        ground_truth: Sequence[torch.Tensor] | None = None,
-        psi_learned: Sequence[torch.Tensor] | None = None,
-        lambdas: Dict[str, float] | None = None,
-        out_path: pathlib.Path | None = None,
-) -> plt.Figure:
-    """
-    Plot the first three columns of the POD spatial-mode matrix ``U``.
-    If a list of ground-truth wavefunctions is supplied, each POD mode is overlaid with the corresponding ground truth wavefunction for visual comaprison.
 
-    Parameters
-    ----------
-    x : torch.Tensor
-        1-D grid on which the modes are evaluated (shape ``(N, 1)`` or ``(N,)``).
-    spatial_modes : torch.Tensor
-        POD spatial modes matrix `U` of shape ``(N, n_modes)``. The function will plot the first three columns (or fewer if ``n_modes < 3``).
-    ground_truth : Sequence[torch.Tensor], optional
-        Ground-truth wavefunctions `psi_0, psi_1, ...`, each of shape ``(N,)``. If provided, the i-th ground truth wavefunction is plotted with POD mode i.
-    psi_learned : Sequence[torch.Tensor], optional
-        Learned wavefunctions `psi_theta_0, psi_theta_1, ...`, each of shape ``(N,)``. If provided, the i-th learned wavefunction is plotted with POD mode i.
-    lambdas : Dict[str, float] | None, optional
-        Optional string with loss weights to be displayed on the figure.
-    out_path : pathlib.Path | None, optional
-        Destination path (saved as a PNG). If ``None``, the figure is only returned.
-
-    Returns
-    -------
-    matplotlib.figure.Figure
-        A plot of the first `n_modes` spatial POD modes.
-    """
-    _apply_style()
-
-    # Ensure we work on CPU and detach from the autograd graph
-    x_np = x.squeeze().detach().cpu().numpy()
-    modes_np = spatial_modes.detach().cpu().numpy()     # shape (N, n_modes)
-
-    # Ground-truth handling
-    if ground_truth is None:
-        gt_np = []
-    else:
-        gt_np = [
-            ground_truth.squeeze().detach().cpu().numpy()
-            for ground_truth in ground_truth[: modes_np.shape[1]]
-        ]
-
-    # Learned wavefunction handling
-    if psi_learned is None:
-        psi_learned_np = []
-    else:
-        psi_learned_np = [
-            psi_learned.squeeze().detach().cpu().numpy()
-            for psi_learned in psi_learned[: modes_np.shape[1]]
-        ]
-
-    n_plot = min(3, modes_np.shape[1])
-
-    # ------------------------------------------------------------------
-    # 1️⃣ Create subplots (1 x n_plot)
-    # ------------------------------------------------------------------
-    fig, axs = plt.subplots(
-        1,
-        n_plot,
-        figsize=(5 * n_plot, 4),
-        constrained_layout=True,
-    )
-    # If there is only one subplot, `axs` is not iterable -> wrap it.
-    if n_plot == 1:
-        axs = [axs]
-
-    pod_mode_color = "#009DFF"
-    true_color = "#E52B50"
-    learned_color = "#39FF14"
-
-    for k in range(n_plot):
-        ax = axs[k]
-
-        # ---- Ground-truth (if provided) ----
-        if k < len(gt_np):
-            ax.plot(x_np,
-                    gt_np[k],
-                    label=rf"True $\psi_{k}$",
-                    color=true_color,
-                    linewidth=4.5,
-                    )
-
-        # ---- Learned wavefunctions (if provided) ----
-        if k < len(psi_learned_np):
-            ax.plot(x_np,
-                    psi_learned_np[k],
-                    label=rf"$\hat{{\psi}}_{k}^\theta$",
-                    color=learned_color,
-                    ls="--",
-                    linewidth=4.5,
-                    )
-
-        # ---- POD mode ----
-        ax.plot(
-            x_np,
-            modes_np[:, k],
-            label=f"POD mode {k}",
-            color=pod_mode_color,
-            ls=":",
-            linewidth=4.75,
-        )
-
-        ax.set_xlabel(r"$x$")
-        ax.set_ylabel("Amplitude")
-        ax.set_title(f"POD spatial model {k}")
-        ax.legend(fontsize=9, loc="upper right")
-        ax.grid(True, which="both", alpha=0.2)
-
-    # ------------------------------------------------------------------
-    # 2️⃣ Optional loss weights row
-    # ------------------------------------------------------------------
-    if lambdas is not None:
-        _add_lambda_row(fig, lambdas, ax=axs[0])
-
-    # ------------------------------------------------------------------
-    # 3️⃣ Optional save
-    # ------------------------------------------------------------------
-    if out_path:
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(out_path, dpi=200, bbox_inches="tight")
-
-    return fig
-
-# ----------------------------------------------------------------------
+# ======================================================================
 # 🗺️ 7️⃣ Overlap matrix heatmap (POD diagnostic)
-# ----------------------------------------------------------------------
+# ======================================================================
 def plot_overlap_heatmap(
     psi_theta: Sequence[torch.Tensor],
     dx: float,
@@ -907,591 +691,542 @@ def plot_overlap_heatmap(
     fmt: str = ".2f",
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
-    """
-    Render a heat map of the overlap matrix <psi_theta_m | psi_theta_n>.
-
-    Parameters
-    ----------
-    psi_theta : Sequence[torch.Tensor]
-        Learned wavefunctions, each 1-D with the same length. The function will stack them into a (n_modes, N) matrix.
-    dx : float
-        Grid spacing.
-    lambdas : Dict[str, float] | None, optional
-        Optional string with loss weights to be displayed on the figure.
-    cmap, fmt : str
-        Color map, print settings for inputs values, and output path.
-    out_path : pathlib.Path | None
-        Destination path (saved as a PNG). If ``None``, the figure is only returned.
-
-    Returns
-    -------
-    matplotlib.figure.Figure
-        Overlap matrix heatmap -> POD diagnostic.
-    """
+    """Render a heatmap of the overlap matrix <psi_m^theta | psi_n^theta>."""
+    _apply_style()
 
     n_modes = len(psi_theta)
-    # ------------------------------------------------------------------
-    # 1️⃣ Stack and normalize the wavefunctions
-    # ------------------------------------------------------------------
-    psi_theta_mat = torch.stack([p.squeeze().detach().cpu() for p in psi_theta]).T  # (N, n_modes)
+    psi_theta_mat = torch.stack([p.squeeze().detach().cpu() for p in psi_theta]).T
 
-    # We use mode_overlap_matrix from pod.py to be consistent with how other overlaps are calculated.
-    from pod import mode_overlap_matrix
     overlap_tensor = mode_overlap_matrix(psi_theta_mat, dx)
-
-    # To ensure diagonal values are exactly 1, we normalize the overlap matrix.
-    # This accounts for both the physical normalization of the wavefunctions
-    # and the specific numerical integration scheme (trapezoidal rule).
     norms = torch.sqrt(torch.diag(overlap_tensor))
     overlap_tensor = overlap_tensor / torch.outer(norms, norms)
-
     overlap = overlap_tensor.numpy()
 
-    # ------------------------------------------------------------------
-    # 2️⃣ Plot the heat map
-    # ------------------------------------------------------------------
-    fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5), facecolor="#0d1117")
+    fig, ax = plt.subplots(
+        figsize=(max(5.2, n_modes * 1.3), max(4.8, n_modes * 1.2)),
+        facecolor=THEME_BG,
+    )
 
-    sns.heatmap(
+    im = ax.imshow(
         overlap,
-        ax=ax,
         cmap=cmap,
         vmin=0.0,
         vmax=1.0,
-        annot=True,
-        fmt=fmt,
-        cbar_kws={"label": "Overlap matrix"},
-        linewidths=0,
+        aspect="equal",
+        interpolation="nearest",
     )
+    ax.grid(False)
 
     ax.set_xticks(np.arange(n_modes))
     ax.set_yticks(np.arange(n_modes))
-    ax.set_xticklabels([rf"$n={i}$" for i in range(n_modes)], rotation=45, ha="right")
-    ax.set_yticklabels([rf"$n={i}$" for i in range(n_modes)])
+    ax.set_xticklabels([rf"$n={i}$" for i in range(n_modes)], fontsize=10)
+    ax.set_yticklabels([rf"$m={i}$" for i in range(n_modes)], fontsize=10)
 
+    # Clean numeric annotations
+    for i in range(n_modes):
+        for j in range(n_modes):
+            val = overlap[i, j]
+            text_color = THEME_BG if val > 0.65 else TEXT_PRIMARY
+            ax.text(
+                j,
+                i,
+                f"{val:{fmt}}",
+                ha="center",
+                va="center",
+                color=text_color,
+                fontsize=10,
+                fontweight="bold",
+            )
 
-    ax.set_title(r"Overlap Matrix $\langle \hat{\psi}_m^\theta | \hat{\psi}_n^\theta \rangle$")
-    #fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="Overlap matrix")
+    ax.set_title(
+        r"Spatial Overlap Matrix $\langle \hat{\psi}_m^\theta \mid \hat{\psi}_n^\theta \rangle$",
+        fontsize=13,
+        pad=12,
+    )
 
-    # ------------------------------------------------------------------
-    # 3️⃣ Loss weights row
-    # ------------------------------------------------------------------
+    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    cbar.set_label("Overlap Value", fontsize=10, color=TEXT_PRIMARY)
+    cbar.ax.tick_params(labelsize=9, colors=TEXT_MUTED)
+
     if lambdas is not None:
         _add_lambda_row(fig, lambdas, ax=ax)
 
-    # ------------------------------------------------------------------
-    # 4️⃣ Save if requested
-    # ------------------------------------------------------------------
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+        fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor=THEME_BG)
 
     return fig
 
-# ----------------------------------------------------------------------
-# 📊 9️⃣ Cross-overlap matrix heatmap
-# ----------------------------------------------------------------------
+
+# ======================================================================
+# 📊 8️⃣ First three spatial POD modes
+# ======================================================================
+def plot_pod_first_three_spatial_modes(
+    x: torch.Tensor,
+    spatial_modes: torch.Tensor,
+    *,
+    ground_truth: Sequence[torch.Tensor] | None = None,
+    psi_learned: Sequence[torch.Tensor] | None = None,
+    lambdas: Dict[str, float] | None = None,
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """Plot first spatial POD modes overlaid with ground truth and learned modes."""
+    _apply_style()
+
+    x_np = x.squeeze().detach().cpu().numpy()
+    modes_np = spatial_modes.detach().cpu().numpy()
+
+    gt_np = (
+        [gt.squeeze().detach().cpu().numpy() for gt in ground_truth[: modes_np.shape[1]]]
+        if ground_truth is not None
+        else []
+    )
+    psi_learned_np = (
+        [pl.squeeze().detach().cpu().numpy() for pl in psi_learned[: modes_np.shape[1]]]
+        if psi_learned is not None
+        else []
+    )
+
+    n_plot = min(3, modes_np.shape[1])
+    fig, axs = plt.subplots(
+        1,
+        n_plot,
+        figsize=(max(5 * n_plot, 12), 4.2),
+        constrained_layout=True,
+    )
+    if n_plot == 1:
+        axs = [axs]
+
+    for k in range(n_plot):
+        ax = axs[k]
+
+        if k < len(gt_np):
+            ax.plot(
+                x_np,
+                gt_np[k],
+                label=rf"True $\psi_{k}$",
+                color=COLOR_TRUE,
+                linewidth=2.8,
+                linestyle="-",
+            )
+
+        if k < len(psi_learned_np):
+            ax.plot(
+                x_np,
+                psi_learned_np[k],
+                label=rf"Learned $\hat{{\psi}}_{k}^\theta$",
+                color=COLOR_LEARNED,
+                linewidth=2.8,
+                linestyle="--",
+            )
+
+        ax.plot(
+            x_np,
+            modes_np[:, k],
+            label=f"POD mode $u_{k}$",
+            color=COLOR_POD_MODE,
+            linewidth=2.8,
+            linestyle="-.",
+        )
+
+        ax.set_xlabel(r"Position $x$", fontsize=11)
+        ax.set_ylabel("Amplitude", fontsize=11)
+        ax.set_title(f"POD Spatial Mode $k={k}$", fontsize=12)
+        ax.legend(fontsize=9, loc="upper right", framealpha=0.85)
+        ax.grid(True, which="both", color=GRID_COLOR, linestyle=":", alpha=0.6)
+
+    fig.suptitle(
+        "POD Spatial Modes vs. Physical Eigenfunctions",
+        fontsize=15,
+        fontweight="bold",
+        color=TEXT_PRIMARY,
+    )
+
+    if lambdas is not None:
+        _add_lambda_row(fig, lambdas, ax=axs[0])
+
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor=THEME_BG)
+
+    return fig
+
+
+# ======================================================================
+# 📊 9️⃣ Cross-overlap matrix heatmap (POD vs Learned)
+# ======================================================================
 def plot_cross_overlap_heatmap(
     pod_modes_physical: Sequence[torch.Tensor] | torch.Tensor,
     psi_matrix: Sequence[torch.Tensor] | torch.Tensor,
     dx: float,
     *,
-    cmap: mcolors.Colormap | str = BLUE_TO_PINK,
+    cmap: mcolors.Colormap | str = cross_overlap_cmap,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
-    """
-    Create a heatmap of the *cross* overlap matrix <u_k | psi_n^theta> where ``u_k`` are the physical POD modes and ``psi_n^theta`` are learned wavefunctions.
+    """Create a heatmap of cross overlap matrix <u_k | psi_n^theta>."""
+    _apply_style()
 
-    This function uses the ``cross_overlap_matrix`` routine defined `src.pod.py`.
-
-    Parameters
-    ----------
-    pod_modes_physical : Sequence[torch.Tensor]
-        Physical POD modes (each 1-D, same length). If a single tensor is passed it is interpreted as a stacked matrix of shape ``(n_modes, N)``.
-    psi_matrix : Sequence[torch.Tensor]
-        Learned wavefunctions Psi^theta = [psi_1^theta psi_2^theta ...]
-    dx : float
-        Spatial grid spacing.
-    cmap, fmt : str, optional
-        Colormap and numeric formatting for the cell.
-    lambdas : Dict[str, float], optional
-        Optional loss-weight dictionary.
-    out_path : pathlib.Path | None, optional
-        Optional output path to save the image (PNG).
-
-    Returns
-    -------
-    fig : matplotlib.figure.Figure
-        Cross overlap matrix <u_k | psi_n^theta> heatmap.
-    """
-    cross_overlap = cross_overlap_matrix(
-        pod_modes_physical,
-        psi_matrix,
-        dx=dx,
-    )       # Expected shape: (n_modes, n_modes)
-
+    cross_overlap = cross_overlap_matrix(pod_modes_physical, psi_matrix, dx=dx)
     n_modes = cross_overlap.shape[0]
 
-    fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5), facecolor="#0d1117")
-
+    fig, ax = plt.subplots(
+        figsize=(max(5.2, n_modes * 1.3), max(4.8, n_modes * 1.2)),
+        facecolor=THEME_BG,
+    )
 
     im = ax.imshow(
         cross_overlap,
         cmap=cmap,
         vmin=-1.0,
         vmax=1.0,
-        aspect='auto',
-        interpolation='nearest'
+        aspect="equal",
+        interpolation="nearest",
     )
-    # Ensure no grid lines for the heatmap
     ax.grid(False)
 
-    # Axis ticks
     ax.set_xticks(np.arange(n_modes))
     ax.set_yticks(np.arange(n_modes))
-    ax.set_xticklabels([rf"$n={i}$" for i in range(n_modes)],
-                       rotation=45, ha="right")
-    ax.set_yticklabels([rf"$n={i}$" for i in range(n_modes)])
+    ax.set_xticklabels([rf"State $n={i}$" for i in range(n_modes)], rotation=45, ha="right", fontsize=9.5)
+    ax.set_yticklabels([rf"POD $u_{i}$" for i in range(n_modes)], fontsize=9.5)
 
-    # ------------------------------------------------------------------
-    # #️⃣ Annotate every cell with its numeric value
-    # ------------------------------------------------------------------
     for i in range(n_modes):
         for j in range(n_modes):
-            txt = f"{cross_overlap[i, j]:{fmt}}"
+            val = cross_overlap[i, j]
+            text_color = THEME_BG if abs(val) > 0.65 else TEXT_PRIMARY
             ax.text(
                 j,
                 i,
-                txt,
+                f"{val:{fmt}}",
                 ha="center",
                 va="center",
-                color="white" if abs(cross_overlap[i, j]) > 0.5 else "black",
-                fontsize=9,
+                color=text_color,
+                fontsize=10,
+                fontweight="bold",
             )
 
-    # ------------------------------------------------------------------
-    # 🔖 Titles, color‑bar and optional λ‑row
-    # ------------------------------------------------------------------
-    ax.set_title(r"Cross Overlap Matrix $\langle u_k | \hat{\psi}_n^\theta \rangle$",
-                 fontsize=16,
-                 )
-
-    fig.colorbar(
-        im,
-        ax=ax,
-        fraction=0.046,
-        pad=0.04,
-        label="Overlap matrix",
+    ax.set_title(
+        r"Cross-Overlap Matrix $\langle u_k \mid \hat{\psi}_n^\theta \rangle$",
+        fontsize=13,
+        pad=12,
     )
+
+    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    cbar.set_label("Projection Value", fontsize=10, color=TEXT_PRIMARY)
+    cbar.ax.tick_params(labelsize=9, colors=TEXT_MUTED)
 
     if lambdas is not None:
         _add_lambda_row(fig, lambdas, ax=ax)
 
-    # ------------------------------------------------------------------
-    # 3️⃣ Optional save
-    # ------------------------------------------------------------------
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+        fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor=THEME_BG)
 
     return fig
 
-# ----------------------------------------------------------------------
-# 📊 1️⃣1️⃣ POD Temporal Modes (Composition Matrix)
-# ----------------------------------------------------------------------
-def plot_pod_temporal_modes(
-    Vh: torch.Tensor | np.ndarray,
+
+# ======================================================================
+# 📊 🔟 POD–Eigenbasis Alignment Heatmap (POD vs True)
+# ======================================================================
+def plot_pod_eigen_alignment(
+    pod_modes_physical: Sequence[torch.Tensor] | torch.Tensor,
+    psi_true_matrix: Sequence[torch.Tensor] | torch.Tensor,
+    dx: float,
     *,
-    cmap: mcolors.Colormap | str = temporal_cmap,
+    cmap: mcolors.Colormap | str = cross_overlap_cmap,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
-    """
-    Create a heatmap of the POD temporal modes matrix V (where V is the right-singular vector matrix).
-    In this context, V acts as a 'Modal Composition Matrix' showing how each POD mode is distributed across learned states.
+    """Create a heatmap of overlap matrix <u_k | psi_n> with ground truth."""
+    _apply_style()
 
-    Parameters
-    ----------
-    Vh : torch.Tensor | np.ndarray
-        The H-transpose of the right singular matrix V (from SVD: U S Vh).
-        Expected shape: (n_modes, n_modes).
-    cmap, fmt : str, optional
-        Colormap and numeric formatting.
-    lambdas : Dict[str, float], optional
-        Optional loss-weight dictionary.
-    out_path : pathlib.Path | None, optional
-        Optional output path.
+    overlap = cross_overlap_matrix(pod_modes_physical, psi_true_matrix, dx=dx)
+    n_modes = overlap.shape[0]
 
-    Returns
-    -------
-    fig : matplotlib.figure.Figure
-    """
-    if isinstance(Vh, torch.Tensor):
-        Vh_np = Vh.detach().cpu().numpy()
-    else:
-        Vh_np = Vh
+    fig, ax = plt.subplots(
+        figsize=(max(5.2, n_modes * 1.3), max(4.8, n_modes * 1.2)),
+        facecolor=THEME_BG,
+    )
 
-    # V is the matrix whose columns are temporal modes. Since we have Vh,
-    # V = Vh.conj().T. For real-valued SVD, V = Vh.T.
+    im = ax.imshow(
+        overlap,
+        cmap=cmap,
+        vmin=-1.0,
+        vmax=1.0,
+        aspect="equal",
+        interpolation="nearest",
+    )
+    ax.grid(False)
+
+    ax.set_xticks(np.arange(n_modes))
+    ax.set_yticks(np.arange(n_modes))
+    ax.set_xticklabels([rf"True $\psi_{i}$" for i in range(n_modes)], rotation=45, ha="right", fontsize=9.5)
+    ax.set_yticklabels([rf"POD $u_{i}$" for i in range(n_modes)], fontsize=9.5)
+
+    for i in range(n_modes):
+        for j in range(n_modes):
+            val = overlap[i, j]
+            text_color = THEME_BG if abs(val) > 0.65 else TEXT_PRIMARY
+            ax.text(
+                j,
+                i,
+                f"{val:{fmt}}",
+                ha="center",
+                va="center",
+                color=text_color,
+                fontsize=10,
+                fontweight="bold",
+            )
+
+    ax.set_title(
+        r"POD Eigen-Alignment $\langle u_k \mid \psi_n \rangle$",
+        fontsize=13,
+        pad=12,
+    )
+
+    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    cbar.set_label("Alignment Value", fontsize=10, color=TEXT_PRIMARY)
+    cbar.ax.tick_params(labelsize=9, colors=TEXT_MUTED)
+
+    if lambdas is not None:
+        _add_lambda_row(fig, lambdas, ax=ax)
+
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor=THEME_BG)
+
+    return fig
+
+
+# ======================================================================
+# 📊 1️⃣1️⃣ POD Temporal Modes (Modal Composition Matrix V)
+# ======================================================================
+def plot_pod_temporal_modes(
+    Vh: torch.Tensor | np.ndarray,
+    *,
+    cmap: mcolors.Colormap | str = cross_overlap_cmap,
+    fmt: str = ".2f",
+    lambdas: Dict[str, float] | None = None,
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """Create a heatmap of modal composition matrix V (right-singular vectors)."""
+    _apply_style()
+
+    Vh_np = Vh.detach().cpu().numpy() if isinstance(Vh, torch.Tensor) else Vh
     V = Vh_np.T
     n_states, n_pod_modes = V.shape
 
-    fig, ax = plt.subplots(figsize=(max(5, n_pod_modes * 1.2), 5), facecolor="#0d1117")
+    fig, ax = plt.subplots(
+        figsize=(max(5.2, n_pod_modes * 1.3), max(4.8, n_states * 1.2)),
+        facecolor=THEME_BG,
+    )
 
-    # We use symmetric limits because V is often orthonormal (entries between -1 and 1)
     im = ax.imshow(
         V,
         cmap=cmap,
         vmin=-1.0,
         vmax=1.0,
-        aspect='auto',
-        interpolation='nearest'
+        aspect="equal",
+        interpolation="nearest",
     )
-    # Ensure no grid lines for the heatmap
     ax.grid(False)
 
-    # Axis ticks
     ax.set_xticks(np.arange(n_pod_modes))
     ax.set_yticks(np.arange(n_states))
-    ax.set_xticklabels([rf"Mode $k={i}$" for i in range(n_pod_modes)],
-                       rotation=45, ha="right")
-    ax.set_yticklabels([rf"State $n={i}$" for i in range(n_states)])
+    ax.set_xticklabels([rf"POD $k={i}$" for i in range(n_pod_modes)], rotation=45, ha="right", fontsize=9.5)
+    ax.set_yticklabels([rf"State $n={i}$" for i in range(n_states)], fontsize=9.5)
 
-    # Annotate cells
     for i in range(n_states):
         for j in range(n_pod_modes):
             val = V[i, j]
-            # Determine text color based on background lightness
-            # The RdBu colormap is dark at ends (-1, 1) and light in middle (0)
-            text_color = "white" if abs(val) > 0.6 else "black"
+            text_color = THEME_BG if abs(val) > 0.65 else TEXT_PRIMARY
             ax.text(
-                j, i, f"{val:{fmt}}",
-                ha="center", va="center",
+                j,
+                i,
+                f"{val:{fmt}}",
+                ha="center",
+                va="center",
                 color=text_color,
-                fontsize=9
+                fontsize=10,
+                fontweight="bold",
             )
 
-    ax.set_title(r"Temporal Modes (Modal Composition $V_{nk}$)", fontsize=16)
-    ax.set_ylabel("Learned States ($n$)")
-    ax.set_xlabel("POD Modes ($k$)")
+    ax.set_title(r"Temporal Modal Composition $V_{nk}$", fontsize=13, pad=12)
+    ax.set_ylabel("Learned States ($n$)", fontsize=11)
+    ax.set_xlabel("POD Modes ($k$)", fontsize=11)
 
-    fig.colorbar(
-        im, ax=ax, fraction=0.046, pad=0.04, label="Coefficient Value"
-    )
+    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    cbar.set_label("Coefficient Value", fontsize=10, color=TEXT_PRIMARY)
+    cbar.ax.tick_params(labelsize=9, colors=TEXT_MUTED)
 
     if lambdas is not None:
         _add_lambda_row(fig, lambdas, ax=ax)
 
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+        fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor=THEME_BG)
 
     return fig
 
-# ----------------------------------------------------------------------
+
+# ======================================================================
 # 📊 1️⃣2️⃣ POD Temporal Overlap Heatmap
-# ----------------------------------------------------------------------
+# ======================================================================
 def plot_pod_temporal_overlap_heatmap(
     Vh: torch.Tensor | np.ndarray,
-    *,
-    cmap: mcolors.Colormap | str = temporal_overlap_cmap,
-    fmt: str = ".2f",
-    lambdas: Dict[str, float] | None = None,
-    out_path: pathlib.Path | None = None,
-) -> plt.Figure:
-    """
-    Render a heatmap of the overlap matrix between temporal modes (columns of V).
-    Since V is unitary (V^H V = I), this should be an identity matrix.
-
-    Parameters
-    ----------
-    Vh : torch.Tensor | np.ndarray
-        The H-transpose of the right singular matrix V.
-    cmap, fmt : str, optional
-    lambdas : Dict[str, float], optional
-    out_path : pathlib.Path | None, optional
-
-    Returns
-    -------
-    fig : matplotlib.figure.Figure
-    """
-    if isinstance(Vh, torch.Tensor):
-        Vh_np = Vh.detach().cpu().numpy()
-    else:
-        Vh_np = Vh
-
-    # V columns are temporal modes. Overlap matrix is V^H @ V.
-    V = Vh_np.conj().T
-    overlap = V.conj().T @ V
-    overlap = np.real(overlap)
-
-    n_modes = overlap.shape[0]
-
-    fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5), facecolor="#0d1117")
-
-    im = ax.imshow(
-        overlap,
-        cmap=cmap,
-        vmin=0.0,
-        vmax=1.0,
-        aspect='auto',
-        interpolation='nearest'
-    )
-    # Ensure no grid lines for the heatmap
-    ax.grid(False)
-
-    ax.set_xticks(np.arange(n_modes))
-    ax.set_yticks(np.arange(n_modes))
-    ax.set_xticklabels([rf"Mode $k={i}$" for i in range(n_modes)], rotation=45, ha="right")
-    ax.set_yticklabels([rf"Mode $k={i}$" for i in range(n_modes)])
-
-    for i in range(n_modes):
-        for j in range(n_modes):
-            val = overlap[i, j]
-            ax.text(
-                j, i, f"{val:{fmt}}",
-                ha="center", va="center",
-                color="white" if val > 0.5 else "black",
-                fontsize=9
-            )
-
-    ax.set_title(r"Temporal Mode Overlap $\langle v_m | v_n \rangle$", fontsize=16)
-
-    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="Overlap")
-
-    if lambdas is not None:
-        _add_lambda_row(fig, lambdas, ax=ax)
-
-    if out_path:
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(out_path, dpi=200, bbox_inches="tight")
-
-    return fig
-
-# ----------------------------------------------------------------------
-# 📊 1️⃣3️⃣ POD Temporal Cross-Overlap Heatmap
-# ----------------------------------------------------------------------
-def plot_pod_temporal_cross_overlap_heatmap(
-    Vh: torch.Tensor | np.ndarray,
-    *,
-    cmap: mcolors.Colormap | str = temporal_overlap_cmap,
-    fmt: str = ".2f",
-    lambdas: Dict[str, float] | None = None,
-    out_path: pathlib.Path | None = None,
-) -> plt.Figure:
-    """
-    Render a heatmap of the cross-overlap between learned states (standard basis) 
-    and POD temporal modes (columns of V). This is exactly the matrix V itself.
-
-    Parameters
-    ----------
-    Vh : torch.Tensor | np.ndarray
-    cmap, fmt : str, optional
-    lambdas : Dict[str, float], optional
-    out_path : pathlib.Path | None, optional
-    """
-    if isinstance(Vh, torch.Tensor):
-        Vh_np = Vh.detach().cpu().numpy()
-    else:
-        Vh_np = Vh
-
-    V = Vh_np.T
-    n_states, n_modes = V.shape
-
-    fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5), facecolor="#0d1117")
-
-    im = ax.imshow(
-        np.abs(V),
-        cmap=cmap,
-        vmin=0.0,
-        vmax=1.0,
-        aspect='auto',
-        interpolation='nearest'
-    )
-    # Ensure no grid lines for the heatmap
-    ax.grid(False)
-
-    ax.set_xticks(np.arange(n_modes))
-    ax.set_yticks(np.arange(n_states))
-    ax.set_xticklabels([rf"Mode $k={i}$" for i in range(n_modes)], rotation=45, ha="right")
-    ax.set_yticklabels([rf"State $n={i}$" for i in range(n_states)])
-
-    for i in range(n_states):
-        for j in range(n_modes):
-            val = V[i, j]
-            ax.text(
-                j, i, f"{val:{fmt}}",
-                ha="center", va="center",
-                color="white" if abs(val) > 0.5 else "black",
-                fontsize=9
-            )
-
-    ax.set_title(r"Temporal Cross-Overlap $|V_{nk}| = |\langle \mathbf{e}_n | v_k \rangle|$", fontsize=16)
-
-    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="Absolute overlap")
-
-    if lambdas is not None:
-        _add_lambda_row(fig, lambdas, ax=ax)
-
-    if out_path:
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(out_path, dpi=200, bbox_inches="tight")
-
-    return fig
-
-# ----------------------------------------------------------------------
-# 📊 🔟 POD–Eigenbasis Alignment Heatmap
-# ----------------------------------------------------------------------
-def plot_pod_eigen_alignment(
-    pod_modes_physical: Sequence[torch.Tensor] | torch.Tensor,
-    psi_true_matrix: Sequence[torch.Tensor] | torch.Tensor,
-    dx: float,
     *,
     cmap: mcolors.Colormap | str = spatial_overlap_cmap,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
-    """
-    Create a heat map of the overlap matrix <u_k | psi_n> where ``u_k`` are the physical POD modes and ``psi_n`` are the ground truth wavefunctions.
+    """Render a heatmap of temporal mode overlap matrix <v_m | v_n> (should equal I)."""
+    _apply_style()
 
-    This function uses the `cross_overlap_matrix`` routine defined in `src.pod.py`.
-
-    Parameters
-    ----------
-    pod_modes_physical : Sequence[torch.Tensor]
-        Physical POD modes (each 1-D, same length). If a single tensor is passed, it is interpreted as a stacked matrix of shape ``(n_modes, N)``.
-    psi_true_matrix : Sequence[torch.Tensor]
-        Ground truth wavefunctions Psi = [psi_1 psi_2 ...]
-    dx : float | None, optional
-    cmap, fmt : str, optional
-        Colormap and numeric formatting for the cell
-    lambdas : Dict[str, float], optional
-        Optional loss-weight dictionary.
-    out_path : pathlib.Path | None, optional
-        Optional output path to save the image (PNG).
-
-    Returns
-    -------
-    fig : matplotlib.figure.Figure
-        Overlap matrix <u_k | psi_n> heatmap.
-    """
-    overlap = cross_overlap_matrix(
-        pod_modes_physical,
-        psi_true_matrix,
-        dx=dx,
-    )           # Expected shape: (n_modes, n_modes)
-
+    Vh_np = Vh.detach().cpu().numpy() if isinstance(Vh, torch.Tensor) else Vh
+    V = Vh_np.conj().T
+    overlap = np.real(V.conj().T @ V)
     n_modes = overlap.shape[0]
 
-    fig, ax = plt.subplots(figsize=(max(5, n_modes * 1.2), 5), facecolor="#0d1117")
+    fig, ax = plt.subplots(
+        figsize=(max(5.2, n_modes * 1.3), max(4.8, n_modes * 1.2)),
+        facecolor=THEME_BG,
+    )
 
     im = ax.imshow(
         overlap,
         cmap=cmap,
-        vmin=-1.0,
+        vmin=0.0,
         vmax=1.0,
-        aspect='auto',
-        interpolation='nearest'
+        aspect="equal",
+        interpolation="nearest",
     )
-    # Ensure no grid lines for the heatmap
     ax.grid(False)
 
-    # Axis ticks
     ax.set_xticks(np.arange(n_modes))
     ax.set_yticks(np.arange(n_modes))
-    ax.set_xticklabels([rf"$n={i}$" for i in range(n_modes)],
-                       rotation=45, ha="right")
-    ax.set_yticklabels([rf"$n={i}$" for i in range(n_modes)])
+    ax.set_xticklabels([rf"$v_{i}$" for i in range(n_modes)], fontsize=10)
+    ax.set_yticklabels([rf"$v_{i}$" for i in range(n_modes)], fontsize=10)
 
-    # ------------------------------------------------------------------
-    # #️⃣ Annotate every cell with its numeric value
-    # ------------------------------------------------------------------
     for i in range(n_modes):
         for j in range(n_modes):
-            txt = f"{overlap[i, j]:{fmt}}"
+            val = overlap[i, j]
+            text_color = THEME_BG if val > 0.65 else TEXT_PRIMARY
             ax.text(
                 j,
                 i,
-                txt,
+                f"{val:{fmt}}",
                 ha="center",
                 va="center",
-                color="white" if abs(overlap[i, j]) > 0.5 else "black",
-                fontsize=9,
+                color=text_color,
+                fontsize=10,
+                fontweight="bold",
             )
-    # ------------------------------------------------------------------
-    # 🔖 Titles, color‑bar and optional λ‑row
-    # ------------------------------------------------------------------
-    ax.set_title(r"Overlap Matrix $\langle u_k | \hat{\psi}_n \rangle$",
-                 fontsize=16,
-                 )
 
-    fig.colorbar(
-        im,
-        ax=ax,
-        fraction=0.046,
-        pad=0.04,
-        label="Overlap matrix",
-    )
+    ax.set_title(r"Temporal Mode Overlap $\langle v_m \mid v_n \rangle$", fontsize=13, pad=12)
+
+    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    cbar.set_label("Overlap Value", fontsize=10, color=TEXT_PRIMARY)
+    cbar.ax.tick_params(labelsize=9, colors=TEXT_MUTED)
 
     if lambdas is not None:
         _add_lambda_row(fig, lambdas, ax=ax)
 
-    # ------------------------------------------------------------------
-    # 3️⃣ Optional save
-    # ------------------------------------------------------------------
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(out_path, dpi=200, bbox_inches="tight")
+        fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor=THEME_BG)
 
     return fig
 
-# ----------------------------------------------------------------------
+
+# ======================================================================
+# 📊 1️⃣3️⃣ POD Temporal Cross-Overlap Heatmap
+# ======================================================================
+def plot_pod_temporal_cross_overlap_heatmap(
+    Vh: torch.Tensor | np.ndarray,
+    *,
+    cmap: mcolors.Colormap | str = spatial_overlap_cmap,
+    fmt: str = ".2f",
+    lambdas: Dict[str, float] | None = None,
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """Render heatmap of absolute temporal cross-overlap |V_{nk}|."""
+    _apply_style()
+
+    Vh_np = Vh.detach().cpu().numpy() if isinstance(Vh, torch.Tensor) else Vh
+    V = Vh_np.T
+    n_states, n_modes = V.shape
+
+    fig, ax = plt.subplots(
+        figsize=(max(5.2, n_modes * 1.3), max(4.8, n_states * 1.2)),
+        facecolor=THEME_BG,
+    )
+
+    im = ax.imshow(
+        np.abs(V),
+        cmap=cmap,
+        vmin=0.0,
+        vmax=1.0,
+        aspect="equal",
+        interpolation="nearest",
+    )
+    ax.grid(False)
+
+    ax.set_xticks(np.arange(n_modes))
+    ax.set_yticks(np.arange(n_states))
+    ax.set_xticklabels([rf"POD $k={i}$" for i in range(n_modes)], rotation=45, ha="right", fontsize=9.5)
+    ax.set_yticklabels([rf"State $n={i}$" for i in range(n_states)], fontsize=9.5)
+
+    for i in range(n_states):
+        for j in range(n_modes):
+            val = np.abs(V[i, j])
+            text_color = THEME_BG if val > 0.65 else TEXT_PRIMARY
+            ax.text(
+                j,
+                i,
+                f"{val:{fmt}}",
+                ha="center",
+                va="center",
+                color=text_color,
+                fontsize=10,
+                fontweight="bold",
+            )
+
+    ax.set_title(
+        r"Temporal Cross-Overlap $|V_{nk}| = |\langle \mathbf{e}_n \mid v_k \rangle|$",
+        fontsize=13,
+        pad=12,
+    )
+
+    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    cbar.set_label("Absolute Overlap", fontsize=10, color=TEXT_PRIMARY)
+    cbar.ax.tick_params(labelsize=9, colors=TEXT_MUTED)
+
+    if lambdas is not None:
+        _add_lambda_row(fig, lambdas, ax=ax)
+
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor=THEME_BG)
+
+    return fig
+
+
+# ======================================================================
 # 📊 1️⃣4️⃣ Hilbert Space Phase Portrait
-# ----------------------------------------------------------------------
+# ======================================================================
 def plot_hilbert_phase_portrait(
     learned_wavefunctions: np.ndarray | torch.Tensor,
     true_wavefunctions: np.ndarray | torch.Tensor,
     x: np.ndarray | torch.Tensor,
     *,
-    out_path: Path | None = None,
+    out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
-    """
-    Embed learned wavefunctions in eigenstate coefficient space (Hilbert portrait).
-
-    Projects high-dimensional wavefunctions onto the subspace spanned by the first few true eigenstates, visualizing the distribution of learned states in a 3D coefficient space.
-
-    Parameters
-    ----------
-    learned_wavefunctions : np.ndarray | torch.Tensor
-        Array of shape (n_grid_points, n_samples) containing learned wavefunction approximations.
-    true_wavefunctions : np.ndarray | torch.Tensor
-        Array of shape (n_grid_points, n_eigenstates) containing exact eigenstates.
-    x : np.ndarray | torch.Tensor
-        Array of shape (n_grid_points,) containing the spatial grid points for integration.
-    out_path : pathlib.Path | None, optional
-        Destination path (saved as a PNG). If ``None``, the figure is only returned.
-
-    Returns
-    -------
-    matplotlib.figure.Figure
-        3D scatter plot of wavefunction coefficients.
-
-    Notes
-    -----
-    The coefficients are computed as the overlap integral:
-        c_j = int(psi_learned(x) * psi_true_j(x) dx)
-
-    Using the trapezoidal rule for integration
-    """
+    """Project learned wavefunctions onto true eigenstate subspace in 3D."""
     _apply_style()
 
-    # ------------------------------------------------------------------
-    # 1️⃣ Convert to NumPy and validate shapes
-    # ------------------------------------------------------------------
     if isinstance(learned_wavefunctions, torch.Tensor):
         learned_wavefunctions = learned_wavefunctions.detach().cpu().numpy()
     if isinstance(true_wavefunctions, torch.Tensor):
@@ -1499,153 +1234,92 @@ def plot_hilbert_phase_portrait(
     if isinstance(x, torch.Tensor):
         x = x.detach().cpu().numpy()
 
-    # Ensure x is 1D
     x = np.atleast_1d(x).squeeze()
-
-    if learned_wavefunctions.ndim != 2:
-        raise ValueError(
-            f"❌ learned_wavefunctions must be 2D, got {learned_wavefunctions.ndim}D"
-        )
-    if true_wavefunctions.ndim != 2:
-        raise ValueError(
-            f"❌ true_wavefunctions must be 2D, got {true_wavefunctions.ndim}D"
-        )
-
-    n_grid = learned_wavefunctions.shape[0]
-    if true_wavefunctions.shape[0] != n_grid:
-        raise ValueError(
-            f"❌ Grid mismatch: learned has {n_grid} points, "
-            f"true has {true_wavefunctions.shape[0]} points"
-        )
-    if x.shape[0] != n_grid:
-        raise ValueError(
-            f"❌ Grid mismatch: x has {x.shape[0]} points, "
-            f"wavefunctions have {n_grid} points"
-        )
-
-    # ------------------------------------------------------------------
-    # 2️⃣ Compute coefficients (Overlap Integrals)
-    # ------------------------------------------------------------------
-    # Limit to first 3 eigenstates for 3D visualization
     n_states = min(3, true_wavefunctions.shape[1])
-    n_modes = min(3, learned_wavefunctions.shape[1])    # ⚠️ added minimum number myself
+    n_modes = min(3, learned_wavefunctions.shape[1])
 
-    coeffs =  np.zeros((n_modes, n_states), dtype=np.float64)
-
+    coeffs = np.zeros((n_modes, n_states), dtype=np.float64)
     for i in range(n_modes):
-        psi_learned = learned_wavefunctions[:, i]
+        psi_l = learned_wavefunctions[:, i]
         for j in range(n_states):
             true_psi = true_wavefunctions[:, j]
+            coeffs[i, j] = np.trapezoid(psi_l * true_psi, x)
 
-            integrand = psi_learned * true_psi
-            coeffs[i, j] = np.trapezoid(integrand, x)
+    fig = plt.figure(figsize=(7.5, 7.0), facecolor=THEME_BG)
+    ax = fig.add_subplot(111, projection="3d", facecolor=THEME_BG)
 
-    # ------------------------------------------------------------------
-    # 3️⃣ Plot 3D Stem Plot
-    # ------------------------------------------------------------------
-    fig = plt.figure(figsize=(7, 7))
-    ax = fig.add_subplot(111, projection="3d")
+    # Styling 3D panes
+    ax.xaxis.set_pane_color((0.05, 0.07, 0.09, 1.0))
+    ax.yaxis.set_pane_color((0.05, 0.07, 0.09, 1.0))
+    ax.zaxis.set_pane_color((0.05, 0.07, 0.09, 1.0))
 
-    # Calculate data ranges for setting limits
-    x_vals = coeffs[:, 0]
-    y_vals = coeffs[:, 1]
-    z_vals = coeffs[:, 2]
-
-    # Add padding to limits to prevent clipping
-    margin_x = (x_vals.max() - x_vals.min()) * 0.2 if x_vals.max() != x_vals.min() else 0.5
-    margin_y = (y_vals.max() - y_vals.min()) * 0.2 if y_vals.max() != y_vals.min() else 0.5
-    margin_z = (z_vals.max() - z_vals.min()) * 0.2 if z_vals.max() != z_vals.min() else 0.5
-
-    ax.set_xlim(x_vals.min() - margin_x, x_vals.max() + margin_x)
-    ax.set_ylim(y_vals.min() - margin_y, y_vals.max() + margin_y)
-    ax.set_zlim(0, max(z_vals.max() + margin_z, 0.1))   # Ensure z starts at zero and has some room
-
-    # Draw stems from z=0 to each point
     for i in range(n_modes):
         x0, y0, z0 = coeffs[i, 0], coeffs[i, 1], coeffs[i, 2]
 
-        # Draw stems from z=0.0 to z=z0
-        z_start = 0.0
-        z_end = max(z0, 0.001)
-
         ax.plot(
-            [coeffs[i, 0], coeffs[i, 0]],   # x: constant
-            [coeffs[i, 1], coeffs[i, 1]],   # y: constant
-            [0, coeffs[i, 2]],
-            color=PROJECT_COLORS["blue"],
+            [x0, x0],
+            [y0, y0],
+            [0, z0],
+            color=COLOR_POD_MODE,
             linewidth=2.5,
-            alpha=0.8,
+            alpha=0.7,
             zorder=2,
         )
 
         ax.scatter(
-            coeffs[i, 0],
-            coeffs[i, 1],
-            coeffs[i, 2],
-            c=PROJECT_COLORS["blue"],
-            alpha=0.7,
-            s=100,
-            edgecolor="white",
-            linewidth=1.5,
+            x0,
+            y0,
+            z0,
+            c=COLOR_LEARNED,
+            edgecolor=TEXT_PRIMARY,
+            linewidth=1.2,
+            s=90,
+            alpha=0.9,
             zorder=5,
         )
 
-        # Add text annotations
-        text_z = z0 + margin_z * 0.5 if z0 > 0 else 0.05
         ax.text(
-            x0, y0, text_z,
-            f"({x0:.2f}, {y0:.2f}, {z0:.2f})",
-            fontsize=9,
-            color="white",
+            x0,
+            y0,
+            z0 + 0.04,
+            f"State {i}\n({x0:.2f}, {y0:.2f}, {z0:.2f})",
+            fontsize=8.5,
+            color=TEXT_PRIMARY,
             ha="center",
             va="bottom",
-            bbox=dict(facecolor="black", alpha=0.6, edgecolor="none", pad=2),
+            bbox=dict(
+                boxstyle="round,pad=0.25",
+                facecolor=CARD_BG,
+                edgecolor=BORDER_COLOR,
+                alpha=0.85,
+            ),
             zorder=6,
         )
 
-    ax.set_xlabel(r"$\langle \psi_i^\theta | \psi_0 \rangle$", fontsize=11)
-    ax.set_ylabel(r"$\langle \psi_i^\theta | \psi_1 \rangle$", fontsize=11)
-    ax.set_zlabel(r"$\langle \psi_i^\theta | \psi_2 \rangle$", fontsize=11)
-
-    ax.set_title("Hilbert Space Phase Portrait", fontsize=12, pad=10)
+    ax.set_xlabel(r"$\langle \psi_i^\theta \mid \psi_0 \rangle$", fontsize=10, labelpad=8)
+    ax.set_ylabel(r"$\langle \psi_i^\theta \mid \psi_1 \rangle$", fontsize=10, labelpad=8)
+    ax.set_zlabel(r"$\langle \psi_i^\theta \mid \psi_2 \rangle$", fontsize=10, labelpad=8)
+    ax.set_title("Hilbert Space Phase Portrait", fontsize=13, pad=12)
 
     ax.view_init(elev=25, azim=55)
 
-    # ------------------------------------------------------------------
-    # 4️⃣ Optional save
-    # ------------------------------------------------------------------
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(
-            out_path,
-            dpi=200,
-            bbox_inches="tight",
-            facecolor=fig.get_facecolor(),
-        )
+        fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor=THEME_BG)
 
     return fig
 
 
-# ----------------------------------------------------------------------
+# ======================================================================
 # 📊 1️⃣5️⃣ Spectral Energy Cascade
-# ----------------------------------------------------------------------
+# ======================================================================
 def plot_spectral_energy_cascade(
     learned_wavefunctions: np.ndarray | torch.Tensor,
     energies: np.ndarray | torch.Tensor,
     *,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
-    """
-    Compare POD singular values with Hamiltonian energy spectrum.
-
-    Parameters
-    ----------
-    learned_wavefunctions : np.ndarray | torch.Tensor
-        Learned wavefunctions matrix (n_grid, n_modes).
-    energies : np.ndarray | torch.Tensor
-        Learned or true energy eigenvalues.
-    out_path : pathlib.Path | None, optional
-    """
+    """Compare POD singular values with Hamiltonian energy spectrum."""
     _apply_style()
 
     if isinstance(learned_wavefunctions, torch.Tensor):
@@ -1654,260 +1328,176 @@ def plot_spectral_energy_cascade(
         energies = energies.detach().cpu().numpy()
 
     spatial_modes, singular_values, _ = pod_decomposition(learned_wavefunctions)
-
     n = min(len(singular_values), len(energies))
+    modes = np.arange(1, n + 1)
 
-    fig, ax1 = plt.subplots(figsize=(7, 5), facecolor="#0d1117")
+    fig, ax1 = plt.subplots(figsize=(8.5, 4.8), facecolor=THEME_BG)
 
-    # POD spectrum
     sns.lineplot(
-        x=np.arange(1, n + 1),
+        x=modes,
         y=singular_values[:n],
         marker="o",
+        markersize=7,
         ax=ax1,
-        label="POD singular values",
-        color=PROJECT_COLORS["pink"],
+        label=r"POD singular values $\sigma_k$",
+        color=PROJECT_COLORS["pink_vibrant"],
+        linewidth=2.5,
     )
 
     ax1.set_yscale("log")
-    ax1.set_xlabel("Mode index")
-    ax1.set_ylabel("Singular value", color=PROJECT_COLORS["pink"])
-    ax1.tick_params(axis='y', labelcolor=PROJECT_COLORS["pink"])
+    ax1.set_xlabel("Mode Index $k$", fontsize=11)
+    ax1.set_ylabel(r"Singular Value $\sigma_k$", color=PROJECT_COLORS["pink_vibrant"], fontsize=11)
+    ax1.tick_params(axis="y", labelcolor=PROJECT_COLORS["pink_vibrant"])
+    ax1.set_xticks(modes)
 
-    # second axis for energies
     ax2 = ax1.twinx()
-
     sns.lineplot(
-        x=np.arange(1, n + 1),
+        x=modes,
         y=energies[:n],
         marker="s",
+        markersize=7,
         ax=ax2,
         linestyle="--",
-        label="Energy eigenvalues",
-        color=PROJECT_COLORS["cyan"],
+        label=r"Energy $E_k$",
+        color=COLOR_LEARNED,
+        linewidth=2.5,
     )
 
-    ax2.set_ylabel("Energy", color=PROJECT_COLORS["cyan"])
-    ax2.tick_params(axis='y', labelcolor=PROJECT_COLORS["cyan"])
+    ax2.set_ylabel("Energy (eigenvalues)", color=COLOR_LEARNED, fontsize=11)
+    ax2.tick_params(axis="y", labelcolor=COLOR_LEARNED)
     ax2.grid(False)
 
-    ax1.set_title("Spectral Energy Cascade", fontsize=14, pad=15)
+    ax1.set_title("Spectral Energy Cascade", fontsize=13, pad=12)
 
-    # Combine legends
     lines1, labels1 = ax1.get_legend_handles_labels()
     lines2, labels2 = ax2.get_legend_handles_labels()
-    ax1.legend(lines1 + lines2, labels1 + labels2, loc="upper right")
+    ax1.legend(lines1 + lines2, labels1 + labels2, loc="upper right", framealpha=0.85)
     ax2.get_legend().remove()
 
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(
-            out_path,
-            dpi=200,
-            bbox_inches="tight",
-            facecolor=fig.get_facecolor(),
-        )
+        fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor=THEME_BG)
 
     return fig
 
 
-# ----------------------------------------------------------------------
+# ======================================================================
 # 📊 1️⃣6️⃣ POD Partition Function Spectrum
-# ----------------------------------------------------------------------
+# ======================================================================
 def plot_partition_function_spectrum(
     learned_wavefunctions: np.ndarray | torch.Tensor,
     *,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
-    """
-    Interpret POD spectrum as a thermodynamic ensemble.
-
-    Parameters
-    ----------
-    learned_wavefunctions : np.ndarray | torch.Tensor
-        Learned wavefunctions matrix (n_grid, n_modes).
-    out_path : pathlib.Path | None, optional
-    """
+    """Interpret POD spectrum as a thermodynamic ensemble."""
     _apply_style()
 
     if isinstance(learned_wavefunctions, torch.Tensor):
         learned_wavefunctions = learned_wavefunctions.detach().cpu().numpy()
 
     _, singular_values, _ = pod_decomposition(learned_wavefunctions)
-
     if isinstance(singular_values, torch.Tensor):
         singular_values = singular_values.detach().cpu().numpy()
 
-    # probability weights
     p = singular_values**2
     p = p / np.sum(p)
-
-    # effective energies
     E_eff = -np.log(p + 1e-12)
-
-    # entropy
     entropy = -np.sum(p * np.log(p + 1e-12))
-
     modes = np.arange(1, len(p) + 1)
 
-    fig, ax1 = plt.subplots(figsize=(7, 5), facecolor="#0d1117")
+    fig, ax1 = plt.subplots(figsize=(8.5, 4.8), facecolor=THEME_BG)
 
     sns.lineplot(
         x=modes,
         y=p,
         marker="o",
+        markersize=7,
         ax=ax1,
-        label="Boltzmann weights",
-        color=PROJECT_COLORS["purple"],
+        label="Boltzmann weights $p_k$",
+        color=PROJECT_COLORS["purple_deep"],
+        linewidth=2.5,
     )
 
-    ax1.set_ylabel("Mode probability", color=PROJECT_COLORS["purple"])
-    ax1.tick_params(axis='y', labelcolor=PROJECT_COLORS["purple"])
-    ax1.set_xlabel("Mode index")
+    ax1.set_ylabel("Mode Probability $p_k$", color=PROJECT_COLORS["purple_deep"], fontsize=11)
+    ax1.tick_params(axis="y", labelcolor=PROJECT_COLORS["purple_deep"])
+    ax1.set_xlabel("Mode Index $k$", fontsize=11)
+    ax1.set_xticks(modes)
 
     ax2 = ax1.twinx()
-
     sns.lineplot(
         x=modes,
         y=E_eff,
         marker="s",
+        markersize=7,
         linestyle="--",
         ax=ax2,
-        label="Effective energy",
-        color=PROJECT_COLORS["green"],
+        label=r"Effective energy $E_{\text{eff}}$",
+        color=PROJECT_COLORS["green_jade"],
+        linewidth=2.5,
     )
 
-    ax2.set_ylabel("Effective energy", color=PROJECT_COLORS["green"])
-    ax2.tick_params(axis='y', labelcolor=PROJECT_COLORS["green"])
+    ax2.set_ylabel(r"Effective Energy $E_{\text{eff}}$", color=PROJECT_COLORS["green_jade"], fontsize=11)
+    ax2.tick_params(axis="y", labelcolor=PROJECT_COLORS["green_jade"])
     ax2.grid(False)
 
-    ax1.set_title(f"POD Partition Function Spectrum (Entropy={entropy:.3f})", fontsize=14, pad=15)
+    ax1.set_title(
+        f"POD Partition Function Spectrum (Entropy = {entropy:.3f})",
+        fontsize=13,
+        pad=12,
+    )
 
-    # Combine legends
     lines1, labels1 = ax1.get_legend_handles_labels()
     lines2, labels2 = ax2.get_legend_handles_labels()
-    ax1.legend(lines1 + lines2, labels1 + labels2, loc="center right")
+    ax1.legend(lines1 + lines2, labels1 + labels2, loc="center right", framealpha=0.85)
     ax2.get_legend().remove()
 
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(
-            out_path,
-            dpi=200,
-            bbox_inches="tight",
-            facecolor=fig.get_facecolor(),
-        )
+        fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor=THEME_BG)
 
     return fig
 
 
-# ----------------------------------------------------------------------
-# 🧪 Smoke test – runs when the module is executed directly
-# ----------------------------------------------------------------------
+# ======================================================================
+# 🧪 Smoke Test & Main Entry Point
+# ======================================================================
 def _smoke_test() -> None:
     """Generate dummy data and produce all figures."""
     torch.manual_seed(27)
 
-    # Dummy grid
     N = 128
     x = torch.linspace(-5.0, 5.0, N)
 
-    # Fake potentials
     V_true = 0.5 * x**2
     V_learned = V_true + 0.2 * torch.randn_like(V_true)
 
-    # Fake eigenfunctions (sinusoidal basis)
     psi_true = [torch.sin((i + 1) * x) for i in range(3)]
-    psi_learned = [
-        pt + 0.1 * torch.randn_like(pt) for pt in psi_true
-    ]
+    psi_learned = [pt + 0.1 * torch.randn_like(pt) for pt in psi_true]
 
-    # Dummy loss histories (exponential and decay noise)
     epochs = list(range(1, 101))
     total = np.exp(-0.03 * np.arange(100)) + 0.02 * np.random.rand(100)
     physics = np.exp(-0.025 * np.arange(100)) + 0.015 * np.random.rand(100)
-    ortho = np.exp(-0.04 * np.arange(100)) + 0.008 * np.random.rand(100)
+    ordered = np.exp(-0.04 * np.arange(100)) + 0.008 * np.random.rand(100)
     smooth = np.exp(-0.02 * np.arange(100)) + 0.005 * np.random.rand(100)
     data = np.exp(-0.035 * np.arange(100)) + 0.01 * np.random.rand(100)
 
-    lambdas = {"data": 1.0, "physics": 1.0, "smooth": 1e-2, "ortho": 10}
+    lambdas = {"data": 1.0, "physics": 1.0, "smooth": 1e-2, "ordered": 1.0}
 
-    # Produce figures in a temporary folder
     out_dir = pathlib.Path("./_smoke_outputs")
     out_dir.mkdir(exist_ok=True)
 
-    # --------------------------------------------------------------
-    # 1️⃣ Plot the training curves for each term and the total loss
-    # --------------------------------------------------------------
-    plot_loss_history(
-        epochs,
-        total,
-        physics,
-        ortho,
-        smooth,
-        data,
-        lambdas,
-        out_path=out_dir / "loss_history.png",
-    )
+    plot_loss_history(epochs, total, physics, data, smooth, ordered, lambdas, out_path=out_dir / "loss_history.png")
+    plot_potential(x, V_true, V_learned, lambdas, out_path=out_dir / "potential.png")
+    plot_wavefunctions(x, psi_true, psi_learned, out_path=out_dir / "wavefunctions.png")
 
-    # --------------------------------------------------------------
-    # 2️⃣ Plot the learned potential and the ground truth potential
-    # --------------------------------------------------------------
-    plot_potential(
-        x,
-        V_true,
-        V_learned,
-        lambdas,
-        out_path=out_dir / "potential.png",
-    )
-
-    # --------------------------------------------------------------
-    # 3️⃣ Plot wavefunctions for first `n_modes` eigenmodes
-    # --------------------------------------------------------------
-    plot_wavefunctions(
-        x,
-        psi_true,
-        psi_learned,
-        out_path=out_dir / "wavefunctions.png",
-    )
-
-    # --------------------------------------------------------------
-    # 4️⃣ Energy-spectrum bar plot
-    # --------------------------------------------------------------
-    # Dummy ground truth energies (linear ladder)
-    E_true = torch.tensor([0.5, 1.5, 2.5])          # hbar*omega_n units
-    # Fake learned energies -> perturb the true values slightly
+    E_true = torch.tensor([0.5, 1.5, 2.5])
     E_learned = E_true + 0.1 * torch.randn_like(E_true)
+    plot_energy_spectrum(E_true=E_true, E_learned=E_learned, out_path=out_dir / "energy.png")
 
-    energy_path = out_dir / "energy.png"
-    plot_energy_spectrum(
-        E_true=E_true,
-        E_learned=E_learned,
-        out_path=energy_path,
-    )
+    rho_obs = [(pt.squeeze() ** 2 + 0.02 * torch.rand_like(pt.squeeze())) for pt in psi_true]
+    plot_density_vs_observed(x=x, psi_learned=psi_learned, rho_obs=rho_obs, lambdas=lambdas, out_path=out_dir / "density_vs_observed.png")
 
-    # --------------------------------------------------------------
-    # 5️⃣ Probability‑density comparison (dummy data)
-    # --------------------------------------------------------------
-    # Fake observed densities -> noisy version of |psi|^2
-    rho_obs = [
-        (pt.squeeze() ** 2 + 0.02 * torch.rand_like(pt.squeeze())) for pt in psi_true
-    ]
-
-    density_path = out_dir / "density_vs_observed.png"
-    plot_density_vs_observed(
-        x=x,
-        psi_learned=psi_learned,    # from the earlier dummy wavefunctions
-        rho_obs=rho_obs,
-        lambdas=lambdas,            # optional -> omit if you don't want loss terms to render on probability density plot
-        out_path=density_path,
-    )
-
-    # --------------------------------------------------------------
-    # 6️⃣ a) POD singular-value spectrum (dummy data)
-    # --------------------------------------------------------------
-    # Use the same psi_theta matrix you already built for POD demo
-    psi_matrix = torch.stack(psi_learned, dim=1)    # shape (N, n_modes)
+    psi_matrix = torch.stack(psi_learned, dim=1)
     dx = float(x[1] - x[0])
 
     pod_modes_physical, S, Vh_dummy, pod_modes_euclidean = physical_pod_decomposition(
@@ -1917,117 +1507,27 @@ def _smoke_test() -> None:
         align_signs=True,
     )
 
-    sv_path = out_dir / "pod_singular_values.png"
-    plot_pod_singular_values(
-        singular_values=S,
-        out_path=sv_path,
-    )
+    plot_pod_singular_values(singular_values=S, out_path=out_dir / "pod_singular_values.png")
+    plot_pod_first_three_spatial_modes(x=x, spatial_modes=pod_modes_physical, ground_truth=psi_true, lambdas=lambdas, out_path=out_dir / "pod_modes.png")
+    plot_overlap_heatmap(psi_theta=psi_learned, dx=dx, lambdas=lambdas, out_path=out_dir / "overlap_heatmap.png")
+    plot_cross_overlap_heatmap(pod_modes_physical=pod_modes_physical, psi_matrix=psi_matrix, dx=dx, lambdas=lambdas, out_path=out_dir / "cross_overlap_heatmap.png")
+    plot_pod_temporal_modes(Vh=Vh_dummy, lambdas=lambdas, out_path=out_dir / "pod_temporal_modes.png")
+    plot_pod_temporal_overlap_heatmap(Vh=Vh_dummy, lambdas=lambdas, out_path=out_dir / "pod_temporal_overlap.png")
+    plot_pod_temporal_cross_overlap_heatmap(Vh=Vh_dummy, lambdas=lambdas, out_path=out_dir / "pod_temporal_cross_overlap.png")
+    plot_pod_eigen_alignment(pod_modes_physical, torch.stack(psi_true, dim=0).T, dx=dx, lambdas=lambdas, out_path=out_dir / "pod_eigen_alignment.png")
 
-    # --------------------------------------------------------------
-    # 6️⃣b) First three POD spatial modes
-    # -------------------------------------------------------------
-    pod_modes_path = out_dir / "pod_modes.png"
-    plot_pod_first_three_spatial_modes(
-        x=x,
-        spatial_modes=pod_modes_physical,
-        ground_truth=psi_true,
-        lambdas=lambdas,
-        out_path=pod_modes_path,
-    )
+    psi_true_stacked = torch.stack(psi_true, dim=1)
+    plot_hilbert_phase_portrait(learned_wavefunctions=psi_matrix, true_wavefunctions=psi_true_stacked, x=x, out_path=out_dir / "hilbert_portrait.png")
+    plot_spectral_energy_cascade(learned_wavefunctions=psi_matrix, energies=E_true, out_path=out_dir / "spectral_cascade.png")
+    plot_partition_function_spectrum(learned_wavefunctions=psi_matrix, out_path=out_dir / "partition_spectrum.png")
 
-    # --------------------------------------------------------------
-    # 7️⃣a) Overlap‑matrix heatmap (dummy POD diagnostic)
-    # --------------------------------------------------------------
-    overlap_path = out_dir / "overlap_heatmap.png"
-    plot_overlap_heatmap(
-        psi_theta=psi_learned,  # use the same learned wavefunction from the dummy data
-        dx=dx,
-        lambdas=lambdas,  # optional - show loss weights
-        out_path=overlap_path,
-    )
+    print(f"\n[OK] Smoke test complete. All {len(list(out_dir.iterdir()))} figures written to {out_dir.resolve()}\n")
 
-    # --------------------------------------------------------------
-    # 7️⃣b) Temporal modes heatmap (Composition Matrix V)
-    # --------------------------------------------------------------
-    temporal_path = out_dir / "pod_temporal_modes.png"
-    plot_pod_temporal_modes(
-        Vh=Vh_dummy,  # we have Vh from the physical_pod_decomposition call above
-        lambdas=lambdas,
-        out_path=temporal_path,
-    )
-
-    temporal_overlap_path = out_dir / "pod_temporal_overlap.png"
-    plot_pod_temporal_overlap_heatmap(
-        Vh=Vh_dummy,
-        lambdas=lambdas,
-        out_path=temporal_overlap_path,
-    )
-
-    temporal_cross_path = out_dir / "pod_temporal_cross_overlap.png"
-    plot_pod_temporal_cross_overlap_heatmap(
-        Vh=Vh_dummy,
-        lambdas=lambdas,
-        out_path=temporal_cross_path,
-    )
-
-    # --------------------------------------------------------------
-    # 7️⃣c) POD–eigenbasis alignment heatmap
-    # --------------------------------------------------------------
-    alignment_path = out_dir / "pod_eigen_alignment.png"
-    plot_pod_eigen_alignment(
-        pod_modes_physical,
-        torch.stack(psi_true, dim=0).T,
-        dx=dx,
-        lambdas=lambdas,
-        out_path=alignment_path
-    )
-
-    # --------------------------------------------------------------
-    # 8️⃣ Hilbert Space Phase Portrait
-    # --------------------------------------------------------------
-    # Stack the list of wavefunctions into a 2D tensor (n_modes, n_grid)
-    psi_learned_stacked = torch.stack(psi_learned, dim=1)   # Shape: (N, n_modes)
-    psi_true_stacked = torch.stack(psi_true, dim=1)         # Shape: (N, n_eigenmodes)
-
-    hilbert_path = out_dir / "hilbert_portrait.png"
-    plot_hilbert_phase_portrait(
-        learned_wavefunctions=psi_learned_stacked,
-        true_wavefunctions=psi_true_stacked,
-        x=x,
-        out_path=hilbert_path,
-    )
-
-    # --------------------------------------------------------------
-    # 9️⃣ Spectral Energy Cascade
-    # --------------------------------------------------------------
-    cascade_path = out_dir / "spectral_cascade.png"
-    plot_spectral_energy_cascade(
-        learned_wavefunctions=psi_matrix,
-        energies=E_true,
-        out_path=cascade_path,
-    )
-
-    # --------------------------------------------------------------
-    # 🔟 POD Partition Function Spectrum
-    # --------------------------------------------------------------
-    partition_path = out_dir / "partition_spectrum.png"
-    plot_partition_function_spectrum(
-        learned_wavefunctions=psi_matrix,
-        out_path=partition_path,
-    )
-
-    try:
-        print(
-            f"\n✅ Smoke test complete. All {len(list(out_dir.iterdir()))} figures written to {out_dir.resolve()}\n"
-        )
-    except UnicodeEncodeError:
-        print(
-            f"\n[OK] Smoke test complete. All {len(list(out_dir.iterdir()))} figures written to {out_dir.resolve()}\n"
-        )
 
 def main() -> None:
-    """Entry point for ``python -m src.visualizations`` -> runs the smoke test."""
+    """Entry point for ``python -m src.visualizations``."""
     _smoke_test()
+
 
 if __name__ == "__main__":
     main()
