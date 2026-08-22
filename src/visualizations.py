@@ -89,6 +89,8 @@ PROJECT_COLORS = {
     "yellow_orange": "#FFD166",
 }
 
+
+
 # ======================================================================
 # 🎯 Quantity-Specific Comparison Palette (Learned vs. Ground Truth)
 # ======================================================================
@@ -104,8 +106,8 @@ PROJECT_COLORS = {
 
 COMPARISON_PALETTE: Final[Dict[str, Dict[str, str]]] = {
     "potential": {
-        "true": "#7952F5",       # Vibrant Dark Purple / Violet (Ground Truth)
-        "learned": "#D8B4FE",    # Light Lavender / Lilac (Learned PINN)
+        "true": "#F72585",       # Vibrant Dark Purple / Violet (Ground Truth)
+        "learned": "#31FF48",    # Light Lavender / Lilac (Learned PINN)
     },
     "wavefunctions": {
         "true": "#F72585",       # Vibrant Eigenscribe Neon Magenta/Pink (Ground Truth)
@@ -113,12 +115,12 @@ COMPARISON_PALETTE: Final[Dict[str, Dict[str, str]]] = {
     },
     "energy": {
         "true": "#0070EB",       # Deep Royal Blue (Ground Truth)
-        "learned": "#38BDF8",    # Light Vivid Sky / Cyan Blue (Learned PINN)
+        "learned": "#00E8FF",    # Light Vivid Sky / Cyan Blue (Learned PINN)
     },
     "density": {
-        "true": "#059669",       # Vivid Emerald Green (Observed / Ground Truth)
-        "observed": "#059669",   # Alias for observed data
-        "learned": "#00F5D4",    # Luminous Cyan-Green (Learned PINN)
+        "true": "#F72585",       # Vivid Emerald Green (Observed / Ground Truth)
+        "observed": "#7C5CFF",   # Alias for observed data
+        "learned": "#31FF48",    # Luminous Cyan-Green (Learned PINN)
     },
 }
 
