@@ -20,7 +20,10 @@ from __future__ import annotations
 import torch
 import numpy as np
 from typing import Tuple
-from utils import l2_inner_product, get_trapezoidal_weights
+try:
+    from .utils import l2_inner_product, get_trapezoidal_weights
+except (ImportError, ValueError):
+    from utils import l2_inner_product, get_trapezoidal_weights
 
 __all__: list[str] = [
     "pod_decomposition",
@@ -390,7 +393,10 @@ def _run_pod_smoke_test() -> None:
     - verifies Euclidean and phsyical normalization
     - prints the leading singular values
     """
-    from utils import make_grid, set_global_seed
+    try:
+        from .utils import make_grid, set_global_seed
+    except (ImportError, ValueError):
+        from utils import make_grid, set_global_seed
 
     set_global_seed(27)
 

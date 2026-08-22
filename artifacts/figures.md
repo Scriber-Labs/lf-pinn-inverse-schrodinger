@@ -121,7 +121,7 @@
 ## Figure 8: POD spatial modes
 ![POD spatial modes](demo_visuals/pod_modes.png)
 
-> 🏡 First three POD modes (blue) compared with learned $\hat{\psi}_i^\theta$ (green) and ground truth $\hat{\psi}_i$ (red).
+> 🏡 First three POD modes (cyan) compared with learned $\hat{\psi}_i^\theta$ (green) and ground truth $\hat{\psi}_i$ (neon magenta).
 
 > 🔑 **Key Insights**
 > 1. **Geometric structure** – Similarity to $\hat{\psi}_n$ indicates a stable, data-driven basis.
@@ -131,7 +131,7 @@
 > 
 > | **Verdict** | **Failure Mode** | **Description** | **Explanation** |
 > | :---------- | :--------------- | :-------------- | :-------------- |
-> | ❌ | Mode mixing | Pod modes do not resemble any physical eigenfunction. | Blue curves visibly shifted (see Sec. A.6); fix requires re-weighting. |
+> | ❌ | Mode mixing | Pod modes do not resemble any physical eigenfunction. | Cyan curves visibly shifted (see Sec. A.6); fix requires re-weighting. |
 > 
 
 ## Figure 9: Cross-overlap heatmap (POD vs. learned)

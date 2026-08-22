@@ -85,6 +85,7 @@ PROJECT_COLORS = {
     "green_emerald": "#059669",
     "green_dark": "#035100",
     "green_jade": "#00FF7F",
+    "cyan_green": "#00F5D4",
     "yellow_orange": "#FFD166",
 }
 
@@ -97,9 +98,9 @@ PROJECT_COLORS = {
 #
 # Quantity mapping:
 #   - Potential            -> Purple (Dark Violet vs. Light Lavender)
-#   - Wavefunctions        -> Pink   (Vibrant Eigenscribe Neon Pink vs. Luminous Pale Pink)
+#   - Wavefunctions        -> Magenta vs. Green (Vibrant Neon Magenta vs. Luminous Green)
 #   - Energy Eigenvalues   -> Blue   (Deep Royal Blue vs. Vivid Sky/Cyan Blue)
-#   - Probability Densities-> Green  (Vivid Emerald Green vs. Bright Glowing Mint)
+#   - Probability Densities-> Green vs. Cyan-Green (Vivid Emerald Green vs. Luminous Cyan-Green)
 
 COMPARISON_PALETTE: Final[Dict[str, Dict[str, str]]] = {
     "potential": {
@@ -108,7 +109,7 @@ COMPARISON_PALETTE: Final[Dict[str, Dict[str, str]]] = {
     },
     "wavefunctions": {
         "true": "#F72585",       # Vibrant Eigenscribe Neon Magenta/Pink (Ground Truth)
-        "learned": "#FFB4F6",    # Luminous Pastel / Pale Pink (Learned PINN)
+        "learned": "#31FF48",    # Luminous Vibrant Green (Learned PINN)
     },
     "energy": {
         "true": "#0070EB",       # Deep Royal Blue (Ground Truth)
@@ -117,7 +118,7 @@ COMPARISON_PALETTE: Final[Dict[str, Dict[str, str]]] = {
     "density": {
         "true": "#059669",       # Vivid Emerald Green (Observed / Ground Truth)
         "observed": "#059669",   # Alias for observed data
-        "learned": "#57FFBC",    # Bright Luminous Mint / Glowing Green (Learned PINN)
+        "learned": "#00F5D4",    # Luminous Cyan-Green (Learned PINN)
     },
 }
 
@@ -139,7 +140,7 @@ COLOR_DENSITY_LEARNED: Final[str] = COMPARISON_PALETTE["density"]["learned"]
 COLOR_TRUE: Final[str] = "#FF5376"        # Vibrant Rose/Coral (Default ground truth fallback)
 COLOR_LEARNED: Final[str] = "#00E8FF"     # Electric Cyan (Default learned PINN fallback)
 COLOR_OBSERVED: Final[str] = "#FF9D57"    # Warm Orange/Amber (Default observed data fallback)
-COLOR_POD_MODE: Final[str] = "#5280FF"    # Royal Electric Indigo/Blue for POD spatial modes
+COLOR_POD_MODE: Final[str] = "#00E8FF"    # Electric Cyan for POD spatial modes
 COLOR_POD_ALT: Final[str] = "#A855F7"     # Deep Purple for secondary POD / partition weights
 
 # Training Loss Components Palette:
@@ -703,7 +704,7 @@ def plot_pod_singular_values(
     ax.semilogy(
         indices,
         sv,
-        color=PROJECT_COLORS["indigo"],
+        color=COLOR_POD_MODE,
         linewidth=2.2,
         alpha=0.7,
         zorder=1,
