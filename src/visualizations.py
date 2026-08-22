@@ -139,11 +139,11 @@ COLOR_DENSITY_OBSERVED: Final[str] = COMPARISON_PALETTE["density"]["observed"]
 COLOR_DENSITY_LEARNED: Final[str] = COMPARISON_PALETTE["density"]["learned"]
 
 # General semantic fallbacks & POD design tokens:
-COLOR_TRUE: Final[str] = "#FF5376"        # Vibrant Rose/Coral (Default ground truth fallback)
-COLOR_LEARNED: Final[str] = "#00E8FF"     # Electric Cyan (Default learned PINN fallback)
-COLOR_OBSERVED: Final[str] = "#FF9D57"    # Warm Orange/Amber (Default observed data fallback)
-COLOR_POD_MODE: Final[str] = "#00E8FF"    # Electric Cyan for POD spatial modes
-COLOR_POD_ALT: Final[str] = "#A855F7"     # Deep Purple for secondary POD / partition weights
+COLOR_TRUE: Final[str] = "#F72585"        # Vibrant Rose/Coral (Default ground truth fallback)
+COLOR_LEARNED: Final[str] = "#31FF48"     # Electric Cyan (Default learned PINN fallback)
+COLOR_OBSERVED: Final[str] = "#7C5CFF"    # Warm Orange/Amber (Default observed data fallback)
+COLOR_POD_MODE: Final[str] = "#0A95EB"    # Electric Cyan for POD spatial modes
+COLOR_POD_ALT: Final[str] = "#FFD166"     # Deep Purple for secondary POD / partition weights
 
 # Training Loss Components Palette:
 LOSS_COLORS: Final[Dict[str, str]] = {

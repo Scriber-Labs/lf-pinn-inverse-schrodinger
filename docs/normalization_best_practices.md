@@ -39,7 +39,16 @@ This ensures that the resulting modes $U_{phys}$ are orthonormal with respect to
 
 ## 3. Implementation Checklist for this Project
 
-- [ ] **Quadrature Consistency:** Ensure the same integration rule (e.g., Trapezoidal) is used in the model's forward pass, the loss function, and the POD diagnostic.
-- [ ] **Batch-wise vs. Grid-wise:** In 1D, we usually normalize over the full spatial grid. In higher dims, ensure the "Normalization" happens over the spatial dimensions, not the batch dimension.
-- [ ] **Energy Ordering:** Normalization alone doesn't fix mode collapse. Pair orthonormalization with an **Energy Ordering Loss** ($E_1 < E_2 < ...$) to force the networks to pick up different eigenstates.
-- [ ] **Sign Ambiguity:** Wavefunctions $\psi$ and $-\psi$ are physically equivalent. POD diagnostics should align signs to a reference (e.g., forcing the maximum value to be positive) before computing errors.
+- [x] **Quadrature Consistency:** Ensure the same integration rule (e.g., Trapezoidal) is used in the model's forward pass, the loss function, and the POD diagnostic.
+- [x] **Batch-wise vs. Grid-wise:** In 1D, we usually normalize over the full spatial grid. In higher dims, ensure the "Normalization" happens over the spatial dimensions, not the batch dimension.
+- [x] **Energy Ordering:** Normalization alone doesn't fix mode collapse. Pair orthonormalization with an **Energy Ordering Loss** ($E_1 < E_2 < ...$) to force the networks to pick up different eigenstates.
+- [x] **Sign Ambiguity:** Wavefunctions $\psi$ and $-\psi$ are physically equivalent. POD diagnostics should align signs to a reference (e.g., forcing the maximum value to be positive) before computing errors.
+
+## Summary Table
+
+| Checklist Item | Status | Key Source Files | Key CLI Files |
+| --- | --- | --- | --- |
+| **Quadrature Consistency** | ✅ | `src/utils.py`, `src/model.py`, `src/inverse.py`, `src/pod.py` | `cli/cli_train.py`, `cli/extract_metrics.py` |
+| **Batch-wise vs. Grid-wise** | ✅ | `src/model.py`, `src/utils.py`, `src/train.py` | `cli/cli_train.py` |
+| **Energy Ordering** | ✅ | `src/physics.py`, `src/train.py` | `cli//cli_train.py` |
+| **Sign Ambiguity** | ✅ | `src/pod.py` | `cli/cli_train.py` |
