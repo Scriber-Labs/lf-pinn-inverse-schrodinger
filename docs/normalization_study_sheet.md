@@ -30,8 +30,8 @@
 *   **Why it matters:** At the very first "tick" of training, weights are random. If a network outputs all zeros, the norm is zero. Dividing by zero gives `NaN`, which "infects" the entire model and kills the run. $\epsilon$ is your insurance policy.
 
 ## 5. Phase Alignment (`Post-processing`)
-*   **Technical Step:** Checking if $\text{Overlap}(\psi_{learned}, \psi_{true}) < 0$ and flipping the sign.
-*   **Why it matters:** The Schrödinger equation doesn't care about $\pm$ signs (it only cares about $|\psi|^2$). However, humans (and error metrics) do. We align signs *only for visualization* so we can see if the shapes match.
+*   **Technical Step:** Checking if `l2_inner_product(psi_learned, psi_true, dx) < 0` and flipping the sign for consistency.
+*   **Why it matters:** The Schrödinger equation doesn't care about $\pm$ signs (it only cares about $|\psi|^2$). However, humans (and error metrics) do. We align signs *only for visualization* using `l2_inner_product(..., dx)` so we can see if the shapes match consistently.
 *   **Critical Note:** Never do this *inside* the training loop; it confuses the optimizer.
 
 ## 6. POD & Physical Weighting (`Analysis Alignment`)

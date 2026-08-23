@@ -253,10 +253,13 @@ def physical_pod_decomposition(
             dx=dx,
         )
 
-        sign = torch.sign(
-            torch.sum(aligned_physical * pod_modes_physical, dim=0)
-        )
-        sign = torch.where(sign == 0, torch.ones_like(sign), sign)
+        signs = []
+        for col_idx in range(pod_modes_physical.shape[1]):
+            s = torch.sign(
+                l2_inner_product(aligned_physical[:, col_idx], pod_modes_physical[:, col_idx], dx)
+            )
+            signs.append(1.0 if s == 0 else s.item())
+        sign = torch.tensor(signs, device=pod_modes_physical.device, dtype=pod_modes_physical.dtype)
 
         pod_modes_physical = aligned_physical
         pod_modes_euclidean = pod_modes_euclidean * sign.unsqueeze(0)
