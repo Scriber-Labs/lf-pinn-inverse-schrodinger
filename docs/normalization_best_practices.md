@@ -39,7 +39,7 @@ This ensures that the resulting modes $U_{phys}$ are orthonormal with respect to
 
 ## 3. Implementation Checklist for this Project
 
-- [x] **Quadrature Consistency:** Ensure the same integration rule (e.g., Trapezoidal) is used in the model's forward pass, the loss function, and the POD diagnostic.
+- [x] **Quadrature Consistency:** Ensure the same integration rule (e.g., Trapezoidal) is used in the model's forward pass, the loss function, the POD diagnostic, and overlap visualizations.
 - [x] **Batch-wise vs. Grid-wise:** In 1D, we usually normalize over the full spatial grid. In higher dims, ensure the "Normalization" happens over the spatial dimensions, not the batch dimension.
 - [x] **Energy Ordering:** Normalization alone doesn't fix mode collapse. Pair orthonormalization with an **Energy Ordering Loss** ($E_1 < E_2 < ...$) to force the networks to pick up different eigenstates.
 - [x] **Sign Ambiguity:** Wavefunctions $\psi$ and $-\psi$ are physically equivalent. POD diagnostics should align signs to a reference (e.g., forcing the maximum value to be positive) before computing errors.
@@ -48,7 +48,7 @@ This ensures that the resulting modes $U_{phys}$ are orthonormal with respect to
 
 | Checklist Item | Description | Status | Key Source Files | Key CLI Files |
 | --- | --- | --- | --- | --- |
-| **Quadrature Consistency** | Uniform integration rule (Trapezoidal / Simpson) applied consistently across model forward pass, loss functions, and POD diagnostics. | Implemented | `src/utils.py`, `src/model.py`, `src/physics.py`, `src/pod.py` | `cli/cli_train.py`, `cli/extract_metrics.py` |
+| **Quadrature Consistency** | Uniform integration rule (Trapezoidal / Simpson) applied consistently across model forward pass, loss functions, POD diagnostics, and overlap visualizations. | Implemented | `src/utils.py`, `src/model.py`, `src/physics.py`, `src/pod.py`, `src/visualizations.py` | `cli/cli_train.py`, `cli/extract_metrics.py` |
 | **Batch-wise vs. Grid-wise** | In 1D, normalization and $L^2$ inner products integrate over the full spatial grid rather than reducing over the batch dimension. | Implemented | `src/model.py`, `src/utils.py`, `src/pod.py` | `cli/cli_train.py` |
 | **Energy Ordering** | Softly penalized via `energy_ordering_loss` ($\text{ReLU}(E_i - E_{i+1})^2$) added to the training objective, preventing mode swapping while maintaining smooth gradients. | Softly Penalized | `src/physics.py`, `src/train.py` | `cli/cli_train.py` |
 | **Sign Ambiguity** | Resolved via `align_modes_by_reference` in POD diagnostics, flipping modal signs based on reference overlap before metric evaluation. | Implemented | `src/pod.py`, `src/visualizations.py` | `cli/cli_train.py`, `cli/extract_metrics.py` |
