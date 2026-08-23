@@ -46,9 +46,9 @@ This ensures that the resulting modes $U_{phys}$ are orthonormal with respect to
 
 ## Summary Table
 
-| Checklist Item |                                                                                                                                                                                            | Status | Key Source Files    | Key CLI Files |
-| --- |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------------------| --- |
-| **Quadrature Consistency** | The integration rule (e.g., Trapezoidal)used in the model's </br> - forward pass </br> -loss function </br> POD diagnostics.                                                               |      | |  |
-| **Batch-wise vs. Grid-wise** | Since we are working in 1D, we normalize over the full spatial grid. </br> ⚠️ For higher dimenstions, make sure you normalize over the spatial dimentions rather than the batch dimension. |      |  |   |
-| **Energy Ordering** |                                                                                                                                                                                            |      |  |  |
-| **Sign Ambiguity** | |      |  |   |
+| Checklist Item | Description | Status | Key Source Files | Key CLI Files |
+| --- | --- | --- | --- | --- |
+| **Quadrature Consistency** | Uniform integration rule (Trapezoidal / Simpson) applied consistently across model forward pass, loss functions, and POD diagnostics. | Implemented | `src/utils.py`, `src/model.py`, `src/physics.py`, `src/pod.py` | `cli/cli_train.py`, `cli/extract_metrics.py` |
+| **Batch-wise vs. Grid-wise** | In 1D, normalization and $L^2$ inner products integrate over the full spatial grid rather than reducing over the batch dimension. | Implemented | `src/model.py`, `src/utils.py`, `src/pod.py` | `cli/cli_train.py` |
+| **Energy Ordering** | Softly penalized via `energy_ordering_loss` ($\text{ReLU}(E_i - E_{i+1})^2$) added to the training objective, preventing mode swapping while maintaining smooth gradients. | Softly Penalized | `src/physics.py`, `src/train.py` | `cli/cli_train.py` |
+| **Sign Ambiguity** | Resolved via `align_modes_by_reference` in POD diagnostics, flipping modal signs based on reference overlap before metric evaluation. | Implemented | `src/pod.py`, `src/visualizations.py` | `cli/cli_train.py`, `cli/extract_metrics.py` |
