@@ -560,11 +560,13 @@ def main(argv: list[str] | None = None) -> None:    # noqa: D401
         figures.append(plot_spectral_energy_cascade(
             learned_wavefunctions=psi_matrix,
             energies=E_learned,
+            dx=dx,
             out_path=figures_dir / "spectral_cascade.png",
         ))
 
         figures.append(plot_partition_function_spectrum(
             learned_wavefunctions=psi_matrix,
+            dx=dx,
             out_path=figures_dir / "partition_spectrum.png",
         ))
 

@@ -35,9 +35,9 @@
 *   **Critical Note:** Never do this *inside* the training loop; it confuses the optimizer.
 
 ## 6. POD & Physical Weighting (`Analysis Alignment`)
-*   **Technical Step:** Scaling SVD modes by $1/\sqrt{dx}$.
-*   **Why it matters:** SVD is "unitless" linear algebra. Wavefunctions are "physical" functions. To compare an abstract SVD vector to a physical wavefunction, you must account for the integration measure ($dx$).
-*   **The Trap:** If you skip this, your POD modes will look like the right shape but will be on the wrong scale ($1.0$ vs $1/\sqrt{dx}$), leading to incorrect error reports.
+*   **Technical Step:** Scaling SVD modes by $1/\sqrt{w \cdot dx}$ (or pre-weighting snapshots by $\sqrt{w \cdot dx}$ with trapezoidal endpoint weights $w$).
+*   **Why it matters:** SVD is "unitless" linear algebra. Wavefunctions are "physical" functions. To compare an abstract SVD vector to a physical wavefunction, you must account for the integration measure with quadrature weights ($w \cdot dx$).
+*   **The Trap:** If you skip this, your POD modes will look like the right shape but will be on the wrong scale ($1.0$ vs $1/\sqrt{w \cdot dx}$), leading to incorrect error reports.
 
 ---
 
@@ -47,7 +47,7 @@
 | :--- | :--- | :--- |
 | `psi = model(x)` | Is it normalized? | Should be wrapped in `NormalizedWavefunctionNet`. |
 | `loss = sum(psi**2)` | Is the measure included? | Use `l2_inner_product(psi, psi, dx)` (Trapezoidal). |
-| `U, S, V = svd(A)` | Is this physical POD? | Must weight by `sqrt(dx)` first or scale $U$ by $1/\sqrt{dx}$ after. |
+| `U, S, V = svd(A)` | Is this physical POD? | Must weight by `sqrt(w * dx)` first (Trapezoidal) or scale $U$ by $1/\sqrt{w \cdot dx}$ after. |
 | `NaN` in loss | Is there an epsilon? | Check all divisions and square roots in `utils.py`. |
 
 ---

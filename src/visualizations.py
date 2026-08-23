@@ -37,6 +37,7 @@ try:
         mode_overlap_matrix,
         physical_pod_decomposition,
         pod_decomposition,
+        weight_snapshot_matrix,
     )
 except (ImportError, ValueError):
     from pod import (
@@ -44,6 +45,7 @@ except (ImportError, ValueError):
         mode_overlap_matrix,
         physical_pod_decomposition,
         pod_decomposition,
+        weight_snapshot_matrix,
     )
 
 
@@ -1401,17 +1403,28 @@ def plot_spectral_energy_cascade(
     learned_wavefunctions: np.ndarray | torch.Tensor,
     energies: np.ndarray | torch.Tensor,
     *,
+    dx: float | None = None,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """Compare POD singular values with Hamiltonian energy spectrum."""
     _apply_style()
 
-    if isinstance(learned_wavefunctions, torch.Tensor):
-        learned_wavefunctions = learned_wavefunctions.detach().cpu().numpy()
+    if isinstance(learned_wavefunctions, np.ndarray):
+        learned_wavefunctions_tensor = torch.from_numpy(learned_wavefunctions)
+    else:
+        learned_wavefunctions_tensor = learned_wavefunctions
+
+    if dx is not None:
+        weighted = weight_snapshot_matrix(learned_wavefunctions_tensor, dx)
+        spatial_modes, singular_values, _ = pod_decomposition(weighted)
+    else:
+        spatial_modes, singular_values, _ = pod_decomposition(learned_wavefunctions_tensor)
+
+    if isinstance(singular_values, torch.Tensor):
+        singular_values = singular_values.detach().cpu().numpy()
     if isinstance(energies, torch.Tensor):
         energies = energies.detach().cpu().numpy()
 
-    spatial_modes, singular_values, _ = pod_decomposition(learned_wavefunctions)
     n = min(len(singular_values), len(energies))
     modes = np.arange(1, n + 1)
 
@@ -1471,15 +1484,23 @@ def plot_spectral_energy_cascade(
 def plot_partition_function_spectrum(
     learned_wavefunctions: np.ndarray | torch.Tensor,
     *,
+    dx: float | None = None,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """Interpret POD spectrum as a thermodynamic ensemble."""
     _apply_style()
 
-    if isinstance(learned_wavefunctions, torch.Tensor):
-        learned_wavefunctions = learned_wavefunctions.detach().cpu().numpy()
+    if isinstance(learned_wavefunctions, np.ndarray):
+        learned_wavefunctions_tensor = torch.from_numpy(learned_wavefunctions)
+    else:
+        learned_wavefunctions_tensor = learned_wavefunctions
 
-    _, singular_values, _ = pod_decomposition(learned_wavefunctions)
+    if dx is not None:
+        weighted = weight_snapshot_matrix(learned_wavefunctions_tensor, dx)
+        _, singular_values, _ = pod_decomposition(weighted)
+    else:
+        _, singular_values, _ = pod_decomposition(learned_wavefunctions_tensor)
+
     if isinstance(singular_values, torch.Tensor):
         singular_values = singular_values.detach().cpu().numpy()
 
@@ -1602,8 +1623,8 @@ def _smoke_test() -> None:
 
     psi_true_stacked = torch.stack(psi_true, dim=1)
     plot_hilbert_phase_portrait(learned_wavefunctions=psi_matrix, true_wavefunctions=psi_true_stacked, x=x, out_path=out_dir / "hilbert_portrait.png")
-    plot_spectral_energy_cascade(learned_wavefunctions=psi_matrix, energies=E_true, out_path=out_dir / "spectral_cascade.png")
-    plot_partition_function_spectrum(learned_wavefunctions=psi_matrix, out_path=out_dir / "partition_spectrum.png")
+    plot_spectral_energy_cascade(learned_wavefunctions=psi_matrix, energies=E_true, dx=dx, out_path=out_dir / "spectral_cascade.png")
+    plot_partition_function_spectrum(learned_wavefunctions=psi_matrix, dx=dx, out_path=out_dir / "partition_spectrum.png")
 
     print(f"\n[OK] Smoke test complete. All {len(list(out_dir.iterdir()))} figures written to {out_dir.resolve()}\n")
 

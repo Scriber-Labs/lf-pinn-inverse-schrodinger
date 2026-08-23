@@ -78,8 +78,8 @@ def weight_snapshot_matrix(
     """
     Apply spatial-measure weighting before POD.
     
-    For a uniform grid, physical inner products contain the measure ``dx``.
-    Weighting the snapshot matrix by ``sqrt(dx)`` enables the Euclidean SVD to compute with the correct spatial measure.
+    For a uniform grid, physical inner products contain the measure ``dx`` with trapezoidal endpoint weights.
+    Weighting the snapshot matrix by ``sqrt(weights * dx)`` enables the Euclidean SVD to compute with the correct spatial measure.
     
     Parameters
     ----------
@@ -91,7 +91,7 @@ def weight_snapshot_matrix(
     Returns
     -------
     torch.Tensor, shape ``(N_x, N_modes)``
-        Weighted snapshot matrix ``sqrt(dx) * psi_matrix``.
+        Weighted snapshot matrix ``sqrt(weights * dx) * psi_matrix``.
     """
     if dx <= 0:
         raise ValueError(f"❌ dx must be positive, got {dx}.")
