@@ -83,25 +83,6 @@ class MLP(nn.Module):
         """Forward pass -> forwards ``x`` through the stacked MLP."""
         return self.net(x)
 
-class NormalizedWavefunctionNet(nn.Module):
-    """
-    Wraps an MLP to enforce L2 normalization by construction.
-    Eliminates the need for a separate normalization loss term.
-    """
-    def __init__(self, base_net: nn.Module, dx: float) -> None:
-        super().__init__()
-        self.base_net = base_net
-        self.dx = dx
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # Raw prediction
-        psi_raw: torch.Tensor = self.base_net(x)
-
-        # Enforce normalization via utility to ensure consistency
-        # We use a single element list for normalize_wavefunctions
-        return normalize_wavefunctions([psi_raw.squeeze()], self.dx)[0].unsqueeze(1)
-
-
 class InverseSchrodingerModel(nn.Module):
     """
     Joint model that bundles together:
@@ -144,6 +125,7 @@ class InverseSchrodingerModel(nn.Module):
         super().__init__()
 
         self.n_states = n_states
+        self.dx = dx
 
         # Potential network -> single scalar field
         self.potential_net = MLP(
@@ -157,15 +139,12 @@ class InverseSchrodingerModel(nn.Module):
         # One wavefunction network per eigenstate
         self.psi_nets = nn.ModuleList(
             [
-                NormalizedWavefunctionNet(
-                    MLP(
-                        input_dim=1,
-                        output_dim=1,
-                        hidden_dims=hidden_dims,
-                        device=device,
-                        dtype=dtype,
-                    ),
-                    dx=dx,
+                MLP(
+                    input_dim=1,
+                    output_dim=1,
+                    hidden_dims=hidden_dims,
+                    device=device,
+                    dtype=dtype,
                 )
                 for _ in range(n_states)
             ]
@@ -188,12 +167,13 @@ class InverseSchrodingerModel(nn.Module):
         """
         Return a list of orthonormal wavefunctions via Gram-Schmidt.
         """
-        # 1. Get raw normalized predictions from sub-nets
+        # 1. Get raw predictions from sub-nets. Normalization is applied once,
+        # after projection, so each Gram-Schmidt remainder has unit L2 norm.
         psi_list = [net(x).squeeze() for net in self.psi_nets]
         
         # 2. Orthonormalize via Gram-Schmidt
         ortho_list = []
-        dx_val = dx if dx is not None else self.psi_nets[0].dx
+        dx_val = dx if dx is not None else self.dx
 
         for psi in psi_list:
             for prev in ortho_list:

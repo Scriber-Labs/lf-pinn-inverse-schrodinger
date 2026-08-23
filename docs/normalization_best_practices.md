@@ -46,9 +46,9 @@ This ensures that the resulting modes $U_{phys}$ are orthonormal with respect to
 
 ## Summary Table
 
-| Checklist Item | Status | Key Source Files | Key CLI Files |
-| --- | --- | --- | --- |
-| **Quadrature Consistency** | ✅ | `src/utils.py`, `src/model.py`, `src/inverse.py`, `src/pod.py` | `cli/cli_train.py`, `cli/extract_metrics.py` |
-| **Batch-wise vs. Grid-wise** | ✅ | `src/model.py`, `src/utils.py`, `src/train.py` | `cli/cli_train.py` |
-| **Energy Ordering** | ✅ | `src/physics.py`, `src/train.py` | `cli//cli_train.py` |
-| **Sign Ambiguity** | ✅ | `src/pod.py` | `cli/cli_train.py` |
+| Checklist Item |                                                                                                                                                                                            | Status | Key Source Files    | Key CLI Files |
+| --- |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------------------| --- |
+| **Quadrature Consistency** | The integration rule (e.g., Trapezoidal)used in the model's </br> - forward pass </br> -loss function </br> POD diagnostics.                                                               |      | |  |
+| **Batch-wise vs. Grid-wise** | Since we are working in 1D, we normalize over the full spatial grid. </br> ⚠️ For higher dimenstions, make sure you normalize over the spatial dimentions rather than the batch dimension. |      |  |   |
+| **Energy Ordering** |                                                                                                                                                                                            |      |  |  |
+| **Sign Ambiguity** | |      |  |   |
