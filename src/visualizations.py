@@ -22,7 +22,14 @@ Review status: Reviewed and maintained.
 from __future__ import annotations
 
 import pathlib
+from pathlib import Path
+import matplotlib.font_manager as fm
+font_path = Path(__file__).resolve().parent.parent / "assets" / "fonts" / "Aclonica-Regular.ttf"
+if font_path.exists():
+    fm.fontManager.addfont(str(font_path))
+
 from typing import Dict, Final, List, Sequence, Tuple
+
 
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
@@ -36,6 +43,7 @@ try:
         cross_overlap_matrix,
         mode_overlap_matrix,
         physical_pod_decomposition,
+
         pod_decomposition,
         weight_snapshot_matrix,
     )
