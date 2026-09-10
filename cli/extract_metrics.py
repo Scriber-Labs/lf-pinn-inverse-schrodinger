@@ -34,10 +34,22 @@ Date: 04-2026
 """
 
 import argparse
+import io
 import json
 import sys
 from pathlib import Path
 from typing import Tuple, Dict, Any
+
+if sys.stdout.encoding != 'utf-8':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except AttributeError:
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+if sys.stderr.encoding != 'utf-8':
+    try:
+        sys.stderr.reconfigure(encoding='utf-8')
+    except AttributeError:
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 import numpy as np
 import pandas as pd
@@ -143,15 +155,18 @@ def extract_pod_metrics(
     # Get spatial grid spacing
     dx = float(config.get("dx"))
 
-    # Get learned wavefunctions
+    # Get learned wavefunctions and ensure snapshot shape is (N_points, n_states)
     psi_learned = diagnostics["psi_learned"]
     if isinstance(psi_learned, list):
         psi_learned = np.array(psi_learned)
+    psi_learned = np.squeeze(psi_learned)
+    if psi_learned.ndim == 2 and psi_learned.shape[0] < psi_learned.shape[1]:
+        # Shape was (n_states, N_points) -> transpose to (N_points, n_states)
+        psi_learned = psi_learned.T
 
     # ===== POD DECOMPOSITION =====
     from src.pod import physical_pod_decomposition
-    # Note: psi_learned is shape (n_states, N_points). physical_pod_decomposition expects (N_points, n_states)
-    psi_matrix = torch.from_numpy(psi_learned).T.to(dtype=torch.float64)
+    psi_matrix = torch.from_numpy(psi_learned).to(dtype=torch.float64)
     U_phys, S, Vh, U_euclidean = physical_pod_decomposition(
         psi_matrix,
         dx,
@@ -193,14 +208,23 @@ def extract_pod_metrics(
             {"Category": "POD Decomposition", "Parameter": f"σ_{i + 1}", "Value": float(S_np[i]), "Type": "float"})
 
     # ===== ORTHONORMALITY CHECK =====
-    ortho_check = U_np.T @ U_np
+    # Physical orthonormality using trapezoidal quadrature weights and dx
+    ortho_check = mode_overlap_matrix(U_np, dx)
     ortho_error = np.sum(np.abs(ortho_check - np.eye(U_np.shape[1])))
     data.append(
-        {"Category": "POD Orthonormality", "Parameter": "U^T U Orthonormality Error", "Value": float(ortho_error),
+        {"Category": "POD Orthonormality", "Parameter": "POD Physical Orthonormality Error", "Value": float(ortho_error),
+         "Type": "float"})
+
+    # Euclidean orthonormality of Euclidean modes
+    U_euc_np = U_euclidean.numpy()
+    euc_ortho_check = U_euc_np.T @ U_euc_np
+    euc_ortho_error = np.sum(np.abs(euc_ortho_check - np.eye(U_euc_np.shape[1])))
+    data.append(
+        {"Category": "POD Orthonormality", "Parameter": "POD Euclidean Orthonormality Error", "Value": float(euc_ortho_error),
          "Type": "float"})
 
     # ===== MODE OVERLAP MATRIX =====
-    overlap_learned = mode_overlap_matrix(psi_learned.T, dx)
+    overlap_learned = mode_overlap_matrix(psi_learned, dx)
     data.append(
         {"Category": "Mode Overlap", "Parameter": "Learned Overlap Matrix Shape", "Value": str(overlap_learned.shape),
          "Type": "array"})
@@ -225,7 +249,7 @@ def extract_pod_metrics(
          "Type": "float"})
 
     # ===== CROSS OVERLAP =====
-    cross_overlap = cross_overlap_matrix(U_np, psi_learned.T, dx)
+    cross_overlap = cross_overlap_matrix(U_np, psi_learned, dx)
     data.append({"Category": "Cross Overlap", "Parameter": "POD Modes vs Learned Wavefunctions Shape",
                  "Value": str(cross_overlap.shape), "Type": "array"})
 
@@ -244,12 +268,15 @@ def extract_pod_metrics(
 
     # ===== GROUND TRUTH COMPARISON =====
     psi_true = ground_truth["psi_true"]
+    if isinstance(psi_true, list):
+        psi_true = torch.stack(psi_true)
     if isinstance(psi_true, torch.Tensor):
-        psi_true = psi_true.numpy()
-    elif isinstance(psi_true, list):
-        psi_true = torch.stack(psi_true).numpy()
+        psi_true = psi_true.detach().cpu().numpy()
+    psi_true = np.squeeze(psi_true)
+    if psi_true.ndim == 2 and psi_true.shape[0] < psi_true.shape[1]:
+        psi_true = psi_true.T
 
-    overlap_true_learned = cross_overlap_matrix(psi_true.T, psi_learned.T, dx)
+    overlap_true_learned = cross_overlap_matrix(psi_true, psi_learned, dx)
     data.append({"Category": "Ground Truth Comparison", "Parameter": "True vs Learned Overlap Shape",
                  "Value": str(overlap_true_learned.shape), "Type": "array"})
 

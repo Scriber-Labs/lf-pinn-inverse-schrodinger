@@ -43,10 +43,10 @@ try:
         cross_overlap_matrix,
         mode_overlap_matrix,
         physical_pod_decomposition,
-
         pod_decomposition,
         weight_snapshot_matrix,
     )
+    from .utils import l2_inner_product
 except (ImportError, ValueError):
     from pod import (
         cross_overlap_matrix,
@@ -55,6 +55,7 @@ except (ImportError, ValueError):
         pod_decomposition,
         weight_snapshot_matrix,
     )
+    from utils import l2_inner_product
 
 
 # ======================================================================
@@ -869,6 +870,8 @@ def plot_pod_first_three_spatial_modes(
 
     x_np = x.squeeze().detach().cpu().numpy()
     modes_np = spatial_modes.detach().cpu().numpy()
+    if modes_np.ndim == 3:
+        modes_np = modes_np.squeeze(-1)
 
     gt_np = (
         [gt.squeeze().detach().cpu().numpy() for gt in ground_truth[: modes_np.shape[1]]]
@@ -1331,13 +1334,14 @@ def plot_hilbert_phase_portrait(
     x = np.atleast_1d(x).squeeze()
     n_states = min(3, true_wavefunctions.shape[1])
     n_modes = min(3, learned_wavefunctions.shape[1])
+    dx = float(x[1] - x[0]) if len(x) > 1 else 1.0
 
     coeffs = np.zeros((n_modes, n_states), dtype=np.float64)
     for i in range(n_modes):
-        psi_l = learned_wavefunctions[:, i]
+        psi_l = torch.as_tensor(learned_wavefunctions[:, i], dtype=torch.float64)
         for j in range(n_states):
-            true_psi = true_wavefunctions[:, j]
-            coeffs[i, j] = np.trapezoid(psi_l * true_psi, x)
+            true_psi = torch.as_tensor(true_wavefunctions[:, j], dtype=torch.float64)
+            coeffs[i, j] = float(l2_inner_product(psi_l, true_psi, dx))
 
     fig = plt.figure(figsize=(7.5, 7.0), facecolor=THEME_BG)
     ax = fig.add_subplot(111, projection="3d", facecolor=THEME_BG)

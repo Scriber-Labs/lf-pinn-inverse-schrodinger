@@ -8,16 +8,16 @@
 > 🔑 **Key Insights**
 > 1. **Spike 1 ($\approx$ 0-50 epochs)** - Expected transient while the network adjusts from random initial weights.
 > 2. **Spike 2 ($\approx$ 800 epochs)** - Discovery of a higher-curvature potential: smoothness and total loss spike, physics and data terms rise only moderately.
-> 3. **Spike 3 ($\approx$ 2000 epoochs)** - Order-of-magnitude jump in the smootheness term propagates into the physics loss; a new plateau follows with lower smoothness fidelity, but improved data fit.
+> 3. **Spike 3 ($\approx$ 2000 epochs)** - Order-of-magnitude jump in the smoothness term propagates into the physics loss; a new plateau follows with lower smoothness fidelity, but improved data fit.
 
 > ❌ **Failure Modes**
 > 
-> | **Verdict** | **Failure Mode** | **Description** | **Explanation** |
-> | :---------- | :--------------- | :-------------- | :-------------- |
-> | ❌ | High final loss | Optimizer stalls in a local minimum. | Total loss remains greater than 1e-1 at epoch 6000. |
-> | ✔️ | Oscillation avoided | Unbalanced loss weights can cause loss terms to oscillate. | Curves converge monotonically after Spike 3. |
-> | ❌ | Physics collapse | Data loss decreases, while TISE residual increases. | Indicates operator inconsistency. |
-> | ❌ | Over-regularization | Smoothness term dominates, spectrum becomes innacurate. | Post-Spike 3 plateau shows $\lambda_\text{smooth}$ is much greater than others. | 
+> | **Verdict** | **Failure Mode** | **Description**                                                                                                                         | **Explanation**                                                                                                                                                                                                                                                          |
+> | :---------- | :--------------- |:----------------------------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+> | ❌ | High final loss | Optimizer stalls in a local minimum. <br> <br> Heavily driven by the penalty weighting $\lambda_\text{smooth} \gg \lambda_\text{data}$. | Total loss remains greater than 1e-1 at epoch 6000. <br> <br> Note that a high wieghted total loss is not necessarily a failure if the physical residue $\mathcal{L}_\text{SE}$ and data loss $\mathcal{L}_\text{data}$ are near convergence ($~10^{-3}$ to $~10^{-4}$). |
+> | ✔️ | Oscillation avoided | Unbalanced loss weights can cause loss terms to oscillate.                                                                              | Curves converge monotonically after Spike 3.                                                                                                                                                                                                                             |
+> | ❌ | Physics collapse | Data loss decreases, while TISE residual increases.                                                                                     | Indicates operator inconsistency.                                                                                                                                                                                                                                        |
+> | ❌ | Over-regularization | Smoothness term dominates, spectrum becomes inacurate.                                                                                  | Post-Spike 3 plateau shows $\lambda_\text{smooth}$ is much greater than others.                                                                                                                                                                                          | 
 
 ## Figure 2: Learned vs. true potential
 ![Learned potentials](demo_visuals/learned_potential.png)
@@ -30,9 +30,9 @@
 
 > ❌ **Failure Modes**
 > 
-> | **Verdict** | **Failure Mode**              | **Description**                                                                          | **Explanation**                                                    |
-> |:------------|:------------------------------|:-----------------------------------------------------------------------------------------|:-------------------------------------------------------------------|
-> | ❌           | Gemoetric mismatch       | Learned $V_\theta$ shape incompatible with true quadratic.                               | Central well too narrow; tails saturate at $V_\theta \approx \pm 12 $. |
+> | **Verdict** | **Failure Mode**          | **Description**                                                                          | **Explanation**                                                    |
+> |:------------|:--------------------------|:-----------------------------------------------------------------------------------------|:-------------------------------------------------------------------|
+> | ❌           | Geometric mismatch        | Learned $V_\theta$ shape incompatible with true quadratic.                               | Central well too narrow; tails saturate at $V_\theta \approx \pm 12 $. |
 > | ❌           | Boundary under-constraint | Sparse data at $x \in (-\infty, -4.5] \cup [4.5, \infty)$ allows the potential to drift. | Grey dashed domain limits show no training points beyond. |
 
 

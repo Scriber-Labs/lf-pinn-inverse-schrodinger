@@ -127,3 +127,8 @@ inverse-pinn-schrodinger/
  ├── README.md 
  └── requirements.txt
 ```
+
+## 🔮 On the Horizon
+- [ ] Add a Dirichlet Boundary Anchor to the loss function.
+    $$ \mathcal{L}_\text{DBA} = \big(V(x_\text{edge})-V_\text{max}\big)^2 $$
+- 
