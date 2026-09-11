@@ -1602,7 +1602,8 @@ def plot_pod_first_three_spatial_modes(
         ax.set_xlabel(r"Position $x$", fontsize=11)
         ax.set_ylabel("Amplitude", fontsize=11)
         ax.set_title(f"POD Spatial Mode $k={k}$", fontsize=12)
-        ax.legend(fontsize=9, loc="upper right", framealpha=0.85)
+        if k == 0:
+            ax.legend(fontsize=9, loc="upper right", framealpha=0.85)
         ax.grid(True, which="both", color=GRID_COLOR, linestyle=":", alpha=0.6)
 
     fig.suptitle(
