@@ -922,8 +922,8 @@ def plot_pod_first_three_spatial_modes(
             modes_np[:, k],
             label=f"POD mode $u_{k}$",
             color=COLOR_POD_MODE,
-            linewidth=2.8,
-            linestyle="-.",
+            linewidth=3.8,
+            linestyle="dotted",
         )
 
         ax.set_xlabel(r"Position $x$", fontsize=11)
