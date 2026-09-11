@@ -288,7 +288,7 @@ _apply_style()
 
 
 # ======================================================================
-# ✨ Helpers: Gradient Bars & Loss-Weight Badge
+# ✨ Helpers: Gradient Bars & Loss-Weight Badge & Spike Lines
 # ======================================================================
 def _plot_gradient_bar(
     ax: plt.Axes,
@@ -317,14 +317,17 @@ def _plot_gradient_bar(
 
 def _add_lambda_row(
     fig: plt.Figure,
-    lambdas: Dict[str, float],
+    lambdas: Dict[str, float] | None,
     *,
     ax: plt.Axes | None = None,
-) -> None:
+) -> mpl.text.Text | None:
     """
     Render loss-weight dictionary as a sleek glassmorphic pill badge.
     Placed consistently below the figure suptitle or axes title.
     """
+    if not lambdas:
+        return None
+
     lambda_str = "    ".join(rf"$\lambda_{{{k}}} = {v:g}$" for k, v in lambdas.items())
 
     suptitle = getattr(fig, "_suptitle", None)
@@ -341,7 +344,7 @@ def _add_lambda_row(
         else:
             lambda_y = 0.94
 
-    fig.text(
+    return fig.text(
         0.5,
         lambda_y,
         lambda_str,
@@ -360,6 +363,128 @@ def _add_lambda_row(
     )
 
 
+def _add_spike_lines(
+    ax: plt.Axes,
+    spike_epochs: Sequence[int],
+    *,
+    color: str = TEXT_MUTED,
+    linestyle: str = "--",
+    linewidth: float = 1.5,
+    alpha: float = 0.75,
+    label: str = "Spike / Transition",
+) -> None:
+    """Draw vertical grey lines at designated spike/transition epochs on an axes."""
+    if not spike_epochs:
+        return
+    for idx, ep in enumerate(spike_epochs):
+        lbl = label if idx == 0 else None
+        ax.axvline(
+            x=ep,
+            color=color,
+            linestyle=linestyle,
+            linewidth=linewidth,
+            alpha=alpha,
+            label=lbl,
+            zorder=2,
+        )
+
+
+def detect_loss_spikes(
+    epochs: Sequence[int],
+    series: Sequence[float] | np.ndarray | torch.Tensor,
+    *,
+    threshold: float = 1.0,
+    method: str = "log_diff",
+    direction: str = "both",
+    min_epoch_gap: int = 200,
+) -> List[int]:
+    """Identify epoch numbers where significant spikes or transitions occur in a loss series.
+
+    Parameters
+    ----------
+    epochs : Sequence[int]
+        Sequence of epoch numbers corresponding to the loss measurements.
+    series : Sequence[float] | np.ndarray | torch.Tensor
+        Loss values across epochs.
+    threshold : float, default=1.0
+        Sensitivity threshold for detecting a spike.
+        - If method='log_diff': minimum change in log10(loss) between adjacent points.
+          (e.g., threshold=1.0 corresponds to a 10x order-of-magnitude change, threshold=2.0 is a 100x jump/drop).
+        - If method='relative': minimum relative jump (L_t - L_{t-1}) / max(L_{t-1}, eps).
+        - If method='zscore': minimum z-score of point-to-point step differences.
+    method : str, default='log_diff'
+        Detection strategy: 'log_diff', 'relative', or 'zscore'.
+    direction : str, default='both'
+        Direction of change to detect: 'both' (any sharp jump/drop), 'positive'/'up' (spike onset only),
+        or 'negative'/'down' (sharp drops only).
+    min_epoch_gap : int, default=200
+        Minimum epoch distance between successive detected spike markers to avoid clutter.
+        Ensures at most one spike is covered within any given span of `min_epoch_gap` epochs.
+
+    Returns
+    -------
+    List[int]
+        List of epoch numbers where significant spikes/transitions were detected.
+    """
+    if len(epochs) < 2 or len(series) < 2:
+        return []
+
+    if isinstance(series, torch.Tensor):
+        s = series.detach().cpu().numpy().astype(float)
+    elif isinstance(series, np.ndarray):
+        s = series.astype(float)
+    else:
+        s = np.array(series, dtype=float)
+
+    eps = 1e-15
+    s_safe = np.maximum(s, eps)
+    ep_arr = np.array(epochs)
+
+    dir_mode = direction.lower().strip()
+
+    if method == "log_diff":
+        log_s = np.log10(s_safe)
+        diffs = np.diff(log_s)
+        if dir_mode in ("positive", "up", "increase"):
+            spike_indices = np.where(diffs >= threshold)[0] + 1
+        elif dir_mode in ("negative", "down", "decrease"):
+            spike_indices = np.where(diffs <= -threshold)[0] + 1
+        else:
+            spike_indices = np.where(np.abs(diffs) >= threshold)[0] + 1
+    elif method == "relative":
+        rel_diffs = np.diff(s_safe) / s_safe[:-1]
+        if dir_mode in ("positive", "up", "increase"):
+            spike_indices = np.where(rel_diffs >= threshold)[0] + 1
+        elif dir_mode in ("negative", "down", "decrease"):
+            spike_indices = np.where(rel_diffs <= -threshold)[0] + 1
+        else:
+            spike_indices = np.where(np.abs(rel_diffs) >= threshold)[0] + 1
+    elif method == "zscore":
+        diffs = np.diff(s_safe)
+        mean_d = np.mean(diffs)
+        std_d = np.std(diffs) + eps
+        z = (diffs - mean_d) / std_d
+        if dir_mode in ("positive", "up", "increase"):
+            spike_indices = np.where(z >= threshold)[0] + 1
+        elif dir_mode in ("negative", "down", "decrease"):
+            spike_indices = np.where(z <= -threshold)[0] + 1
+        else:
+            spike_indices = np.where(np.abs(z) >= threshold)[0] + 1
+    else:
+        raise ValueError(f"Unknown spike detection method: {method}. Choose from 'log_diff', 'relative', 'zscore'.")
+
+    # Filter by min_epoch_gap
+    detected_epochs: List[int] = []
+    last_ep = -1000000
+    for idx in spike_indices:
+        ep = int(ep_arr[idx])
+        if ep - last_ep >= min_epoch_gap:
+            detected_epochs.append(ep)
+            last_ep = ep
+
+    return detected_epochs
+
+
 # ======================================================================
 # 🩵 1️⃣ Training Curves
 # ======================================================================
@@ -371,9 +496,42 @@ def plot_loss_history(
     smooth: Sequence[float],
     ordered: Sequence[float],
     lambdas: Dict[str, float],
+    *,
+    spike_epochs: Sequence[int] | None = None,
+    detect_spikes: bool = False,
+    spike_threshold: float = 1.0,
+    spike_method: str = "log_diff",
+    spike_direction: str = "both",
+    spike_series: str = "all",
+    min_epoch_gap: int = 200,
+    zoom_range: Tuple[int, int] | int | None = None,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
-    """Render a log-scale line plot of all loss components."""
+    """Render a log-scale line plot of all loss components with optional spike indicators.
+
+    Parameters
+    ----------
+    epochs, total, physics, data, smooth, ordered, lambdas : standard loss inputs.
+    spike_epochs : Sequence[int], optional
+        Explicit list of epoch numbers where vertical grey dashed lines should be drawn.
+    detect_spikes : bool, default=False
+        Whether to automatically detect significant jumps and mark them with grey vertical lines.
+    spike_threshold : float, default=1.0
+        Sensitivity threshold for spike detection (default: 1.0 log10 jump ~ 10x order of magnitude).
+    spike_method : str, default='log_diff'
+        Method used for spike detection ('log_diff', 'relative', 'zscore').
+    spike_direction : str, default='both'
+        Direction of changes to detect ('both', 'positive'/'up', 'negative'/'down').
+    spike_series : str, default='all'
+        Loss component to monitor for spikes ('all', 'Total', 'Physics', 'Data-fit', 'Smoothness', 'Ordered').
+    min_epoch_gap : int, default=200
+        Minimum epoch distance between successive detected spike markers.
+        Ensures at most one spike is covered within a span of `min_epoch_gap` epochs.
+    zoom_range : int or Tuple[int, int], optional
+        Optional x-axis zoom range (max epoch or (start, end)).
+    out_path : pathlib.Path, optional
+        Path to save figure.
+    """
     _apply_style()
 
     comps: List[Tuple[str, str, Sequence[float]]] = [
@@ -383,6 +541,52 @@ def plot_loss_history(
         ("Smoothness", LOSS_COLORS["Smoothness"], smooth),
         ("Ordered", LOSS_COLORS["Ordered"], ordered),
     ]
+
+    # Resolve spike epochs
+    resolved_spikes: List[int] = []
+    if spike_epochs is not None:
+        resolved_spikes = list(spike_epochs)
+    elif detect_spikes:
+        series_map = {
+            "total": total,
+            "physics": physics,
+            "data": data,
+            "data-fit": data,
+            "smooth": smooth,
+            "smoothness": smooth,
+            "ordered": ordered,
+        }
+        if spike_series.lower() == "all":
+            all_spikes: set[int] = set()
+            for s in [total, physics, data, smooth, ordered]:
+                all_spikes.update(
+                    detect_loss_spikes(
+                        epochs,
+                        s,
+                        threshold=spike_threshold,
+                        method=spike_method,
+                        direction=spike_direction,
+                        min_epoch_gap=min_epoch_gap,
+                    )
+                )
+            sorted_spikes = sorted(all_spikes)
+            filtered_spikes: List[int] = []
+            last_ep = -1000000
+            for ep in sorted_spikes:
+                if ep - last_ep >= min_epoch_gap:
+                    filtered_spikes.append(ep)
+                    last_ep = ep
+            resolved_spikes = filtered_spikes
+        else:
+            target_series = series_map.get(spike_series.lower(), total)
+            resolved_spikes = detect_loss_spikes(
+                epochs,
+                target_series,
+                threshold=spike_threshold,
+                method=spike_method,
+                direction=spike_direction,
+                min_epoch_gap=min_epoch_gap,
+            )
 
     fig, ax = plt.subplots(figsize=(9, 5), facecolor=THEME_BG)
     for label, color, series in comps:
@@ -395,6 +599,16 @@ def plot_loss_history(
             linewidth=2.5,
         )
 
+    # Draw vertical grey lines for spikes if any
+    if resolved_spikes:
+        _add_spike_lines(ax, resolved_spikes, color=TEXT_MUTED, linestyle="--", linewidth=1.5, alpha=0.75)
+
+    if zoom_range is not None:
+        if isinstance(zoom_range, (int, float)):
+            ax.set_xlim(epochs[0], epochs[0] + zoom_range)
+        elif isinstance(zoom_range, (tuple, list)) and len(zoom_range) == 2:
+            ax.set_xlim(zoom_range[0], zoom_range[1])
+
     ax.set_yscale("log")
     ax.set_xlabel("Epoch", fontsize=11)
     ax.set_ylabel("Loss (log scale)", fontsize=11)
@@ -403,6 +617,219 @@ def plot_loss_history(
     ax.legend(loc="upper right", framealpha=0.85)
 
     _add_lambda_row(fig, lambdas, ax=ax)
+
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor=THEME_BG)
+
+    return fig
+
+
+# ======================================================================
+# 🩵 1️⃣b Zoomed-In Training Curves
+# ======================================================================
+def plot_loss_history_zoomed(
+    epochs: Sequence[int],
+    total: Sequence[float],
+    physics: Sequence[float],
+    data: Sequence[float],
+    smooth: Sequence[float],
+    ordered: Sequence[float],
+    lambdas: Dict[str, float],
+    *,
+    zoom_epochs: int | Tuple[int, int] | None = None,
+    zoom_fraction: float = 0.15,
+    spike_epochs: Sequence[int] | None = None,
+    detect_spikes: bool = True,
+    spike_threshold: float = 1.0,
+    spike_method: str = "log_diff",
+    spike_direction: str = "both",
+    spike_series: str = "all",
+    min_epoch_gap: int = 200,
+    title: str | None = None,
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """Render a zoomed-in training curves plot focusing on early convergence / spike dynamics.
+
+    Useful for simulations that stabilize or run for many epochs, allowing
+    elaborate inspection of initial loss spikes, transient oscillations, and convergence onset.
+
+    Parameters
+    ----------
+    epochs, total, physics, data, smooth, ordered, lambdas : standard loss inputs.
+    zoom_epochs : int or Tuple[int, int], optional
+        - If int N: zooms from epochs[0] to epochs[0] + N.
+        - If tuple (start, end): zooms to [start, end].
+        - If None: automatically zooms to the first `zoom_fraction` of epochs.
+    zoom_fraction : float, default=0.15
+        Fraction of total training epochs to include when zoom_epochs is None.
+    spike_epochs : Sequence[int], optional
+        Explicit list of spike epochs to mark with grey vertical dashed lines.
+    detect_spikes : bool, default=True
+        Whether to automatically detect and mark spikes with grey vertical lines.
+    spike_threshold : float, default=1.0
+        Sensitivity threshold for spike detection (default: 1.0 log10 jump ~ 10x order of magnitude).
+    spike_method : str, default='log_diff'
+        Method for spike detection: 'log_diff', 'relative', or 'zscore'.
+    spike_direction : str, default='both'
+        Direction of changes to detect ('both', 'positive'/'up', 'negative'/'down').
+    spike_series : str, default='all'
+        Loss component to monitor for spikes ('all', 'Total', 'Physics', 'Data-fit', 'Smoothness', 'Ordered').
+    min_epoch_gap : int, default=200
+        Minimum epoch distance between successive detected spike markers.
+        Ensures at most one spike is covered within a span of `min_epoch_gap` epochs.
+    title : str, optional
+        Custom title. If None, generates an informative title with the zoomed epoch range.
+    out_path : pathlib.Path, optional
+        Path to save figure.
+
+    Returns
+    -------
+    plt.Figure
+        The rendered zoomed matplotlib Figure.
+    """
+    _apply_style()
+
+    ep_arr = np.array(epochs)
+    n_total = len(ep_arr)
+
+    # Determine zoom indices
+    if zoom_epochs is None:
+        n_zoom = max(min(int(n_total * zoom_fraction), n_total), min(20, n_total))
+        start_idx = 0
+        end_idx = n_zoom
+    elif isinstance(zoom_epochs, (int, float)):
+        target_ep = ep_arr[0] + int(zoom_epochs)
+        start_idx = 0
+        end_idx = int(np.searchsorted(ep_arr, target_ep, side="right"))
+        end_idx = max(min(end_idx, n_total), min(5, n_total))
+    elif isinstance(zoom_epochs, (tuple, list)) and len(zoom_epochs) == 2:
+        start_val, end_val = zoom_epochs
+        start_idx = int(np.searchsorted(ep_arr, start_val, side="left"))
+        end_idx = int(np.searchsorted(ep_arr, end_val, side="right"))
+        start_idx = max(0, min(start_idx, n_total - 1))
+        end_idx = max(start_idx + 1, min(end_idx, n_total))
+    else:
+        start_idx = 0
+        end_idx = n_total
+
+    z_epochs = ep_arr[start_idx:end_idx]
+    z_total = np.array(total)[start_idx:end_idx]
+    z_physics = np.array(physics)[start_idx:end_idx]
+    z_data = np.array(data)[start_idx:end_idx]
+    z_smooth = np.array(smooth)[start_idx:end_idx]
+    z_ordered = np.array(ordered)[start_idx:end_idx]
+
+    # Resolve spikes in zoomed window
+    resolved_spikes: List[int] = []
+    if spike_epochs is not None:
+        resolved_spikes = [ep for ep in spike_epochs if z_epochs[0] <= ep <= z_epochs[-1]]
+    elif detect_spikes:
+        series_map = {
+            "total": z_total,
+            "physics": z_physics,
+            "data": z_data,
+            "data-fit": z_data,
+            "smooth": z_smooth,
+            "smoothness": z_smooth,
+            "ordered": z_ordered,
+        }
+        if spike_series.lower() == "all":
+            all_spikes: set[int] = set()
+            for s in [z_total, z_physics, z_data, z_smooth, z_ordered]:
+                all_spikes.update(
+                    detect_loss_spikes(
+                        z_epochs,
+                        s,
+                        threshold=spike_threshold,
+                        method=spike_method,
+                        direction=spike_direction,
+                        min_epoch_gap=min_epoch_gap,
+                    )
+                )
+            sorted_spikes = sorted(all_spikes)
+            filtered_spikes: List[int] = []
+            last_ep = -1000000
+            for ep in sorted_spikes:
+                if ep - last_ep >= min_epoch_gap:
+                    filtered_spikes.append(ep)
+                    last_ep = ep
+            resolved_spikes = filtered_spikes
+        else:
+            target_series = series_map.get(spike_series.lower(), z_total)
+            resolved_spikes = detect_loss_spikes(
+                z_epochs,
+                target_series,
+                threshold=spike_threshold,
+                method=spike_method,
+                direction=spike_direction,
+                min_epoch_gap=min_epoch_gap,
+            )
+
+    comps: List[Tuple[str, str, Sequence[float]]] = [
+        ("Total", LOSS_COLORS["Total"], z_total),
+        ("Physics", LOSS_COLORS["Physics"], z_physics),
+        ("Data-fit", LOSS_COLORS["Data-fit"], z_data),
+        ("Smoothness", LOSS_COLORS["Smoothness"], z_smooth),
+        ("Ordered", LOSS_COLORS["Ordered"], z_ordered),
+    ]
+
+    fig, ax = plt.subplots(figsize=(9, 5), facecolor=THEME_BG)
+    for label, color, series in comps:
+        sns.lineplot(
+            x=z_epochs,
+            y=series,
+            ax=ax,
+            label=label,
+            color=color,
+            linewidth=2.5,
+        )
+
+    if resolved_spikes:
+        _add_spike_lines(ax, resolved_spikes, color=TEXT_MUTED, linestyle="--", linewidth=1.5, alpha=0.75)
+
+    ax.set_yscale("log")
+    ax.set_xlabel("Epoch", fontsize=11)
+    ax.set_ylabel("Loss (log scale)", fontsize=11)
+
+    start_ep = int(z_epochs[0])
+    end_ep = int(z_epochs[-1])
+    plot_title = title if title is not None else f"Early Training Dynamics (Zoomed: Epochs {start_ep}–{end_ep})"
+    ax.set_title(plot_title, fontsize=13, pad=12)
+
+    ax.grid(True, which="both", color=GRID_COLOR, linestyle=":", alpha=0.6)
+
+    _add_lambda_row(fig, lambdas, ax=ax)
+
+    handles, labels = ax.get_legend_handles_labels()
+    lambda_artists = [t for t in fig.texts if r"\lambda" in t.get_text()]
+    if lambda_artists:
+        fig.canvas.draw()
+        renderer = fig.canvas.get_renderer()
+        lambda_bbox = lambda_artists[0].get_window_extent(renderer).transformed(fig.transFigure.inverted())
+        n_items = len(labels)
+        fs = 7.5 if n_items >= 6 else 8.5
+        hl = 1.0 if n_items >= 6 else 1.2
+        hp = 0.2 if n_items >= 6 else 0.3
+        cs = 0.3 if n_items >= 6 else 0.5
+        ax.legend(
+            handles,
+            labels,
+            loc="upper left",
+            bbox_to_anchor=(lambda_bbox.x0, lambda_bbox.y0 - 0.012, lambda_bbox.width, 0.04),
+            bbox_transform=fig.transFigure,
+            mode="expand",
+            borderaxespad=0.0,
+            ncol=n_items,
+            fontsize=fs,
+            borderpad=0.4,
+            handlelength=hl,
+            handletextpad=hp,
+            columnspacing=cs,
+            framealpha=0.85,
+        )
+    else:
+        ax.legend(loc="upper right", framealpha=0.85)
 
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -784,6 +1211,8 @@ def plot_overlap_heatmap(
     lambdas: Dict[str, float] | None = None,
     cmap: mcolors.Colormap | str = spatial_overlap_cmap,
     fmt: str = ".2f",
+    cbar_location: str = "bottom",
+    cbar_pad: float | None = None,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """Render a heatmap of the overlap matrix <psi_m^theta | psi_n^theta>."""
@@ -839,7 +1268,8 @@ def plot_overlap_heatmap(
         pad=12,
     )
 
-    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    pad = cbar_pad if cbar_pad is not None else (0.12 if cbar_location in ("bottom", "top") else 0.04)
+    cbar = fig.colorbar(im, ax=ax, location=cbar_location, fraction=0.046, pad=pad)
     cbar.set_label("Overlap Value", fontsize=10, color=TEXT_PRIMARY)
     cbar.ax.tick_params(labelsize=9, colors=TEXT_MUTED)
 
@@ -960,6 +1390,8 @@ def plot_cross_overlap_heatmap(
     cmap: mcolors.Colormap | str = cross_overlap_cmap,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
+    cbar_location: str = "bottom",
+    cbar_pad: float | None = None,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """Create a heatmap of cross overlap matrix <u_k | psi_n^theta>."""
@@ -1009,7 +1441,8 @@ def plot_cross_overlap_heatmap(
         pad=12,
     )
 
-    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    pad = cbar_pad if cbar_pad is not None else (0.12 if cbar_location in ("bottom", "top") else 0.04)
+    cbar = fig.colorbar(im, ax=ax, location=cbar_location, fraction=0.046, pad=pad)
     cbar.set_label("Projection Value", fontsize=10, color=TEXT_PRIMARY)
     cbar.ax.tick_params(labelsize=9, colors=TEXT_MUTED)
 
@@ -1034,6 +1467,8 @@ def plot_pod_eigen_alignment(
     cmap: mcolors.Colormap | str = cross_overlap_cmap,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
+    cbar_location: str = "bottom",
+    cbar_pad: float | None = None,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """Create a heatmap of overlap matrix <u_k | psi_n> with ground truth."""
@@ -1083,7 +1518,8 @@ def plot_pod_eigen_alignment(
         pad=12,
     )
 
-    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    pad = cbar_pad if cbar_pad is not None else (0.12 if cbar_location in ("bottom", "top") else 0.04)
+    cbar = fig.colorbar(im, ax=ax, location=cbar_location, fraction=0.046, pad=pad)
     cbar.set_label("Alignment Value", fontsize=10, color=TEXT_PRIMARY)
     cbar.ax.tick_params(labelsize=9, colors=TEXT_MUTED)
 
@@ -1106,6 +1542,8 @@ def plot_pod_temporal_modes(
     cmap: mcolors.Colormap | str = cross_overlap_cmap,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
+    cbar_location: str = "bottom",
+    cbar_pad: float | None = None,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """Create a heatmap of modal composition matrix V (right-singular vectors)."""
@@ -1154,7 +1592,8 @@ def plot_pod_temporal_modes(
     ax.set_ylabel("Learned States ($n$)", fontsize=11)
     ax.set_xlabel("POD Modes ($k$)", fontsize=11)
 
-    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    pad = cbar_pad if cbar_pad is not None else (0.12 if cbar_location in ("bottom", "top") else 0.04)
+    cbar = fig.colorbar(im, ax=ax, location=cbar_location, fraction=0.046, pad=pad)
     cbar.set_label("Coefficient Value", fontsize=10, color=TEXT_PRIMARY)
     cbar.ax.tick_params(labelsize=9, colors=TEXT_MUTED)
 
@@ -1177,6 +1616,8 @@ def plot_pod_temporal_overlap_heatmap(
     cmap: mcolors.Colormap | str = spatial_overlap_cmap,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
+    cbar_location: str = "bottom",
+    cbar_pad: float | None = None,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """Render a heatmap of temporal mode overlap matrix <v_m | v_n> (should equal I)."""
@@ -1224,7 +1665,8 @@ def plot_pod_temporal_overlap_heatmap(
 
     ax.set_title(r"Temporal Mode Overlap $\langle v_m \mid v_n \rangle$", fontsize=13, pad=12)
 
-    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    pad = cbar_pad if cbar_pad is not None else (0.12 if cbar_location in ("bottom", "top") else 0.04)
+    cbar = fig.colorbar(im, ax=ax, location=cbar_location, fraction=0.046, pad=pad)
     cbar.set_label("Overlap Value", fontsize=10, color=TEXT_PRIMARY)
     cbar.ax.tick_params(labelsize=9, colors=TEXT_MUTED)
 
@@ -1247,6 +1689,8 @@ def plot_pod_temporal_cross_overlap_heatmap(
     cmap: mcolors.Colormap | str = spatial_overlap_cmap,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
+    cbar_location: str = "bottom",
+    cbar_pad: float | None = None,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """Render heatmap of absolute temporal cross-overlap |V_{nk}|."""
@@ -1297,7 +1741,8 @@ def plot_pod_temporal_cross_overlap_heatmap(
         pad=12,
     )
 
-    cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    pad = cbar_pad if cbar_pad is not None else (0.12 if cbar_location in ("bottom", "top") else 0.04)
+    cbar = fig.colorbar(im, ax=ax, location=cbar_location, fraction=0.046, pad=pad)
     cbar.set_label("Absolute Overlap", fontsize=10, color=TEXT_PRIMARY)
     cbar.ax.tick_params(labelsize=9, colors=TEXT_MUTED)
 
@@ -1593,6 +2038,8 @@ def _smoke_test() -> None:
 
     epochs = list(range(1, 101))
     total = np.exp(-0.03 * np.arange(100)) + 0.02 * np.random.rand(100)
+    # Inject a realistic loss spike at epoch 25 to test spike detection and grey vertical marker
+    total[24] = total[23] * 5.0
     physics = np.exp(-0.025 * np.arange(100)) + 0.015 * np.random.rand(100)
     ordered = np.exp(-0.04 * np.arange(100)) + 0.008 * np.random.rand(100)
     smooth = np.exp(-0.02 * np.arange(100)) + 0.005 * np.random.rand(100)
@@ -1603,7 +2050,29 @@ def _smoke_test() -> None:
     out_dir = pathlib.Path("./_smoke_outputs")
     out_dir.mkdir(exist_ok=True)
 
-    plot_loss_history(epochs, total, physics, data, smooth, ordered, lambdas, out_path=out_dir / "loss_history.png")
+    plot_loss_history(
+        epochs,
+        total,
+        physics,
+        data,
+        smooth,
+        ordered,
+        lambdas,
+        detect_spikes=True,
+        out_path=out_dir / "loss_history.png",
+    )
+    plot_loss_history_zoomed(
+        epochs,
+        total,
+        physics,
+        data,
+        smooth,
+        ordered,
+        lambdas,
+        zoom_epochs=40,
+        detect_spikes=True,
+        out_path=out_dir / "loss_history_zoomed.png",
+    )
     plot_potential(x, V_true, V_learned, lambdas, out_path=out_dir / "potential.png")
     plot_wavefunctions(x, psi_true, psi_learned, out_path=out_dir / "wavefunctions.png")
 
