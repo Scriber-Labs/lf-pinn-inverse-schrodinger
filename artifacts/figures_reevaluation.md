@@ -4,13 +4,15 @@
 ![Training-curve panel](demo_visuals/training_curves.png)
 ![Training-curve zoomed](demo_visuals/training_curves_zoomed.png)
 ![Training-curve zoomed ranges](demo_visuals/training_curves_spikes.png)
+![Training-curve zoomed spike 1](demo_visuals/training_curves_spike_1_epoch_5.png)
+![Training-curve zoomed spike 2](demo_visuals/training_curves_spike_2_epoch_782.png)
 
 > 🏡 The optimization trajectory displays two primary transition spikes before settling into an invariant plateau after epoch 800.
 
 > 🔑 **Key Insights**
 > 1. **Spike 1 (Epoch 5, window [1, 205])** - Initial parameter adaptation transient from randomized initialization, after which data loss decreases below $10^{-1}$ and physics loss smoothly declines towards $10^{-1}$.
 > 2. **Spike 2 (Epoch 782, window [732, 982])** - Severe instability triggered by a massive spike in the smoothness loss term ($\mathcal{L}_\text{smooth} > 10^4$), directly forcing the physics loss $\mathcal{L}_\text{physics}$ and total loss up to $\approx 5.0$.
-> 3. **Post-Transition Invariant Plateau (Epochs 800–6000)** - All loss components remain strictly constant: total loss $\approx 5.0$, smoothness loss $\approx 40.0$, physics loss $\approx 5.0$, and data-fit loss $\approx 2.7 \times 10^{-2}$.
+> 3. **Post-Transition Invariant Plateau (Epochs 800–6000)** - All loss components remain strictly constant: total loss $\approx 5.0$, smoothness loss $\approx 40.0$, physics loss $\approx 5.0$, and data-fit loss $\approx 2.7 \times 10^{-2}$. There is no third spike at epoch 2000.
 
 > ❌ **Failure Modes**
 > 
@@ -62,7 +64,7 @@
 
 > 🔑 **Key Insights**
 > 1. **Energy Values** - $E_0^\theta = 0.36$ (true $0.50$, error $-28\%$), $E_1^\theta = 1.50$ (true $1.50$, error $0.0\%$), $E_2^\theta = 2.40$ (true $2.50$, error $-4.0\%$).
-> 2. **Order Enforcement** - Spectral ordering loss $\mathcal{L}_\text{ordered}$ successfully preserves strict monotonic separation.
+> 2. **Order Enforcement** - Spectral ordering loss $\mathcal{L}_\text{order}$ successfully preserves strict monotonic separation.
 
 > ❌ **Failure Modes**
 > 
@@ -196,7 +198,7 @@
 > | ✔️ | Identity deviation | Off-diagonal deviation from standard identity. | Off-diagonals are identically $0.00$, fully passing unitary criteria. |
 
 ## Figure 13: Temporal cross-overlap
-![POD temporal overlap heatmap](demo_visuals/pod_temporal_cross_overlap.png)
+![POD temporal cross-overlap heatmap](demo_visuals/pod_temporal_cross_overlap.png)
 
 > 🏡 Absolute temporal projections $|V_{nk}| = |\langle \mathbf{e}_n | v_k \rangle|$ reveal modal mixing across snapshot states.
 
@@ -225,7 +227,22 @@
 > | :---------- | :--------------- | :-------------- | :-------------- |
 > | ✔️ | Hilbert frame distortion | Significant rotation away from true eigen-axes ($< 0.90$ on axis). | Projections onto corresponding true axes are $\ge 0.96$, showing high subspace fidelity. |
 
-## Figure 15: POD Partition Function Spectrum
+## Figure 15: Spectral Energy Cascade
+![Spectral Energy Cascade](demo_visuals/spectral_cascade.png)
+
+> 🏡 Comparison between physical eigenvalue spectrum $E_k$ and POD singular values $\sigma_k$.
+
+> 🔑 **Key Insights**
+> 1. **Physical vs. POD Decoupling** - Physical energy eigenvalues scale monotonically ($0.36 \to 1.50 \to 2.40$), while POD singular values remain uniform near $\approx 5.05$.
+> 2. **Dynamical Invariance** - POD singular spectrum does not mirror the linear energy ladder of the harmonic oscillator.
+
+> ❌ **Failure Modes**
+> 
+> | **Verdict** | **Failure Mode** | **Description** | **Explanation** |
+> | :---------- | :--------------- | :-------------- | :-------------- |
+> | ❌ | Energy cascade mismatch | POD singular values fail to decay with increasing modal energy. | $\sigma_k$ values remain flat at $\approx 5.05$, indicating lack of energy-weighted modal hierarchy. |
+
+## Figure 16: POD Partition Function Spectrum
 ![POD Partition Function Spectrum](demo_visuals/partition_spectrum.png)
 
 > 🏡 Statistical thermodynamic representation of POD modes demonstrates maximal entropy equipartition ($S = 1.099$).
@@ -241,17 +258,8 @@
 > | :---------- | :--------------- | :-------------- | :-------------- |
 > | ❌ | Degenerate entropy | Information entropy saturates at theoretical maximum. | $S = 1.099 \approx \ln(3)$ confirms complete loss of modal hierarchy. |
 
-## Figure 16: Spectral Energy Cascade
-![Spectral Energy Cascade](demo_visuals/spectral_cascade.png)
-
-> 🏡 Comparison between physical eigenvalue spectrum $E_k$ and POD singular values $\sigma_k$.
-
-> 🔑 **Key Insights**
-> 1. **Physical vs. POD Decoupling** - Physical energy eigenvalues scale monotonically ($0.36 \to 1.50 \to 2.40$), while POD singular values remain uniform near $\approx 5.05$.
-> 2. **Dynamical Invariance** - POD singular spectrum does not mirror the linear energy ladder of the harmonic oscillator.
-
-> ❌ **Failure Modes**
-> 
-> | **Verdict** | **Failure Mode** | **Description** | **Explanation** |
-> | :---------- | :--------------- | :-------------- | :-------------- |
-> | ❌ | Energy cascade mismatch | POD singular values fail to decay with increasing modal energy. | $\sigma_k$ values remain flat at $\approx 5.05$, indicating lack of energy-weighted modal hierarchy. |
+## Conclusions
+- **Spectral Recovery & Subspace Fidelity**: Figures 4, 7, and 14 demonstrate that the model accurately captures the energy eigenvalues ($E_1 = 1.50$, $E_2 = 2.40$), preserves strict spatial orthonormality ($\langle \hat{\psi}_m^\theta | \hat{\psi}_n^\theta \rangle = \delta_{mn}$), and accurately spans the low-energy Hilbert subspace ($\ge 0.96$ alignment with true analytical eigenstates).
+- **Potential Identifiability & Asymptotics**: Figure 2 highlights that the inverse problem is under-determined; the optimizer minimizes data loss using an asymmetric sigmoidal potential step rather than the true parabolic well, inducing spurious high-frequency ripples in low-density tails (Figure 3).
+- **Optimization Trajectory**: Multi-scale training diagnostics (Figure 1) confirm two distinct transitions (Spike 1 at epoch 5 and Spike 2 at epoch 782) followed by an invariant plateau across epochs 800–6000, with no intermediate spike near epoch 2000.
+- **POD Basis Decoupling**: POD diagnostics (Figures 6, 8–13, 15, 16) demonstrate that unweighted snapshot SVD produces degenerate singular values ($\sigma_k = 1.0$) and rotated spatial modes, which can be resolved via physical measure-weighted decomposition.

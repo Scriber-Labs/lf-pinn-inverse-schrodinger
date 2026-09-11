@@ -7,8 +7,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94303fd0-08e1-414c-bbcd-ce122f24d6c0" name="Changes" comment="Added IntelliJ IDEA project configuration files to version control.">
-      <change beforePath="$PROJECT_DIR$/artifacts/figures.md" beforeDir="false" afterPath="$PROJECT_DIR$/artifacts/figures.md" afterDir="false" />
+    <list default="true" id="bb16bf9d-5f4f-4082-9b17-e366580f8b10" name="Changes" comment="Added reevaluation analysis outputs to `figures_reevaluation.md` and updated `figures.md` with new training curve visualizations.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/artifacts/figures_reevaluation.md" beforeDir="false" afterPath="$PROJECT_DIR$/artifacts/figures_reevaluation.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,104 +17,88 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="241" />
+    <option name="cachedIndexableFilesCount" value="197" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Python Script" />
+        <option value="Jupyter Notebook" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;eigenscribe&quot;
-  }
-}</component>
-  <component name="GithubDefaultAccount">
-    <option name="defaultAccountId" value="abb6097a-26a9-408d-bb7b-0596bc2b4362" />
-  </component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/Scriber-Labs/lf-pinn-inverse-schrodinger.git&quot;,
-    &quot;accountId&quot;: &quot;abb6097a-26a9-408d-bb7b-0596bc2b4362&quot;
-  }
-}</component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0000470573717883" />
-      <entry key="S2" value="1.1500054912636657" />
-      <entry key="S5" value="2.509694333243744" />
-      <entry key="S10" value="4.929309732866067" />
-      <entry key="S30" value="9.542976028324208" />
-      <entry key="S60" value="11.792154647011008" />
-      <entry key="M2" value="13.245767637021642" />
-      <entry key="M5" value="14.257253661493385" />
-      <entry key="M10" value="14.621369791818372" />
-      <entry key="M15" value="14.758746491041244" />
-      <entry key="M30" value="19.434228824966024" />
-      <entry key="H1" value="121.62202757122203" />
-      <entry key="H2" value="570.5559914546999" />
-      <entry key="H4" value="1311.8217478828128" />
-      <entry key="D1" value="2687.0699002953065" />
-      <entry key="W1" value="4867.088173121103" />
+      <entry key="MS100" value="2.892200343714665" />
+      <entry key="MS500" value="8.336891054728863" />
+      <entry key="S2" value="20.03056202079513" />
+      <entry key="S5" value="30.262097420581398" />
+      <entry key="S10" value="38.64307357498713" />
+      <entry key="S30" value="60.835045482134355" />
+      <entry key="S60" value="88.8372025263233" />
+      <entry key="M2" value="124.74395030480859" />
+      <entry key="M5" value="171.22914663118289" />
+      <entry key="M10" value="209.36487290165076" />
+      <entry key="M15" value="237.97458756165088" />
+      <entry key="M30" value="295.60067473891644" />
+      <entry key="H1" value="358.3121705865675" />
+      <entry key="H2" value="463.5985260096841" />
+      <entry key="H4" value="820.8296795413722" />
+      <entry key="D1" value="5189.348966618805" />
+      <entry key="W1" value="8356.64759812359" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="0.0" />
-      <entry key="S2" value="0.0" />
-      <entry key="S5" value="0.0" />
-      <entry key="S10" value="0.0" />
-      <entry key="S30" value="7.597095477543407E-176" />
-      <entry key="S60" value="3.2415429445518155E-88" />
-      <entry key="M2" value="2.547836514654957E-44" />
-      <entry key="M5" value="6.568253108150969E-18" />
-      <entry key="M10" value="4.390335920158596E-9" />
-      <entry key="M15" value="3.914315162166704E-6" />
-      <entry key="M30" value="0.003753675235966814" />
-      <entry key="H1" value="0.12764848128426542" />
-      <entry key="H2" value="0.7813404763951226" />
-      <entry key="H4" value="1.9645769029602678" />
-      <entry key="D1" value="4.312676449051332" />
-      <entry key="W1" value="11.204394837852192" />
+      <entry key="MS100" value="3.3909723869596014E-32" />
+      <entry key="MS500" value="5.082353287067137E-7" />
+      <entry key="S2" value="0.026700304402804135" />
+      <entry key="S5" value="0.2347504778996141" />
+      <entry key="S10" value="0.4845105549929887" />
+      <entry key="S30" value="0.7854184173111611" />
+      <entry key="S60" value="0.8862383524262595" />
+      <entry key="M2" value="0.9414025711856728" />
+      <entry key="M5" value="0.9795344835371961" />
+      <entry key="M10" value="1.0704424921123679" />
+      <entry key="M15" value="1.2306500740444684" />
+      <entry key="M30" value="1.6908207767437482" />
+      <entry key="H1" value="2.3017412895469964" />
+      <entry key="H2" value="3.3122141974673696" />
+      <entry key="H4" value="5.498243837646862" />
+      <entry key="D1" value="33.557383370203986" />
+      <entry key="W1" value="56.59647295736923" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9330329915368074" />
-      <entry key="MS500" value="0.986240689797032" />
-      <entry key="S2" value="1.1163821702864904" />
-      <entry key="S5" value="2.44614018995088" />
-      <entry key="S10" value="4.87427510303031" />
-      <entry key="S30" value="9.516028624595597" />
-      <entry key="S60" value="11.777221971615074" />
-      <entry key="M2" value="13.23789153460897" />
-      <entry key="M5" value="14.253997829614308" />
-      <entry key="M10" value="14.61972365868763" />
-      <entry key="M15" value="14.757648829930366" />
-      <entry key="M30" value="19.43741969991864" />
-      <entry key="H1" value="121.74927014919362" />
-      <entry key="H2" value="571.3368365389223" />
-      <entry key="H4" value="1313.7858253006596" />
-      <entry key="D1" value="2691.382411328533" />
-      <entry key="W1" value="4878.292479681623" />
+      <entry key="MS100" value="2.784158061188231" />
+      <entry key="MS500" value="8.277315766849313" />
+      <entry key="S2" value="19.995236607781518" />
+      <entry key="S5" value="30.31650173671685" />
+      <entry key="S10" value="38.902533100281936" />
+      <entry key="S30" value="61.474956698323744" />
+      <entry key="S60" value="89.6359435053653" />
+      <entry key="M2" value="125.63671634542" />
+      <entry key="M5" value="172.18761258798338" />
+      <entry key="M10" value="210.4239254731499" />
+      <entry key="M15" value="239.19689981007394" />
+      <entry key="M30" value="297.2863278947939" />
+      <entry key="H1" value="360.6107380918906" />
+      <entry key="H2" value="466.9087386083853" />
+      <entry key="H4" value="826.3263394753574" />
+      <entry key="D1" value="5222.904757092908" />
+      <entry key="W1" value="8413.243695052937" />
     </decayedShown>
   </component>
-  <component name="ProblemsViewState">
-    <option name="selectedTabId" value="ProjectErrors" />
-  </component>
   <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 6
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 3
 }</component>
-  <component name="ProjectId" id="39JhPa5AVT9kuUpnvq1jeeQtOov" />
+  <component name="ProjectId" id="3BjTFQxy2SH1lfLSLJ6rlPu4rul" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -122,12 +107,12 @@
   &quot;keyToString&quot;: {
     &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.cli_train (1).executor&quot;: &quot;Run&quot;,
     &quot;Python.cli_train.executor&quot;: &quot;Run&quot;,
-    &quot;Python.extract_metrics.executor&quot;: &quot;Run&quot;,
+    &quot;Python.inverse.executor&quot;: &quot;Run&quot;,
     &quot;Python.model.executor&quot;: &quot;Run&quot;,
     &quot;Python.physics.executor&quot;: &quot;Run&quot;,
-    &quot;Python.repo_summary.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.smoke_test_extract_metrics.executor&quot;: &quot;Run&quot;,
+    &quot;Python.pod.executor&quot;: &quot;Run&quot;,
     &quot;Python.train.executor&quot;: &quot;Run&quot;,
     &quot;Python.utils.executor&quot;: &quot;Run&quot;,
     &quot;Python.visualizations.executor&quot;: &quot;Run&quot;,
@@ -139,9 +124,9 @@
     &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
     &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;junie.plugin.stays.banner.dismissed&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/lshriver/PycharmProjects/lf-pinn-inverse-schrodinger/assets/fonts&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -149,71 +134,26 @@
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
     &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
-  },
-  &quot;keyToStringList&quot;: {
-    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
-      &quot;Mermaid&quot;,
-      &quot;CSS&quot;,
-      &quot;JavaScript&quot;,
-      &quot;TEXT&quot;
-    ]
   }
 }</component>
-  <component name="RecapSpentCounter">
-    <option name="endsOfQuotaMs" value="1775685895709" />
-    <option name="spentUsd" value="0.26806453" />
-  </component>
-  <component name="RecapUselessUpdatesCounter">
-    <option name="suspendCountdown" value="0" />
-  </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/assets/fonts" />
-      <recent name="$PROJECT_DIR$/assets/mermaid-diagrams" />
-      <recent name="$PROJECT_DIR$/data" />
-      <recent name="$USER_HOME$/Downloads" />
-      <recent name="$PROJECT_DIR$/.." />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="$APPLICATION_CONFIG_DIR$/scratches" />
-      <recent name="$PROJECT_DIR$/cli" />
-      <recent name="$PROJECT_DIR$/assets/mermaid-diagrams" />
-      <recent name="$PROJECT_DIR$/assets/images" />
+      <recent name="C:\Users\sofia\PycharmProjects\lf-pinn-inverse-schrodinger\cli" />
+      <recent name="C:\Users\sofia\PycharmProjects\lf-pinn-inverse-schrodinger\assets\mermaid-diagrams" />
+      <recent name="C:\Users\sofia\PycharmProjects\lf-pinn-inverse-schrodinger\data\reference_runs" />
+      <recent name="C:\Users\sofia\PycharmProjects\lf-pinn-inverse-schrodinger\data" />
+      <recent name="C:\Users\sofia\PycharmProjects\lf-pinn-inverse-schrodinger\notebooks" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.visualizations">
+  <component name="RunManager" selected="Python.cli_train">
     <configuration default="true" type="LATEX_RUN_CONFIGURATION" factoryName="LaTeX configuration factory">
       <steps>
-        <latexmkCompile id="fa88dc65-68b5-41f4-8697-c009c35bcd5f" />
-        <pdfViewer id="a01841aa-3c23-44cb-8f75-96de6be05488" />
+        <latexmkCompile id="5a0c93a2-7540-460c-a4ef-bb73c6952071" />
+        <pdfViewer id="ecc67574-d3c5-4ffa-a20f-7ba4ad8bcca7" />
       </steps>
       <method v="2" />
     </configuration>
     <configuration name="cli_train" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="inverse_schrodinger" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="DEBUG_JUST_MY_CODE" value="false" />
-      <option name="RUN_TOOL" value="" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/cli/cli_train.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="extract_metrics" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="inverse_schrodinger" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -228,7 +168,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="DEBUG_JUST_MY_CODE" value="false" />
       <option name="RUN_TOOL" value="" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/cli/extract_metrics.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/cli/cli_train.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -237,7 +177,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="smoke_test_extract_metrics" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="pod" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="inverse_schrodinger" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -246,13 +186,13 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="DEBUG_JUST_MY_CODE" value="false" />
       <option name="RUN_TOOL" value="" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/smoke_test_extract_metrics.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/pod.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -274,9 +214,33 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="DEBUG_JUST_MY_CODE" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="false" />
       <option name="RUN_TOOL" value="" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/train.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="utils" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="inverse_schrodinger" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="false" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/utils.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -294,12 +258,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="SDK_NAME" value="Python 3.13 (lf-pinn-inverse-schrodinger)" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
-      <option name="IS_MODULE_SDK" value="false" />
+      <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="DEBUG_JUST_MY_CODE" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="false" />
       <option name="RUN_TOOL" value="" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/visualizations.py" />
       <option name="PARAMETERS" value="" />
@@ -310,13 +273,28 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration default="true" type="ShConfigurationType">
+      <option name="SCRIPT_TEXT" value="" />
+      <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+      <option name="SCRIPT_PATH" value="" />
+      <option name="SCRIPT_OPTIONS" value="" />
+      <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+      <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="INDEPENDENT_INTERPRETER_PATH" value="false" />
+      <option name="INTERPRETER_PATH" value="&quot;$PROJECT_DIR$/../../../../Program Files/Git/bin/bash.exe&quot;" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="EXECUTE_IN_TERMINAL" value="true" />
+      <option name="EXECUTE_SCRIPT_FILE" value="true" />
+      <envs />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.visualizations" />
-        <item itemvalue="Python.train" />
-        <item itemvalue="Python.smoke_test_extract_metrics" />
-        <item itemvalue="Python.extract_metrics" />
         <item itemvalue="Python.cli_train" />
+        <item itemvalue="Python.visualizations" />
+        <item itemvalue="Python.utils" />
+        <item itemvalue="Python.train" />
+        <item itemvalue="Python.pod" />
       </list>
     </recent_temporary>
   </component>
@@ -329,447 +307,415 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="94303fd0-08e1-414c-bbcd-ce122f24d6c0" name="Changes" comment="" />
-      <created>1770420057747</created>
+      <changelist id="bb16bf9d-5f4f-4082-9b17-e366580f8b10" name="Changes" comment="" />
+      <created>1775001375268</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1770420057747</updated>
+      <updated>1775001375268</updated>
     </task>
-    <task id="LOCAL-00080" summary="Still working on the Hilbert Space Phase Space Stem Plot.">
+    <task id="LOCAL-00001" summary="Started repo entropy control 'treatment'.">
       <option name="closed" value="true" />
-      <created>1776961212150</created>
-      <option name="number" value="00080" />
-      <option name="presentableId" value="LOCAL-00080" />
+      <created>1775036113930</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
       <option name="project" value="LOCAL" />
-      <updated>1776961212150</updated>
+      <updated>1775036113930</updated>
     </task>
-    <task id="LOCAL-00081" summary="Still working on the Hilbert Space Phase Space Stem Plot.">
+    <task id="LOCAL-00002" summary="Updated loss table images.">
       <option name="closed" value="true" />
-      <created>1776964563912</created>
-      <option name="number" value="00081" />
-      <option name="presentableId" value="LOCAL-00081" />
+      <created>1775036791416</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
       <option name="project" value="LOCAL" />
-      <updated>1776964563912</updated>
+      <updated>1775036791416</updated>
     </task>
-    <task id="LOCAL-00082" summary="Still working on the Hilbert Space Phase Space Stem Plot.">
+    <task id="LOCAL-00003" summary="Updated the number of decimal places printed for the singular values in `notebooks/demo.ipynb`">
       <option name="closed" value="true" />
-      <created>1776973906811</created>
-      <option name="number" value="00082" />
-      <option name="presentableId" value="LOCAL-00082" />
+      <created>1775406335247</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
       <option name="project" value="LOCAL" />
-      <updated>1776973906811</updated>
+      <updated>1775406335247</updated>
     </task>
-    <task id="LOCAL-00083" summary="Working on markdown notes in the artifacts directory.">
+    <task id="LOCAL-00004" summary="Added singular value annotations on POD singular values graph">
       <option name="closed" value="true" />
-      <created>1776979735619</created>
-      <option name="number" value="00083" />
-      <option name="presentableId" value="LOCAL-00083" />
+      <created>1775408243885</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
       <option name="project" value="LOCAL" />
-      <updated>1776979735620</updated>
+      <updated>1775408243885</updated>
     </task>
-    <task id="LOCAL-00084" summary="Working on markdown notes in the artifacts directory.">
+    <task id="LOCAL-00005" summary="Implemented a small SQL lite data logger for reproducibility checks. Cli has also been fixed, but the README.md description should probably be updated.">
       <option name="closed" value="true" />
-      <created>1777070544324</created>
-      <option name="number" value="00084" />
-      <option name="presentableId" value="LOCAL-00084" />
+      <created>1775429563302</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
       <option name="project" value="LOCAL" />
-      <updated>1777070544324</updated>
+      <updated>1775429563302</updated>
     </task>
-    <task id="LOCAL-00085" summary="Big 'update' to cli training metrics data stuff">
+    <task id="LOCAL-00006" summary="Erased old figure analysis notes up to POD analysis.">
       <option name="closed" value="true" />
-      <created>1777103240359</created>
-      <option name="number" value="00085" />
-      <option name="presentableId" value="LOCAL-00085" />
+      <created>1775433271607</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
       <option name="project" value="LOCAL" />
-      <updated>1777103240359</updated>
+      <updated>1775433271607</updated>
     </task>
-    <task id="LOCAL-00086" summary="Big 'update' to cli training metrics data stuff">
+    <task id="LOCAL-00007" summary="CLI repo management stuff">
       <option name="closed" value="true" />
-      <created>1777103340398</created>
-      <option name="number" value="00086" />
-      <option name="presentableId" value="LOCAL-00086" />
+      <created>1777111756324</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
       <option name="project" value="LOCAL" />
-      <updated>1777103340399</updated>
+      <updated>1777111756324</updated>
     </task>
-    <task id="LOCAL-00087" summary="Almost threw away utils.py and replaced it with extract_metrics.py . I got lucky and caught it before having to go through a sea of bullshit. Lucky me">
+    <task id="LOCAL-00008" summary="CLI repo management stuff">
       <option name="closed" value="true" />
-      <created>1777104613602</created>
-      <option name="number" value="00087" />
-      <option name="presentableId" value="LOCAL-00087" />
+      <created>1777114129499</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
       <option name="project" value="LOCAL" />
-      <updated>1777104613602</updated>
+      <updated>1777114129499</updated>
     </task>
-    <task id="LOCAL-00088" summary="Almost threw away utils.py and replaced it with extract_metrics.py . I got lucky and caught it before having to go through a sea of bullshit. Lucky me">
+    <task id="LOCAL-00009" summary="Updated the authorship details in pytho scripts. I still need to provide a description of teh db_logger.py script">
       <option name="closed" value="true" />
-      <created>1777105197471</created>
-      <option name="number" value="00088" />
-      <option name="presentableId" value="LOCAL-00088" />
+      <created>1777115665372</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
       <option name="project" value="LOCAL" />
-      <updated>1777105197471</updated>
+      <updated>1777115665372</updated>
     </task>
-    <task id="LOCAL-00089" summary="Almost threw away utils.py and replaced it with extract_metrics.py . I got lucky and caught it before having to go through a sea of bullshit. Lucky me">
+    <task id="LOCAL-00010" summary="Updated the authorship details in pytho scripts. I still need to provide a description of teh db_logger.py script">
       <option name="closed" value="true" />
-      <created>1777105752411</created>
-      <option name="number" value="00089" />
-      <option name="presentableId" value="LOCAL-00089" />
+      <created>1777117833432</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
       <option name="project" value="LOCAL" />
-      <updated>1777105752412</updated>
+      <updated>1777117833432</updated>
     </task>
-    <task id="LOCAL-00090" summary="Almost threw away utils.py and replaced it with extract_metrics.py . I got lucky and caught it before having to go through a sea of bullshit. Lucky me">
+    <task id="LOCAL-00011" summary="Got a little side-tracked making a table of a training run in load_run_analysis.ipynb, but it has stylesheets and colors involved and is a good stopping point for my brain this morning so i will allow it. Need to finsih figure analysis, creating new figures, and then return to thinking about plotly dasdhboard extensions form there. May the force be with us.">
       <option name="closed" value="true" />
-      <created>1777105928064</created>
-      <option name="number" value="00090" />
-      <option name="presentableId" value="LOCAL-00090" />
+      <created>1777120552344</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
       <option name="project" value="LOCAL" />
-      <updated>1777105928064</updated>
+      <updated>1777120552344</updated>
     </task>
-    <task id="LOCAL-00091" summary="Almost threw away utils.py and replaced it with extract_metrics.py . I got lucky and caught it before having to go through a sea of bullshit. Lucky me">
+    <task id="LOCAL-00012" summary="Removed take-home-messages.md and rewrote the information in that file on the zesical research notebook website.">
       <option name="closed" value="true" />
-      <created>1777106446829</created>
-      <option name="number" value="00091" />
-      <option name="presentableId" value="LOCAL-00091" />
+      <created>1777679128691</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
       <option name="project" value="LOCAL" />
-      <updated>1777106446829</updated>
+      <updated>1777679128691</updated>
     </task>
-    <task id="LOCAL-00092" summary="well i guess i made some progess with a training database, but the original goal (makng a plotly dashboard) was in vain since i ran out of ai credits from getting in a bug auding loop. yay coding character building experiences.">
+    <task id="LOCAL-00013" summary="Junie-assisted update of normalization steps.">
       <option name="closed" value="true" />
-      <created>1777109049812</created>
-      <option name="number" value="00092" />
-      <option name="presentableId" value="LOCAL-00092" />
+      <created>1777752463680</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
       <option name="project" value="LOCAL" />
-      <updated>1777109049812</updated>
+      <updated>1777752463680</updated>
     </task>
-    <task id="LOCAL-00093" summary="Normalization audit continues. Here, normalization in the `plot_overlap_heatmap(...)` function in the `visualizations.py` script was adjusted to be consistent with normalization of the learned wavefunctions. Details written in obsidian vault.">
+    <task id="LOCAL-00014" summary="Rewriting mermaid architecture diagram with new style and normalization steps included">
       <option name="closed" value="true" />
-      <created>1777338854221</created>
-      <option name="number" value="00093" />
-      <option name="presentableId" value="LOCAL-00093" />
+      <created>1777960170423</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
       <option name="project" value="LOCAL" />
-      <updated>1777338854221</updated>
+      <updated>1777960170423</updated>
     </task>
-    <task id="LOCAL-00094" summary="updated cli/extract_metrics.py to include physical_pod_decomposition and updated import of utils from src.pod as follows:&#10;&#10;old code: `from utils import l2_inner_prodcut`&#10;new code: `from .utils import l2_inner_product`">
+    <task id="LOCAL-00015" summary="Rewriting mermaid architecture diagram with new style and normalization steps included">
       <option name="closed" value="true" />
-      <created>1779831886706</created>
-      <option name="number" value="00094" />
-      <option name="presentableId" value="LOCAL-00094" />
+      <created>1778083634982</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
       <option name="project" value="LOCAL" />
-      <updated>1779831886707</updated>
+      <updated>1778083634982</updated>
     </task>
-    <task id="LOCAL-00095" summary="added a pod.mmd diagram to handle pod diagnostic information separately from the main architecture and a new architecture diagram with normalization information included but with styling slightly different from architecture_2_....mmd diagram">
+    <task id="LOCAL-00016" summary="Rewriting mermaid architecture diagram with new style and normalization steps included">
       <option name="closed" value="true" />
-      <created>1779833274110</created>
-      <option name="number" value="00095" />
-      <option name="presentableId" value="LOCAL-00095" />
+      <created>1778119602648</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
       <option name="project" value="LOCAL" />
-      <updated>1779833274110</updated>
+      <updated>1778119602648</updated>
     </task>
-    <task id="LOCAL-00096" summary="added a pod.mmd diagram to handle pod diagnostic information separately from the main architecture and a new architecture diagram with normalization information included but with styling slightly different from architecture_2_....mmd diagram">
+    <task id="LOCAL-00017" summary="updated project 2 mermaid diagram and now about to make some changes to source code so they match the mermaid diagram.">
       <option name="closed" value="true" />
-      <created>1779833540304</created>
-      <option name="number" value="00096" />
-      <option name="presentableId" value="LOCAL-00096" />
+      <created>1779430764508</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
       <option name="project" value="LOCAL" />
-      <updated>1779833540304</updated>
+      <updated>1779430764508</updated>
     </task>
-    <task id="LOCAL-00097" summary="file directory changes">
+    <task id="LOCAL-00018" summary="updated src/pod.py, src/visualizations.py, and notebooks/demo.ipynb to include suggested POD diagnostic workflow">
       <option name="closed" value="true" />
-      <created>1779844071392</created>
-      <option name="number" value="00097" />
-      <option name="presentableId" value="LOCAL-00097" />
+      <created>1779436532420</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
       <option name="project" value="LOCAL" />
-      <updated>1779844071393</updated>
+      <updated>1779436532420</updated>
     </task>
-    <task id="LOCAL-00098" summary="first commit since emergency git reset. still have normalization and apple-windows results to reconcile">
+    <task id="LOCAL-00019" summary="figure 1 and 2 analysis done">
       <option name="closed" value="true" />
-      <created>1779874913474</created>
-      <option name="number" value="00098" />
-      <option name="presentableId" value="LOCAL-00098" />
+      <created>1779447791505</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
       <option name="project" value="LOCAL" />
-      <updated>1779874913475</updated>
+      <updated>1779447791505</updated>
     </task>
-    <task id="LOCAL-00099" summary="updated graphs">
+    <task id="LOCAL-00020" summary="figure 1 and 2 analysis done">
       <option name="closed" value="true" />
-      <created>1779879898251</created>
-      <option name="number" value="00099" />
-      <option name="presentableId" value="LOCAL-00099" />
+      <created>1779462012347</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
       <option name="project" value="LOCAL" />
-      <updated>1779879898251</updated>
+      <updated>1779462012347</updated>
     </task>
-    <task id="LOCAL-00100" summary="starting a fresh figure analysis and made minor changes to architecture_final.mmd">
+    <task id="LOCAL-00021" summary="nuanced normalization cleaning">
       <option name="closed" value="true" />
-      <created>1779880733165</created>
-      <option name="number" value="00100" />
-      <option name="presentableId" value="LOCAL-00100" />
+      <created>1779474017086</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
       <option name="project" value="LOCAL" />
-      <updated>1779880733165</updated>
+      <updated>1779474017086</updated>
     </task>
-    <task id="LOCAL-00101" summary="minor styling changes to architecture_final.mmd">
+    <task id="LOCAL-00022" summary="nuanced normalization cleaning">
       <option name="closed" value="true" />
-      <created>1779881875890</created>
-      <option name="number" value="00101" />
-      <option name="presentableId" value="LOCAL-00101" />
+      <created>1779474648898</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
       <option name="project" value="LOCAL" />
-      <updated>1779881875890</updated>
+      <updated>1779474648898</updated>
     </task>
-    <task id="LOCAL-00102" summary="updated figure analysis for drogon">
+    <task id="LOCAL-00023" summary="figure 1, 2, and 3 analysis drafts typed up. some polishing needs to be done (mainly removing redundant information and deciding where to highlihgt the important points).">
       <option name="closed" value="true" />
-      <created>1780011193586</created>
-      <option name="number" value="00102" />
-      <option name="presentableId" value="LOCAL-00102" />
+      <created>1779550559257</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
       <option name="project" value="LOCAL" />
-      <updated>1780011193587</updated>
+      <updated>1779550559257</updated>
     </task>
-    <task id="LOCAL-00103" summary="updated figure analysis for drogon">
+    <task id="LOCAL-00024" summary="figure 1, 2, 3, and 4 analysis drafts have been typed up. some polishing needs to be done (mainly removing redundant information and deciding where to highlihgt the important points).">
       <option name="closed" value="true" />
-      <created>1780177221479</created>
-      <option name="number" value="00103" />
-      <option name="presentableId" value="LOCAL-00103" />
+      <created>1779550631856</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
       <option name="project" value="LOCAL" />
-      <updated>1780177221479</updated>
+      <updated>1779550631856</updated>
     </task>
-    <task id="LOCAL-00104" summary="updated figure analysis for drogon">
+    <task id="LOCAL-00025" summary="normalization best practices documentation">
       <option name="closed" value="true" />
-      <created>1780178343326</created>
-      <option name="number" value="00104" />
-      <option name="presentableId" value="LOCAL-00104" />
+      <created>1779876316795</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
       <option name="project" value="LOCAL" />
-      <updated>1780178343326</updated>
+      <updated>1779876316795</updated>
     </task>
-    <task id="LOCAL-00105" summary="updated figure analysis for drogon">
+    <task id="LOCAL-00026" summary="normalization best practices documentation">
       <option name="closed" value="true" />
-      <created>1780190695214</created>
-      <option name="number" value="00105" />
-      <option name="presentableId" value="LOCAL-00105" />
+      <created>1779876618923</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
       <option name="project" value="LOCAL" />
-      <updated>1780190695215</updated>
+      <updated>1779876618923</updated>
     </task>
-    <task id="LOCAL-00106" summary="updated figure analysis for drogon">
+    <task id="LOCAL-00027" summary="🪶 updated cli/extract_metrics.py and ran on windows. there is an interesting failure mode that results in the swapping of the spatial modes that manifests on the windows computer.">
       <option name="closed" value="true" />
-      <created>1780194520477</created>
-      <option name="number" value="00106" />
-      <option name="presentableId" value="LOCAL-00106" />
+      <created>1779941335795</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
       <option name="project" value="LOCAL" />
-      <updated>1780194520477</updated>
+      <updated>1779941335795</updated>
     </task>
-    <task id="LOCAL-00107" summary="updated visualization utilities for drogon">
+    <task id="LOCAL-00028" summary="Includes critical stability fixes (UTF-8 encoding for Windows), 100% adherence to normalization best practices, and physically consistent $L^2$ loss functions.">
       <option name="closed" value="true" />
-      <created>1786800087817</created>
-      <option name="number" value="00107" />
-      <option name="presentableId" value="LOCAL-00107" />
+      <created>1779943525698</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
       <option name="project" value="LOCAL" />
-      <updated>1786800087818</updated>
+      <updated>1779943525698</updated>
     </task>
-    <task id="LOCAL-00108" summary="updated training outputs and figure size in demo notebook">
+    <task id="LOCAL-00029" summary="added a temporal mode heatmap plot and updated documentation">
       <option name="closed" value="true" />
-      <created>1786806297617</created>
-      <option name="number" value="00108" />
-      <option name="presentableId" value="LOCAL-00108" />
+      <created>1779949560711</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
       <option name="project" value="LOCAL" />
-      <updated>1786806297617</updated>
+      <updated>1779949560711</updated>
     </task>
-    <task id="LOCAL-00109" summary="updated training outputs and figure size in demo notebook">
+    <task id="LOCAL-00030" summary="color styling and last temporal overlap matrices">
       <option name="closed" value="true" />
-      <created>1786806305543</created>
-      <option name="number" value="00109" />
-      <option name="presentableId" value="LOCAL-00109" />
+      <created>1779956830553</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
       <option name="project" value="LOCAL" />
-      <updated>1786806305543</updated>
+      <updated>1779956830553</updated>
     </task>
-    <task id="LOCAL-00110" summary="updated execution timestamps in demo notebook">
+    <task id="LOCAL-00031" summary="updated color stuff">
       <option name="closed" value="true" />
-      <created>1787374575561</created>
-      <option name="number" value="00110" />
-      <option name="presentableId" value="LOCAL-00110" />
+      <created>1779958760465</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
       <option name="project" value="LOCAL" />
-      <updated>1787374575561</updated>
+      <updated>1779958760465</updated>
     </task>
-    <task id="LOCAL-00111" summary="updated color palettes in visualizations for improved distinction">
+    <task id="LOCAL-00032" summary="updated README.md">
       <option name="closed" value="true" />
-      <created>1787376087283</created>
-      <option name="number" value="00111" />
-      <option name="presentableId" value="LOCAL-00111" />
+      <created>1780433174284</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
       <option name="project" value="LOCAL" />
-      <updated>1787376087283</updated>
+      <updated>1780433174284</updated>
     </task>
-    <task id="LOCAL-00112" summary="updated execution timestamps in demo notebook">
+    <task id="LOCAL-00033" summary="updated README.md and cli to include notebook-matching figures and CLI options">
       <option name="closed" value="true" />
-      <created>1787397468204</created>
-      <option name="number" value="00112" />
-      <option name="presentableId" value="LOCAL-00112" />
+      <created>1780776531303</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
       <option name="project" value="LOCAL" />
-      <updated>1787397468204</updated>
+      <updated>1780776531303</updated>
     </task>
-    <task id="LOCAL-00113" summary="removed redundant `.iml` file and updated execution timestamps, training outputs in demo notebook">
+    <task id="LOCAL-00034" summary="updated README.md to mention research artifacts.">
       <option name="closed" value="true" />
-      <created>1787457307638</created>
-      <option name="number" value="00113" />
-      <option name="presentableId" value="LOCAL-00113" />
+      <created>1780777512283</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
       <option name="project" value="LOCAL" />
-      <updated>1787457307638</updated>
+      <updated>1780777512283</updated>
     </task>
-    <task id="LOCAL-00114" summary="updated execution timestamps and execution counts in demo notebook, revised normalization best practices documentation">
+    <task id="LOCAL-00035" summary="updated README.md and created a USAGE_GUIDE.md for CLI documentation">
       <option name="closed" value="true" />
-      <created>1787457929349</created>
-      <option name="number" value="00114" />
-      <option name="presentableId" value="LOCAL-00114" />
+      <created>1780779646702</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
       <option name="project" value="LOCAL" />
-      <updated>1787457929349</updated>
+      <updated>1780779646702</updated>
     </task>
-    <task id="LOCAL-00115" summary="updated execution timestamps and execution counts in demo notebook, added clarifications to normalization best practices documentation">
+    <task id="LOCAL-00036" summary="updated figures.md0">
       <option name="closed" value="true" />
-      <created>1787460844732</created>
-      <option name="number" value="00115" />
-      <option name="presentableId" value="LOCAL-00115" />
+      <created>1780782343036</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
       <option name="project" value="LOCAL" />
-      <updated>1787460844732</updated>
+      <updated>1780782343037</updated>
     </task>
-    <task id="LOCAL-00116" summary="updated execution timestamps and execution counts in demo notebook, added clarifications to normalization best practices documentation">
+    <task id="LOCAL-00037" summary="updated figures indices">
       <option name="closed" value="true" />
-      <created>1787461417754</created>
-      <option name="number" value="00116" />
-      <option name="presentableId" value="LOCAL-00116" />
+      <created>1780785282211</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
       <option name="project" value="LOCAL" />
-      <updated>1787461417754</updated>
+      <updated>1780785282211</updated>
     </task>
-    <task id="LOCAL-00117" summary="updated execution timestamps in demo notebook, refined normalization best practices documentation, and added `dx` parameter support for spectral visualizations">
+    <task id="LOCAL-00038" summary="figures 1-5 analyses.">
       <option name="closed" value="true" />
-      <created>1787461924619</created>
-      <option name="number" value="00117" />
-      <option name="presentableId" value="LOCAL-00117" />
+      <created>1780793447105</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
       <option name="project" value="LOCAL" />
-      <updated>1787461924619</updated>
+      <updated>1780793447105</updated>
     </task>
-    <task id="LOCAL-00118" summary="updated execution timestamps, training outputs, and added support for custom font loading in visualizations">
+    <task id="LOCAL-00039" summary="figures 6-9 analyses. Some changes need to be made to source code -&gt; figure 8 should match up more with the learned wavefunctions and Figure 9 should be closer to identity&#10;(according to o3).">
       <option name="closed" value="true" />
-      <created>1788370148531</created>
-      <option name="number" value="00118" />
-      <option name="presentableId" value="LOCAL-00118" />
+      <created>1780795563612</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
       <option name="project" value="LOCAL" />
-      <updated>1788370148531</updated>
+      <updated>1780795563612</updated>
     </task>
-    <task id="LOCAL-00119" summary="updated execution timestamps and training outputs in demo notebook">
+    <task id="LOCAL-00040" summary="Finished first-pass figure analysis. need to make corrections to source code and see if alignment of pod modes are corrected.">
       <option name="closed" value="true" />
-      <created>1789084831580</created>
-      <option name="number" value="00119" />
-      <option name="presentableId" value="LOCAL-00119" />
+      <created>1780796499187</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
       <option name="project" value="LOCAL" />
-      <updated>1789084831581</updated>
+      <updated>1780796499188</updated>
     </task>
-    <task id="LOCAL-00120" summary="adjusted POD mode plot styling: increased linewidth and updated linestyle to dotted">
+    <task id="LOCAL-00041" summary="Updated pod.py to include a small cleanup">
       <option name="closed" value="true" />
-      <created>1789085692263</created>
-      <option name="number" value="00120" />
-      <option name="presentableId" value="LOCAL-00120" />
+      <created>1780798741325</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
       <option name="project" value="LOCAL" />
-      <updated>1789085692263</updated>
+      <updated>1780798741325</updated>
     </task>
-    <task id="LOCAL-00121" summary="refined imports and added loss analysis enhancements in demo notebook">
+    <task id="LOCAL-00042" summary="Updated mermaid diagrams and included pod diagnostics in demo.ipynb (added a definition in @pod.py that supports this)">
       <option name="closed" value="true" />
-      <created>1789091577221</created>
-      <option name="number" value="00121" />
-      <option name="presentableId" value="LOCAL-00121" />
+      <created>1780819324889</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
       <option name="project" value="LOCAL" />
-      <updated>1789091577221</updated>
+      <updated>1780819324890</updated>
     </task>
-    <task id="LOCAL-00122" summary="added zoomed loss spike matrix visualization logic and integrated it into demo notebook">
+    <task id="LOCAL-00043" summary="Updated mermaid diagrams and included pod diagnostics in demo.ipynb (added a definition in @pod.py that supports this)">
       <option name="closed" value="true" />
-      <created>1789091823344</created>
-      <option name="number" value="00122" />
-      <option name="presentableId" value="LOCAL-00122" />
+      <created>1787374890071</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
       <option name="project" value="LOCAL" />
-      <updated>1789091823344</updated>
+      <updated>1787374890071</updated>
     </task>
-    <task id="LOCAL-00123" summary="conditionally display legend in POD spatial mode plots when k=0">
+    <task id="LOCAL-00044" summary="Updated training outputs in demo.ipynb to reflect new results and improve final loss metrics.">
       <option name="closed" value="true" />
-      <created>1789092419485</created>
-      <option name="number" value="00123" />
-      <option name="presentableId" value="LOCAL-00123" />
+      <created>1788365109423</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
       <option name="project" value="LOCAL" />
-      <updated>1789092419485</updated>
+      <updated>1788365109424</updated>
     </task>
-    <task id="LOCAL-00124" summary="removed execution timestamps, outputs, and execution counts from demo notebook">
+    <task id="LOCAL-00045" summary="Updated training outputs in demo.ipynb to reflect improved loss metrics and updated execution timings.">
       <option name="closed" value="true" />
-      <created>1789093940091</created>
-      <option name="number" value="00124" />
-      <option name="presentableId" value="LOCAL-00124" />
+      <created>1789083559660</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
       <option name="project" value="LOCAL" />
-      <updated>1789093940091</updated>
+      <updated>1789083559660</updated>
     </task>
-    <task id="LOCAL-00125" summary="updated execution timestamps, outputs, and execution counts in demo notebook">
+    <task id="LOCAL-00046" summary="Added reevaluation analysis outputs to `figures_reevaluation.md` and updated `figures.md` with new training curve visualizations.">
       <option name="closed" value="true" />
-      <created>1789094254436</created>
-      <option name="number" value="00125" />
-      <option name="presentableId" value="LOCAL-00125" />
+      <created>1789107513194</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
       <option name="project" value="LOCAL" />
-      <updated>1789094254436</updated>
+      <updated>1789107513194</updated>
     </task>
-    <task id="LOCAL-00126" summary="updated execution timestamps in demo notebook">
-      <option name="closed" value="true" />
-      <created>1789095197246</created>
-      <option name="number" value="00126" />
-      <option name="presentableId" value="LOCAL-00126" />
-      <option name="project" value="LOCAL" />
-      <updated>1789095197246</updated>
-    </task>
-    <task id="LOCAL-00127" summary="added project-specific developer guidelines in `AGENTS.md` and updated execution timestamps, outputs, and execution counts in demo notebook">
-      <option name="closed" value="true" />
-      <created>1789107630747</created>
-      <option name="number" value="00127" />
-      <option name="presentableId" value="LOCAL-00127" />
-      <option name="project" value="LOCAL" />
-      <updated>1789107630747</updated>
-    </task>
-    <task id="LOCAL-00128" summary="Added IntelliJ IDEA project configuration files to version control.">
-      <option name="closed" value="true" />
-      <created>1789109022861</created>
-      <option name="number" value="00128" />
-      <option name="presentableId" value="LOCAL-00128" />
-      <option name="project" value="LOCAL" />
-      <updated>1789109022861</updated>
-    </task>
-    <option name="localTasksCounter" value="129" />
+    <option name="localTasksCounter" value="47" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
-    </option>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="pyproject.toml" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="updated graphs" />
-    <MESSAGE value="starting a fresh figure analysis and made minor changes to architecture_final.mmd" />
-    <MESSAGE value="minor styling changes to architecture_final.mmd" />
-    <MESSAGE value="updated figure analysis for drogon" />
-    <MESSAGE value="updated visualization utilities for drogon" />
-    <MESSAGE value="updated training outputs and final loss in demo notebook" />
-    <MESSAGE value="updated training outputs and figure size in demo notebook" />
-    <MESSAGE value="updated color palettes in visualizations for improved distinction" />
-    <MESSAGE value="removed IDE project file and updated execution timestamps, outputs, and logs in demo notebook" />
-    <MESSAGE value="removed redundant `.iml` file and updated execution timestamps, training outputs in demo notebook" />
-    <MESSAGE value="updated execution timestamps and execution counts in demo notebook, revised normalization best practices documentation" />
-    <MESSAGE value="updated execution timestamps and execution counts in demo notebook, added clarifications to normalization best practices documentation" />
-    <MESSAGE value="updated execution timestamps in demo notebook, refined normalization best practices documentation, and added `dx` parameter support for spectral visualizations" />
-    <MESSAGE value="updated execution timestamps, training outputs, and added support for custom font loading in visualizations" />
-    <MESSAGE value="updated execution timestamps and training outputs in demo notebook" />
-    <MESSAGE value="adjusted POD mode plot styling: increased linewidth and updated linestyle to dotted" />
-    <MESSAGE value="refined imports and added loss analysis enhancements in demo notebook" />
-    <MESSAGE value="added zoomed loss spike matrix visualization logic and integrated it into demo notebook" />
-    <MESSAGE value="conditionally display legend in POD spatial mode plots when k=0" />
-    <MESSAGE value="removed execution timestamps, outputs, and execution counts from demo notebook" />
-    <MESSAGE value="updated execution timestamps, outputs, and execution counts in demo notebook" />
-    <MESSAGE value="updated execution timestamps in demo notebook" />
-    <MESSAGE value="added developer guidelines for project setup, testing, and architecture; updated execution timestamps, outputs, and execution counts in demo notebook" />
-    <MESSAGE value="added project-specific developer guidelines in `AGENTS.md` and updated execution timestamps, outputs, and execution counts in demo notebook" />
-    <MESSAGE value="Added IntelliJ IDEA project configuration files to version control." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added IntelliJ IDEA project configuration files to version control." />
+    <MESSAGE value="updated src/pod.py, src/visualizations.py, and notebooks/demo.ipynb to include suggested POD diagnostic workflow" />
+    <MESSAGE value="figure 1 and 2 analysis done" />
+    <MESSAGE value="nuanced normalization cleaning" />
+    <MESSAGE value="figure 1, 2, and 3 analysis drafts typed up. some polishing needs to be done (mainly removing redundant information and deciding where to highlihgt the important points)." />
+    <MESSAGE value="figure 1, 2, 3, and 4 analysis drafts have been typed up. some polishing needs to be done (mainly removing redundant information and deciding where to highlihgt the important points)." />
+    <MESSAGE value="normalization best practices documentation" />
+    <MESSAGE value=" updated cli/extract_metrics.py and ran on windows. there is an interesting failure mode that results in the swapping of the spatial modes that manifests on the windows computer." />
+    <MESSAGE value="Includes critical stability fixes (UTF-8 encoding for Windows), 100% adherence to normalization best practices, and physically consistent $L^2$ loss functions." />
+    <MESSAGE value="added a temporal mode heatmap plot and updated documentation" />
+    <MESSAGE value="color styling and last temporal overlap matrices" />
+    <MESSAGE value="updated color stuff" />
+    <MESSAGE value="updated README.md" />
+    <MESSAGE value="updated README.md and cli to include notebook-matching figures and CLI options" />
+    <MESSAGE value="updated README.md to mention research artifacts." />
+    <MESSAGE value="updated README.md and created a USAGE_GUIDE.md for CLI documentation" />
+    <MESSAGE value="updated figures.md0" />
+    <MESSAGE value="updated figures indices" />
+    <MESSAGE value="figures 1-5 analyses." />
+    <MESSAGE value="figures 6-9 analyses. Some changes need to be made to source code -&gt; figure 8 should match up more with the learned wavefunctions and Figure 9 should be closer to identity&#10;(according to o3)." />
+    <MESSAGE value="Finished first-pass figure analysis. need to make corrections to source code and see if alignment of pod modes are corrected." />
+    <MESSAGE value="Updated pod.py to include a small cleanup" />
+    <MESSAGE value="Updated mermaid diagrams and included pod diagnostics in demo.ipynb (added a definition in @pod.py that supports this)" />
+    <MESSAGE value="Updated training outputs in demo.ipynb to reflect new results and improve final loss metrics." />
+    <MESSAGE value="Updated training outputs in demo.ipynb to reflect improved loss metrics and updated execution timings." />
+    <MESSAGE value="Added reevaluation analysis outputs to `figures_reevaluation.md` and updated `figures.md` with new training curve visualizations." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added reevaluation analysis outputs to `figures_reevaluation.md` and updated `figures.md` with new training curve visualizations." />
   </component>
 </project>
