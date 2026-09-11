@@ -9,7 +9,28 @@
   <component name="ChangeListManager">
     <list default="true" id="bb16bf9d-5f4f-4082-9b17-e366580f8b10" name="Changes" comment="Added reevaluation analysis outputs to `figures_reevaluation.md` and updated `figures.md` with new training curve visualizations.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/artifacts/figures_reevaluation.md" beforeDir="false" afterPath="$PROJECT_DIR$/artifacts/figures_reevaluation.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_smoke_outputs/cross_overlap_heatmap.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/cross_overlap_heatmap.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_smoke_outputs/density_vs_observed.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/density_vs_observed.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_smoke_outputs/energy.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/energy.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_smoke_outputs/hilbert_portrait.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/hilbert_portrait.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_smoke_outputs/loss_history.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/loss_history.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_smoke_outputs/loss_history_spike_matrix.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/loss_history_spike_matrix.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_smoke_outputs/loss_history_spike_matrix_out_of_bounds.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/loss_history_spike_matrix_out_of_bounds.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_smoke_outputs/loss_history_zoomed.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/loss_history_zoomed.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_smoke_outputs/overlap_heatmap.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/overlap_heatmap.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_smoke_outputs/partition_spectrum.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/partition_spectrum.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_smoke_outputs/pod_eigen_alignment.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/pod_eigen_alignment.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_smoke_outputs/pod_modes.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/pod_modes.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_smoke_outputs/pod_singular_values.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/pod_singular_values.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_smoke_outputs/pod_temporal_cross_overlap.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/pod_temporal_cross_overlap.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_smoke_outputs/pod_temporal_modes.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/pod_temporal_modes.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_smoke_outputs/pod_temporal_overlap.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/pod_temporal_overlap.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_smoke_outputs/potential.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/potential.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_smoke_outputs/spectral_cascade.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/spectral_cascade.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_smoke_outputs/wavefunctions.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/wavefunctions.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/artifacts/demo_visuals/learned_potential.png" beforeDir="false" afterPath="$PROJECT_DIR$/artifacts/demo_visuals/learned_potential.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/demo.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/demo.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/visualizations.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/visualizations.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -280,7 +301,7 @@
       <option name="SCRIPT_OPTIONS" value="" />
       <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
       <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="INDEPENDENT_INTERPRETER_PATH" value="false" />
+      <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
       <option name="INTERPRETER_PATH" value="&quot;$PROJECT_DIR$/../../../../Program Files/Git/bin/bash.exe&quot;" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="EXECUTE_IN_TERMINAL" value="true" />

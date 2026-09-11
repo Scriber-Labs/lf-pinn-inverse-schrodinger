@@ -1412,7 +1412,7 @@ def plot_potential(
     x: torch.Tensor,
     V_true: torch.Tensor,
     V_learned: torch.Tensor,
-    lambdas: Dict[str, float],
+    lambdas: Dict[str, float] | None = None,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
     """Plot the analytic ground truth potential and the network's prediction."""
@@ -1450,8 +1450,6 @@ def plot_potential(
     ax.set_title("Learned vs. Ground Truth Potential", fontsize=13, pad=12)
     ax.grid(True, which="both", color=GRID_COLOR, linestyle=":", alpha=0.6)
     ax.legend(loc="upper center", framealpha=0.85)
-
-    _add_lambda_row(fig, lambdas, ax=ax)
 
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
