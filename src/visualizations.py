@@ -320,6 +320,7 @@ def _add_lambda_row(
     lambdas: Dict[str, float] | None,
     *,
     ax: plt.Axes | None = None,
+    y: float | None = None,
 ) -> mpl.text.Text | None:
     """
     Render loss-weight dictionary as a sleek glassmorphic pill badge.
@@ -330,19 +331,22 @@ def _add_lambda_row(
 
     lambda_str = "    ".join(rf"$\lambda_{{{k}}} = {v:g}$" for k, v in lambdas.items())
 
-    suptitle = getattr(fig, "_suptitle", None)
-    if suptitle is not None:
-        _, title_y = suptitle.get_position()
-        lambda_y = title_y - 0.05
+    if y is not None:
+        lambda_y = y
     else:
-        if ax is None:
-            ax = fig.axes[0] if fig.axes else None
-
-        if ax is not None:
-            bbox = ax.get_position()
-            lambda_y = bbox.y1 - 0.03
+        suptitle = getattr(fig, "_suptitle", None)
+        if suptitle is not None:
+            _, title_y = suptitle.get_position()
+            lambda_y = title_y - 0.05
         else:
-            lambda_y = 0.94
+            if ax is None:
+                ax = fig.axes[0] if fig.axes else None
+
+            if ax is not None:
+                bbox = ax.get_position()
+                lambda_y = bbox.y1 - 0.03
+            else:
+                lambda_y = 0.94
 
     return fig.text(
         0.5,
@@ -799,30 +803,26 @@ def plot_loss_history_zoomed(
 
     ax.grid(True, which="both", color=GRID_COLOR, linestyle=":", alpha=0.6)
 
-    _add_lambda_row(fig, lambdas, ax=ax)
+    lambda_artist = _add_lambda_row(fig, lambdas, ax=ax)
 
     handles, labels = ax.get_legend_handles_labels()
-    lambda_artists = [t for t in fig.texts if r"\lambda" in t.get_text()]
-    if lambda_artists:
+    if lambda_artist is not None:
         fig.canvas.draw()
         renderer = fig.canvas.get_renderer()
-        lambda_bbox = lambda_artists[0].get_window_extent(renderer).transformed(fig.transFigure.inverted())
+        lambda_bbox = lambda_artist.get_window_extent(renderer).transformed(fig.transFigure.inverted())
         n_items = len(labels)
         fs = 7.5 if n_items >= 6 else 8.5
         hl = 1.0 if n_items >= 6 else 1.2
-        hp = 0.2 if n_items >= 6 else 0.3
-        cs = 0.3 if n_items >= 6 else 0.5
-        ax.legend(
+        hp = 0.3 if n_items >= 6 else 0.4
+        cs = 0.5 if n_items >= 6 else 0.8
+        fig.legend(
             handles,
             labels,
-            loc="upper left",
-            bbox_to_anchor=(lambda_bbox.x0, lambda_bbox.y0 - 0.012, lambda_bbox.width, 0.04),
-            bbox_transform=fig.transFigure,
-            mode="expand",
-            borderaxespad=0.0,
+            loc="upper center",
+            bbox_to_anchor=(0.5, lambda_bbox.y0 - 0.015),
             ncol=n_items,
             fontsize=fs,
-            borderpad=0.4,
+            borderpad=0.35,
             handlelength=hl,
             handletextpad=hp,
             columnspacing=cs,
@@ -1052,9 +1052,10 @@ def plot_loss_history_spike_matrix(
             _add_spike_lines(ax, panel_spikes, color=TEXT_MUTED, linestyle="--", linewidth=1.8, alpha=0.85)
 
         ax.set_yscale("log")
-        ax.set_xlabel("Epoch", fontsize=10.5)
-        ax.set_ylabel("Loss (log scale)", fontsize=10.5)
-        ax.set_title(note, fontsize=11.5, pad=8)
+        ax.set_xlabel("Epoch", fontsize=11)
+        if i % actual_cols == 0:
+            ax.set_ylabel("Loss (log scale)", fontsize=11)
+        ax.set_title(note, fontsize=12, pad=8)
         ax.grid(True, which="both", color=GRID_COLOR, linestyle=":", alpha=0.6)
         ax.legend(loc="upper right", framealpha=0.85, fontsize=8.5)
 
@@ -1063,11 +1064,11 @@ def plot_loss_history_spike_matrix(
         axes_flat[j].set_visible(False)
 
     suptitle_text = title if title is not None else f"Zoomed Loss Spike Matrix ([-{pre_window}, +{post_window}] Epoch Windows)"
-    fig.suptitle(suptitle_text, fontsize=14, fontweight="bold", color=TEXT_PRIMARY, y=0.98)
+    fig.suptitle(suptitle_text, fontsize=13, fontweight="bold", color=TEXT_PRIMARY, y=0.98)
 
     _add_lambda_row(fig, lambdas, ax=axes_flat[0])
 
-    plt.tight_layout(rect=[0, 0, 1, 0.94 if lambdas else 0.96])
+    plt.tight_layout(rect=[0, 0, 1, 0.90 if lambdas else 0.95])
 
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
