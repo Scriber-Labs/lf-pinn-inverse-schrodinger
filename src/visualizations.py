@@ -839,6 +839,249 @@ def plot_loss_history_zoomed(
 
 
 # ======================================================================
+# 🩵 1️⃣c Zoomed-In Loss Spike Matrix (Window: [Spike - 50, Spike + 200])
+# ======================================================================
+def plot_loss_history_spike_matrix(
+    epochs: Sequence[int],
+    total: Sequence[float],
+    physics: Sequence[float],
+    data: Sequence[float],
+    smooth: Sequence[float],
+    ordered: Sequence[float],
+    lambdas: Dict[str, float] | None = None,
+    *,
+    spike_epochs: Sequence[int] | None = None,
+    detect_spikes: bool = True,
+    spike_threshold: float = 1.0,
+    spike_method: str = "log_diff",
+    spike_direction: str = "both",
+    spike_series: str = "all",
+    min_epoch_gap: int = 200,
+    pre_window: int = 50,
+    post_window: int = 200,
+    ncols: int = 2,
+    title: str | None = None,
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """Render a matrix / multi-panel grid of zoomed figures centered around each loss spike.
+
+    For each detected or specified vertical bar (spike epoch T_spike), the subplot focuses
+    on [T_spike - pre_window, T_spike + post_window] (default: [T_spike - 50, T_spike + 200]).
+    Accounts for simulation edge cases where spikes or window bounds lie outside the simulation
+    epoch boundaries, adjusting and clamping window ranges accordingly.
+
+    Parameters
+    ----------
+    epochs, total, physics, data, smooth, ordered : loss history inputs.
+    lambdas : Dict[str, float], optional
+        Dictionary of loss component weights for the badge display.
+    spike_epochs : Sequence[int], optional
+        Explicit list of spike / vertical bar epoch positions. If None and detect_spikes is True,
+        spikes are automatically identified.
+    detect_spikes : bool, default=True
+        Whether to automatically detect spikes if spike_epochs is not provided.
+    spike_threshold : float, default=1.0
+        Sensitivity threshold for spike detection (default: 1.0 log10 jump ~ 10x order of magnitude).
+    spike_method : str, default='log_diff'
+        Method for spike detection: 'log_diff', 'relative', or 'zscore'.
+    spike_direction : str, default='both'
+        Direction of changes to detect ('both', 'positive'/'up', 'negative'/'down').
+    spike_series : str, default='all'
+        Loss component to monitor for spikes ('all', 'Total', 'Physics', 'Data-fit', 'Smoothness', 'Ordered').
+    min_epoch_gap : int, default=200
+        Minimum epoch distance between successive detected spike markers.
+    pre_window : int, default=50
+        Number of epochs before the vertical bar position to include (default: 50).
+    post_window : int, default=200
+        Number of epochs after the vertical bar position to include (default: 200).
+    ncols : int, default=2
+        Number of columns in the subplot matrix.
+    title : str, optional
+        Custom figure suptitle.
+    out_path : pathlib.Path, optional
+        Path to save figure.
+
+    Returns
+    -------
+    plt.Figure
+        The rendered matrix matplotlib Figure.
+    """
+    _apply_style()
+
+    ep_arr = np.array(epochs)
+    if len(ep_arr) == 0:
+        raise ValueError("epochs sequence must not be empty.")
+
+    min_sim_ep = int(ep_arr[0])
+    max_sim_ep = int(ep_arr[-1])
+
+    # 1. Resolve spike epochs
+    resolved_spikes: List[int] = []
+    if spike_epochs is not None:
+        resolved_spikes = [int(ep) for ep in spike_epochs]
+    elif detect_spikes:
+        series_map = {
+            "total": total,
+            "physics": physics,
+            "data": data,
+            "data-fit": data,
+            "smooth": smooth,
+            "smoothness": smooth,
+            "ordered": ordered,
+        }
+        if spike_series.lower() == "all":
+            all_spikes: set[int] = set()
+            for s in [total, physics, data, smooth, ordered]:
+                all_spikes.update(
+                    detect_loss_spikes(
+                        epochs,
+                        s,
+                        threshold=spike_threshold,
+                        method=spike_method,
+                        direction=spike_direction,
+                        min_epoch_gap=min_epoch_gap,
+                    )
+                )
+            sorted_spikes = sorted(all_spikes)
+            filtered_spikes: List[int] = []
+            last_ep = -1000000
+            for ep in sorted_spikes:
+                if ep - last_ep >= min_epoch_gap:
+                    filtered_spikes.append(ep)
+                    last_ep = ep
+            resolved_spikes = filtered_spikes
+        else:
+            target_series = series_map.get(spike_series.lower(), total)
+            resolved_spikes = detect_loss_spikes(
+                epochs,
+                target_series,
+                threshold=spike_threshold,
+                method=spike_method,
+                direction=spike_direction,
+                min_epoch_gap=min_epoch_gap,
+            )
+
+    # 2. Account for simulations with no spikes or spikes outside simulation ranges
+    # Build list of panels: each panel has (target_spike_or_center, start_ep, end_ep, note)
+    panels: List[Tuple[int | None, int, int, str]] = []
+
+    if not resolved_spikes:
+        # Fallback panel: focus on initial pre_window + post_window epochs of simulation
+        start_ep = min_sim_ep
+        end_ep = min(max_sim_ep, min_sim_ep + pre_window + post_window)
+        panels.append((None, start_ep, end_ep, f"Epochs {start_ep}–{end_ep} (No discrete spikes detected)"))
+    else:
+        for sp in resolved_spikes:
+            # Adjust and clamp spike position and window bounds
+            adjusted_sp = max(min_sim_ep, min(sp, max_sim_ep))
+            target_start = adjusted_sp - pre_window
+            target_end = adjusted_sp + post_window
+
+            # Clamping to simulation bounds
+            start_ep = max(min_sim_ep, target_start)
+            end_ep = min(max_sim_ep, target_end)
+
+            # In case simulation is very short or window has zero span, ensure at least 2 points
+            if end_ep <= start_ep:
+                end_ep = min(max_sim_ep, start_ep + 1)
+
+            note = f"Spike @ Epoch {sp}"
+            if sp < min_sim_ep or sp > max_sim_ep:
+                note += f" (adjusted to sim range [{min_sim_ep}, {max_sim_ep}])"
+            elif target_start < min_sim_ep or target_end > max_sim_ep:
+                note += f" (window clamped to [{start_ep}, {end_ep}])"
+
+            panels.append((sp, start_ep, end_ep, note))
+
+    n_panels = len(panels)
+    actual_cols = min(ncols, n_panels) if n_panels > 0 else 1
+    actual_rows = int(np.ceil(n_panels / actual_cols))
+
+    fig_w = 8.5 * actual_cols if actual_cols > 1 else 9.0
+    fig_h = max(4.5 * actual_rows, 4.8)
+
+    fig, axes = plt.subplots(
+        actual_rows,
+        actual_cols,
+        figsize=(fig_w, fig_h),
+        facecolor=THEME_BG,
+        squeeze=False,
+    )
+    axes_flat = axes.flatten()
+
+    total_np = np.array(total)
+    physics_np = np.array(physics)
+    data_np = np.array(data)
+    smooth_np = np.array(smooth)
+    ordered_np = np.array(ordered)
+
+    for i, (sp, start_ep, end_ep, note) in enumerate(panels):
+        ax = axes_flat[i]
+
+        # Find slice indices
+        start_idx = int(np.searchsorted(ep_arr, start_ep, side="left"))
+        end_idx = int(np.searchsorted(ep_arr, end_ep, side="right"))
+        start_idx = max(0, min(start_idx, len(ep_arr) - 1))
+        end_idx = max(start_idx + 1, min(end_idx, len(ep_arr)))
+
+        sub_epochs = ep_arr[start_idx:end_idx]
+        sub_comps: List[Tuple[str, str, np.ndarray]] = [
+            ("Total", LOSS_COLORS["Total"], total_np[start_idx:end_idx]),
+            ("Physics", LOSS_COLORS["Physics"], physics_np[start_idx:end_idx]),
+            ("Data-fit", LOSS_COLORS["Data-fit"], data_np[start_idx:end_idx]),
+            ("Smoothness", LOSS_COLORS["Smoothness"], smooth_np[start_idx:end_idx]),
+            ("Ordered", LOSS_COLORS["Ordered"], ordered_np[start_idx:end_idx]),
+        ]
+
+        for label, color, series in sub_comps:
+            sns.lineplot(
+                x=sub_epochs,
+                y=series,
+                ax=ax,
+                label=label,
+                color=color,
+                linewidth=2.5,
+            )
+
+        # Draw vertical bar for this panel's spike (and any other spikes within this window)
+        panel_spikes = [s for s in resolved_spikes if start_ep <= s <= end_ep]
+        if sp is not None and sp not in panel_spikes and min_sim_ep <= sp <= max_sim_ep:
+            panel_spikes.append(sp)
+
+        if panel_spikes:
+            _add_spike_lines(ax, panel_spikes, color=TEXT_MUTED, linestyle="--", linewidth=1.8, alpha=0.85)
+
+        ax.set_yscale("log")
+        ax.set_xlabel("Epoch", fontsize=10.5)
+        ax.set_ylabel("Loss (log scale)", fontsize=10.5)
+        ax.set_title(note, fontsize=11.5, pad=8)
+        ax.grid(True, which="both", color=GRID_COLOR, linestyle=":", alpha=0.6)
+        ax.legend(loc="upper right", framealpha=0.85, fontsize=8.5)
+
+    # Hide unused axes
+    for j in range(n_panels, len(axes_flat)):
+        axes_flat[j].set_visible(False)
+
+    suptitle_text = title if title is not None else f"Zoomed Loss Spike Matrix ([-{pre_window}, +{post_window}] Epoch Windows)"
+    fig.suptitle(suptitle_text, fontsize=14, fontweight="bold", color=TEXT_PRIMARY, y=0.98)
+
+    _add_lambda_row(fig, lambdas, ax=axes_flat[0])
+
+    plt.tight_layout(rect=[0, 0, 1, 0.94 if lambdas else 0.96])
+
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor=THEME_BG)
+
+    return fig
+
+
+# Alias for convenience / flexible naming
+plot_loss_spikes_matrix = plot_loss_history_spike_matrix
+plot_loss_history_spikes_matrix = plot_loss_history_spike_matrix
+
+
+# ======================================================================
 # 🌠 2️⃣ Potential plot (true vs. learned)
 # ======================================================================
 def plot_potential(
@@ -2072,6 +2315,32 @@ def _smoke_test() -> None:
         zoom_epochs=40,
         detect_spikes=True,
         out_path=out_dir / "loss_history_zoomed.png",
+    )
+    plot_loss_history_spike_matrix(
+        epochs,
+        total,
+        physics,
+        data,
+        smooth,
+        ordered,
+        lambdas,
+        detect_spikes=True,
+        pre_window=50,
+        post_window=200,
+        out_path=out_dir / "loss_history_spike_matrix.png",
+    )
+    plot_loss_history_spike_matrix(
+        epochs,
+        total,
+        physics,
+        data,
+        smooth,
+        ordered,
+        lambdas,
+        spike_epochs=[-10, 25, 95, 200],  # test spikes outside / boundary simulation ranges
+        pre_window=50,
+        post_window=200,
+        out_path=out_dir / "loss_history_spike_matrix_out_of_bounds.png",
     )
     plot_potential(x, V_true, V_learned, lambdas, out_path=out_dir / "potential.png")
     plot_wavefunctions(x, psi_true, psi_learned, out_path=out_dir / "wavefunctions.png")
