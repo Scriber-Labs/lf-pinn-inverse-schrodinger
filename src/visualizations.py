@@ -787,6 +787,7 @@ def plot_loss_history_zoomed(
             label=label,
             color=color,
             linewidth=2.5,
+            legend=False,
         )
 
     if resolved_spikes:
@@ -807,6 +808,8 @@ def plot_loss_history_zoomed(
 
     handles, labels = ax.get_legend_handles_labels()
     if lambda_artist is not None:
+        if ax.get_legend() is not None:
+            ax.get_legend().remove()
         fig.canvas.draw()
         renderer = fig.canvas.get_renderer()
         lambda_bbox = lambda_artist.get_window_extent(renderer).transformed(fig.transFigure.inverted())
