@@ -31,6 +31,7 @@ if font_path.exists():
 from typing import Dict, Final, List, Sequence, Tuple
 
 
+import matplotlib as mpl
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
@@ -1468,7 +1469,7 @@ def plot_overlap_heatmap(
     lambdas: Dict[str, float] | None = None,
     cmap: mcolors.Colormap | str = spatial_overlap_cmap,
     fmt: str = ".2f",
-    cbar_location: str = "bottom",
+    cbar_location: str = "right",
     cbar_pad: float | None = None,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
@@ -1648,7 +1649,7 @@ def plot_cross_overlap_heatmap(
     cmap: mcolors.Colormap | str = cross_overlap_cmap,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
-    cbar_location: str = "bottom",
+    cbar_location: str = "right",
     cbar_pad: float | None = None,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
@@ -1725,7 +1726,7 @@ def plot_pod_eigen_alignment(
     cmap: mcolors.Colormap | str = cross_overlap_cmap,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
-    cbar_location: str = "bottom",
+    cbar_location: str = "right",
     cbar_pad: float | None = None,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
@@ -1800,7 +1801,7 @@ def plot_pod_temporal_modes(
     cmap: mcolors.Colormap | str = cross_overlap_cmap,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
-    cbar_location: str = "bottom",
+    cbar_location: str = "right",
     cbar_pad: float | None = None,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
@@ -1874,7 +1875,7 @@ def plot_pod_temporal_overlap_heatmap(
     cmap: mcolors.Colormap | str = spatial_overlap_cmap,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
-    cbar_location: str = "bottom",
+    cbar_location: str = "right",
     cbar_pad: float | None = None,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
@@ -1947,7 +1948,7 @@ def plot_pod_temporal_cross_overlap_heatmap(
     cmap: mcolors.Colormap | str = spatial_overlap_cmap,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
-    cbar_location: str = "bottom",
+    cbar_location: str = "right",
     cbar_pad: float | None = None,
     out_path: pathlib.Path | None = None,
 ) -> plt.Figure:
