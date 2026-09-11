@@ -321,6 +321,8 @@ def _add_lambda_row(
     *,
     ax: plt.Axes | None = None,
     y: float | None = None,
+    x: float | None = None,
+    fontsize: float | None = None,
 ) -> mpl.text.Text | None:
     """
     Render loss-weight dictionary as a sleek glassmorphic pill badge.
@@ -331,30 +333,31 @@ def _add_lambda_row(
 
     lambda_str = "    ".join(rf"$\lambda_{{{k}}} = {v:g}$" for k, v in lambdas.items())
 
-    if y is not None:
-        lambda_y = y
+    if ax is not None:
+        bbox = ax.get_position()
+        lambda_x = x if x is not None else (bbox.x0 + bbox.x1) / 2.0
+        lambda_y = y if y is not None else (bbox.y1 - 0.03)
     else:
-        suptitle = getattr(fig, "_suptitle", None)
-        if suptitle is not None:
-            _, title_y = suptitle.get_position()
-            lambda_y = title_y - 0.05
+        lambda_x = x if x is not None else 0.5
+        if y is not None:
+            lambda_y = y
         else:
-            if ax is None:
-                ax = fig.axes[0] if fig.axes else None
-
-            if ax is not None:
-                bbox = ax.get_position()
-                lambda_y = bbox.y1 - 0.03
+            suptitle = getattr(fig, "_suptitle", None)
+            if suptitle is not None:
+                _, title_y = suptitle.get_position()
+                lambda_y = title_y - 0.05
             else:
                 lambda_y = 0.94
 
+    fs = fontsize if fontsize is not None else 9.5
+
     return fig.text(
-        0.5,
+        lambda_x,
         lambda_y,
         lambda_str,
         ha="center",
         va="center",
-        fontsize=9.5,
+        fontsize=fs,
         color=TEXT_PRIMARY,
         bbox=dict(
             boxstyle="round,pad=0.5,rounding_size=0.3",
@@ -1058,7 +1061,7 @@ def plot_loss_history_spike_matrix(
         ax.set_xlabel("Epoch", fontsize=11)
         if i % actual_cols == 0:
             ax.set_ylabel("Loss (log scale)", fontsize=11)
-        ax.set_title(note, fontsize=12, pad=8)
+        ax.set_title(note, fontsize=12, pad=12)
         ax.grid(True, which="both", color=GRID_COLOR, linestyle=":", alpha=0.6)
         ax.legend(loc="upper right", framealpha=0.85, fontsize=8.5)
 
@@ -1069,9 +1072,16 @@ def plot_loss_history_spike_matrix(
     suptitle_text = title if title is not None else f"Zoomed Loss Spike Matrix ([-{pre_window}, +{post_window}] Epoch Windows)"
     fig.suptitle(suptitle_text, fontsize=13, fontweight="bold", color=TEXT_PRIMARY, y=0.98)
 
-    _add_lambda_row(fig, lambdas, ax=axes_flat[0])
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
 
-    plt.tight_layout(rect=[0, 0, 1, 0.90 if lambdas else 0.95])
+    if lambdas:
+        for i in range(n_panels):
+            _add_lambda_row(
+                fig,
+                lambdas,
+                ax=axes_flat[i],
+                fontsize=8.0 if actual_cols > 1 else 9.0,
+            )
 
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1351,7 +1361,7 @@ def plot_density_vs_observed(
     )
 
     if lambdas is not None:
-        _add_lambda_row(fig, lambdas, ax=axes[0])
+        _add_lambda_row(fig, lambdas)
 
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1618,7 +1628,7 @@ def plot_pod_first_three_spatial_modes(
     )
 
     if lambdas is not None:
-        _add_lambda_row(fig, lambdas, ax=axs[0])
+        _add_lambda_row(fig, lambdas)
 
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
