@@ -3,7 +3,8 @@
 ## Figure 1: Training Curves
 ![Training-curve panel](demo_visuals/training_curves.png)
 ![Training-curve zoomed](demo_visuals/training_curves_zoomed.png)
-![Training-curve zoomed ranges](demo_visuals/training_curves_spikes.png)
+![Training-curve zoomed spike 1](demo_visuals/training_curves_spike_1_epoch_5.png)
+![Training-curve zoomed spike 2](demo_visuals/training_curves_spike_2_epoch_782.png)
 
 > 🏡 The optimizer exhibits three distinct regime transitions before settling on a stable plateau.
 

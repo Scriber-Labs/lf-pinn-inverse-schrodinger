@@ -7,9 +7,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94303fd0-08e1-414c-bbcd-ce122f24d6c0" name="Changes" comment="added project-specific developer guidelines in `AGENTS.md` and updated execution timestamps, outputs, and execution counts in demo notebook">
-      <change beforePath="$PROJECT_DIR$/notebooks/demo.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/demo.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/visualizations.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/visualizations.py" afterDir="false" />
+    <list default="true" id="94303fd0-08e1-414c-bbcd-ce122f24d6c0" name="Changes" comment="Added IntelliJ IDEA project configuration files to version control.">
+      <change beforePath="$PROJECT_DIR$/artifacts/figures.md" beforeDir="false" afterPath="$PROJECT_DIR$/artifacts/figures.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,61 +50,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="2.3971431429570913" />
-      <entry key="MS500" value="6.6657448380599895" />
-      <entry key="S2" value="17.076784488553514" />
-      <entry key="S5" value="32.22365942790074" />
-      <entry key="S10" value="49.32846910697723" />
-      <entry key="S30" value="72.94773961914377" />
-      <entry key="S60" value="81.66954834179879" />
-      <entry key="M2" value="86.61533654294102" />
-      <entry key="M5" value="92.13873533954987" />
-      <entry key="M10" value="136.21918204315836" />
-      <entry key="M15" value="232.09480199472375" />
-      <entry key="M30" value="612.7334134175172" />
-      <entry key="H1" value="1236.4033843098205" />
-      <entry key="H2" value="1891.3806659569193" />
-      <entry key="H4" value="2392.757384757823" />
-      <entry key="D1" value="2959.264266377656" />
-      <entry key="W1" value="4923.368712028563" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0000470573717883" />
+      <entry key="S2" value="1.1500054912636657" />
+      <entry key="S5" value="2.509694333243744" />
+      <entry key="S10" value="4.929309732866067" />
+      <entry key="S30" value="9.542976028324208" />
+      <entry key="S60" value="11.792154647011008" />
+      <entry key="M2" value="13.245767637021642" />
+      <entry key="M5" value="14.257253661493385" />
+      <entry key="M10" value="14.621369791818372" />
+      <entry key="M15" value="14.758746491041244" />
+      <entry key="M30" value="19.434228824966024" />
+      <entry key="H1" value="121.62202757122203" />
+      <entry key="H2" value="570.5559914546999" />
+      <entry key="H4" value="1311.8217478828128" />
+      <entry key="D1" value="2687.0699002953065" />
+      <entry key="W1" value="4867.088173121103" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
       <entry key="MS500" value="0.0" />
       <entry key="S2" value="0.0" />
-      <entry key="S5" value="2.0778723741078872E-285" />
-      <entry key="S10" value="4.5585237584861915E-143" />
-      <entry key="S30" value="3.688800603887632E-48" />
-      <entry key="S60" value="2.2587625443850683E-24" />
-      <entry key="M2" value="2.126821081212599E-12" />
-      <entry key="M5" value="3.8554372546378096E-5" />
-      <entry key="M10" value="0.010636766624174945" />
-      <entry key="M15" value="0.07060959328300001" />
-      <entry key="M30" value="0.5041510257428453" />
-      <entry key="H1" value="1.479338745531393" />
-      <entry key="H2" value="2.6599061461477747" />
-      <entry key="H4" value="3.6247831375292785" />
-      <entry key="D1" value="4.776198593172152" />
-      <entry key="W1" value="11.368994267481318" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="7.597095477543407E-176" />
+      <entry key="S60" value="3.2415429445518155E-88" />
+      <entry key="M2" value="2.547836514654957E-44" />
+      <entry key="M5" value="6.568253108150969E-18" />
+      <entry key="M10" value="4.390335920158596E-9" />
+      <entry key="M15" value="3.914315162166704E-6" />
+      <entry key="M30" value="0.003753675235966814" />
+      <entry key="H1" value="0.12764848128426542" />
+      <entry key="H2" value="0.7813404763951226" />
+      <entry key="H4" value="1.9645769029602678" />
+      <entry key="D1" value="4.312676449051332" />
+      <entry key="W1" value="11.204394837852192" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="2.334138595913226" />
-      <entry key="MS500" value="6.631162883777779" />
-      <entry key="S2" value="17.05475751255492" />
-      <entry key="S5" value="32.20583629757447" />
-      <entry key="S10" value="49.31355168109485" />
-      <entry key="S30" value="72.93963133087385" />
-      <entry key="S60" value="81.66487494465808" />
-      <entry key="M2" value="86.61282027912621" />
-      <entry key="M5" value="92.1376974336522" />
-      <entry key="M10" value="136.22904236193563" />
-      <entry key="M15" value="232.16450850599367" />
-      <entry key="M30" value="613.2362248239224" />
-      <entry key="H1" value="1237.8812283790705" />
-      <entry key="H2" value="1894.039357465616" />
-      <entry key="H4" value="2396.381374229364" />
-      <entry key="D1" value="2964.0402945782585" />
-      <entry key="W1" value="4934.737618397608" />
+      <entry key="MS100" value="0.9330329915368074" />
+      <entry key="MS500" value="0.986240689797032" />
+      <entry key="S2" value="1.1163821702864904" />
+      <entry key="S5" value="2.44614018995088" />
+      <entry key="S10" value="4.87427510303031" />
+      <entry key="S30" value="9.516028624595597" />
+      <entry key="S60" value="11.777221971615074" />
+      <entry key="M2" value="13.23789153460897" />
+      <entry key="M5" value="14.253997829614308" />
+      <entry key="M10" value="14.61972365868763" />
+      <entry key="M15" value="14.757648829930366" />
+      <entry key="M30" value="19.43741969991864" />
+      <entry key="H1" value="121.74927014919362" />
+      <entry key="H2" value="571.3368365389223" />
+      <entry key="H4" value="1313.7858253006596" />
+      <entry key="D1" value="2691.382411328533" />
+      <entry key="W1" value="4878.292479681623" />
     </decayedShown>
   </component>
   <component name="ProblemsViewState">
@@ -335,14 +334,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1770420057747</updated>
-    </task>
-    <task id="LOCAL-00079" summary="Still working on the Hilbert Space Phase Space Stem Plot.">
-      <option name="closed" value="true" />
-      <created>1774555055088</created>
-      <option name="number" value="00079" />
-      <option name="presentableId" value="LOCAL-00079" />
-      <option name="project" value="LOCAL" />
-      <updated>1774555055088</updated>
     </task>
     <task id="LOCAL-00080" summary="Still working on the Hilbert Space Phase Space Stem Plot.">
       <option name="closed" value="true" />
@@ -728,7 +719,15 @@
       <option name="project" value="LOCAL" />
       <updated>1789107630747</updated>
     </task>
-    <option name="localTasksCounter" value="128" />
+    <task id="LOCAL-00128" summary="Added IntelliJ IDEA project configuration files to version control.">
+      <option name="closed" value="true" />
+      <created>1789109022861</created>
+      <option name="number" value="00128" />
+      <option name="presentableId" value="LOCAL-00128" />
+      <option name="project" value="LOCAL" />
+      <updated>1789109022861</updated>
+    </task>
+    <option name="localTasksCounter" value="129" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -746,7 +745,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="first commit since emergency git reset. still have normalization and apple-windows results to reconcile" />
     <MESSAGE value="updated graphs" />
     <MESSAGE value="starting a fresh figure analysis and made minor changes to architecture_final.mmd" />
     <MESSAGE value="minor styling changes to architecture_final.mmd" />
@@ -771,6 +769,7 @@
     <MESSAGE value="updated execution timestamps in demo notebook" />
     <MESSAGE value="added developer guidelines for project setup, testing, and architecture; updated execution timestamps, outputs, and execution counts in demo notebook" />
     <MESSAGE value="added project-specific developer guidelines in `AGENTS.md` and updated execution timestamps, outputs, and execution counts in demo notebook" />
-    <option name="LAST_COMMIT_MESSAGE" value="added project-specific developer guidelines in `AGENTS.md` and updated execution timestamps, outputs, and execution counts in demo notebook" />
+    <MESSAGE value="Added IntelliJ IDEA project configuration files to version control." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added IntelliJ IDEA project configuration files to version control." />
   </component>
 </project>
