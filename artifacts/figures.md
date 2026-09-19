@@ -1,4 +1,4 @@
-# Figure Analysis (Windows Computer)
+# Figure Analysis (macOS Computer)
 
 ## Figure 1: Training Curves
 ![Training-curve panel](demo_visuals/training_curves.png)
@@ -6,21 +6,20 @@
 ![Training-curve zoomed spike 1](demo_visuals/training_curves_spike_1_epoch_5.png)
 ![Training-curve zoomed spike 2](demo_visuals/training_curves_spike_2_epoch_782.png)
 
-> 🏡 The optimizer exhibits three distinct regime transitions before settling on a stable plateau.
+> 🏡 The optimizer exhibits three distinct regime transitions before settling on a stable plateau after around epoch 800.
 
 > 🔑 **Key Insights**
-> 1. **Spike 1 ($\approx$ 0-50 epochs)** - Expected transient while the network adjusts from random initial weights.
-> 2. **Spike 2 ($\approx$ 800 epochs)** - Discovery of a higher-curvature potential: smoothness and total loss spike, physics and data terms rise only moderately.
-> 3. **Spike 3 ($\approx$ 2000 epochs)** - Order-of-magnitude jump in the smoothness term propagates into the physics loss; a new plateau follows with lower smoothness fidelity, but improved data fit.
+> 1. **Epoch 5:** Expected transient while the network adjusts from random initial weights.
+> 2. **Epoch 782:** Discovery of a higher-curvature potential; smoothness and total loss spike while physics and data terms rise only moderately.
 
-> ❌ **Failure Modes**
+> 2. ❌ **Failure Modes**
 > 
 > | **Verdict** | **Failure Mode** | **Description**                                                                                                                         | **Explanation**                                                                                                                                                                                                                                                          |
 > | :---------- | :--------------- |:----------------------------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 > | ❌ | High final loss | Optimizer stalls in a local minimum. <br> <br> Heavily driven by the penalty weighting $\lambda_\text{smooth} \gg \lambda_\text{data}$. | Total loss remains greater than 1e-1 at epoch 6000. <br> <br> Note that a high wieghted total loss is not necessarily a failure if the physical residue $\mathcal{L}_\text{SE}$ and data loss $\mathcal{L}_\text{data}$ are near convergence ($~10^{-3}$ to $~10^{-4}$). |
-> | ✔️ | Oscillation avoided | Unbalanced loss weights can cause loss terms to oscillate.                                                                              | Curves converge monotonically after Spike 3.                                                                                                                                                                                                                             |
+> | ✔️ | Oscillation avoided | Unbalanced loss weights can cause loss terms to oscillate.                                                                              | Curves converge monotonically shortly after epoch 782.                                                                                                                                                                                                                             |
 > | ❌ | Physics collapse | Data loss decreases, while TISE residual increases.                                                                                     | Indicates operator inconsistency.                                                                                                                                                                                                                                        |
-> | ❌ | Over-regularization | Smoothness term dominates, spectrum becomes inacurate.                                                                                  | Post-Spike 3 plateau shows $\lambda_\text{smooth}$ is much greater than others.                                                                                                                                                                                          | 
+> | ❌ | Over-regularization | Smoothness term dominates, spectrum becomes inacurate.                                                                                  | Loss curves all begin to plateau after ~ epoch 850 with $\lambda_\text{smooth}$ taking on values much greater than others.                                                                                                                                                                                          | 
 
 ## Figure 2: Learned vs. true potential
 ![Learned potentials](demo_visuals/learned_potential.png)
