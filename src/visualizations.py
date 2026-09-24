@@ -111,15 +111,15 @@ PROJECT_COLORS = {
 # - Learned (PINN) = lighter, luminous tint (high contrast against GT & dark bg)
 #
 # Quantity mapping:
-#   - Potential            -> Purple (Dark Violet vs. Light Lavender)
-#   - Wavefunctions        -> Magenta vs. Green (Vibrant Neon Magenta vs. Luminous Green)
-#   - Energy Eigenvalues   -> Blue   (Deep Royal Blue vs. Vivid Sky/Cyan Blue)
-#   - Probability Densities-> Green vs. Cyan-Green (Vivid Emerald Green vs. Luminous Cyan-Green)
+#   - Potential            -> Magenta vs. Green (#F72585 vs. #31FF48)
+#   - Wavefunctions        -> Magenta vs. Green (#F72585 vs. #31FF48)
+#   - Energy Eigenvalues   -> Blue vs. Cyan (#0070EB vs. #00E8FF)
+#   - Probability Densities-> Magenta/Purple vs. Green (#F72585 / #7C5CFF vs. #31FF48)
 
 COMPARISON_PALETTE: Final[Dict[str, Dict[str, str]]] = {
     "potential": {
-        "true": "#F72585",       # Vibrant Dark Purple / Violet (Ground Truth)
-        "learned": "#31FF48",    # Light Lavender / Lilac (Learned PINN)
+        "true": "#F72585",       # Vibrant Neon Magenta/Pink (Ground Truth)
+        "learned": "#31FF48",    # Luminous Vibrant Green (Learned PINN)
     },
     "wavefunctions": {
         "true": "#F72585",       # Vibrant Eigenscribe Neon Magenta/Pink (Ground Truth)
@@ -130,9 +130,9 @@ COMPARISON_PALETTE: Final[Dict[str, Dict[str, str]]] = {
         "learned": "#00E8FF",    # Light Vivid Sky / Cyan Blue (Learned PINN)
     },
     "density": {
-        "true": "#F72585",       # Vivid Emerald Green (Observed / Ground Truth)
-        "observed": "#7C5CFF",   # Alias for observed data
-        "learned": "#31FF48",    # Luminous Cyan-Green (Learned PINN)
+        "true": "#F72585",       # Vibrant Neon Magenta/Pink (Ground Truth)
+        "observed": "#7C5CFF",   # Electric Purple (Observed data alias)
+        "learned": "#31FF48",    # Luminous Vibrant Green (Learned PINN)
     },
 }
 
@@ -151,11 +151,11 @@ COLOR_DENSITY_OBSERVED: Final[str] = COMPARISON_PALETTE["density"]["observed"]
 COLOR_DENSITY_LEARNED: Final[str] = COMPARISON_PALETTE["density"]["learned"]
 
 # General semantic fallbacks & POD design tokens:
-COLOR_TRUE: Final[str] = "#F72585"        # Vibrant Rose/Coral (Default ground truth fallback)
-COLOR_LEARNED: Final[str] = "#31FF48"     # Electric Cyan (Default learned PINN fallback)
-COLOR_OBSERVED: Final[str] = "#7C5CFF"    # Warm Orange/Amber (Default observed data fallback)
-COLOR_POD_MODE: Final[str] = "#0A95EB"    # Electric Cyan for POD spatial modes
-COLOR_POD_ALT: Final[str] = "#FFD166"     # Deep Purple for secondary POD / partition weights
+COLOR_TRUE: Final[str] = "#F72585"        # Vibrant Rose/Pink (Default ground truth fallback)
+COLOR_LEARNED: Final[str] = "#31FF48"     # Luminous Vibrant Green (Default learned PINN fallback)
+COLOR_OBSERVED: Final[str] = "#7C5CFF"    # Electric Purple (Default observed data fallback)
+COLOR_POD_MODE: Final[str] = "#0A95EB"    # Vivid Sky Blue for POD spatial modes
+COLOR_POD_ALT: Final[str] = "#FFD166"     # Yellow-Orange for secondary POD / partition weights
 
 # Training Loss Components Palette:
 LOSS_COLORS: Final[Dict[str, str]] = {
@@ -192,44 +192,168 @@ def get_comparison_colors(quantity: str) -> Tuple[str, str]:
     palette = COMPARISON_PALETTE.get(key, {"true": COLOR_TRUE, "learned": COLOR_LEARNED})
     return palette["true"], palette["learned"]
 
-# ======================================================================
-# 🌈 Perceptually Smooth, Intuitive Colormaps
-# ======================================================================
 
-# 1. Sequential Colormap for [0, 1] Overlaps (0 = Orthogonal/Quiet -> 1 = Unit Overlap/Bright Glow)
-# Off-diagonal zeros stay dark; diagonals pop in glowing cyan/rose.
+# ======================================================================
+# 🧠 Semantic Visual-Memory Gradients
+# ======================================================================
+# These colormaps serve as a cognitive and visual-memory convention across the project:
+#   - 🟢 Green   : Temporal / dynamical structure (temporal POD modes, time-evolution)
+#   - 🩷 Magenta : Spatial structure (spatial POD modes, domain coordinates)
+#   - 🔵 Blue    : Wavefunctions / quantum states (learned & ground truth eigenstates)
+#   - 🟣 Purple  : Hamiltonian / potential / operator structure (V(x), energy landscape)
+#
+# NOTE: These gradients represent conceptual associations and visual-memory aids,
+# NOT direct numerical encodings. Colors do not encode mathematical value by themselves.
+# Continuous numerical diagnostics (e.g. signed overlaps, unitary overlap matrices)
+# retain separate diagnostic colormaps.
+
+temporal_pod_cmap = mcolors.LinearSegmentedColormap.from_list(
+    "temporal_pod_gradient",
+    [
+        (0.00, "#071A12"),
+        (0.25, "#064E3B"),
+        (0.50, "#059669"),
+        (0.75, "#31FF48"),
+        (1.00, "#B7FFCF"),
+    ],
+)
+
+spatial_pod_cmap = mcolors.LinearSegmentedColormap.from_list(
+    "spatial_pod_gradient",
+    [
+        (0.00, "#210817"),
+        (0.25, "#7C174F"),
+        (0.50, "#AD1457"),
+        (0.75, "#F72585"),
+        (1.00, "#FFB4F6"),
+    ],
+)
+
+wavefunction_cmap = mcolors.LinearSegmentedColormap.from_list(
+    "wavefunction_gradient",
+    [
+        (0.00, "#06152B"),
+        (0.25, "#003B73"),
+        (0.50, "#0070EB"),
+        (0.75, "#00B8FF"),
+        (1.00, "#B8F6FF"),
+    ],
+)
+
+hamiltonian_cmap = mcolors.LinearSegmentedColormap.from_list(
+    "hamiltonian_gradient",
+    [
+        (0.00, "#120A24"),
+        (0.25, "#3B176E"),
+        (0.50, "#7C3AED"),
+        (0.75, "#A855F7"),
+        (1.00, "#D8B4FE"),
+    ],
+)
+
+# Semantic Colormap Aliases (Uppercase Constants)
+TEMPORAL_POD_CMAP: Final[mcolors.LinearSegmentedColormap] = temporal_pod_cmap
+SPATIAL_POD_CMAP: Final[mcolors.LinearSegmentedColormap] = spatial_pod_cmap
+WAVEFUNCTION_CMAP: Final[mcolors.LinearSegmentedColormap] = wavefunction_cmap
+HAMILTONIAN_CMAP: Final[mcolors.LinearSegmentedColormap] = hamiltonian_cmap
+
+
+# ======================================================================
+# 🌈 Perceptually Smooth, Intuitive Diagnostic Colormaps
+# ======================================================================
+# These diagnostic colormaps are uniquely crafted for specific mathematical &
+# modal visualizations, harmonized with the four semantic color families:
+#   - Spatial Overlap     : [0, 1] sequential gradient in the Magenta family
+#   - Temporal Overlap    : [0, 1] sequential gradient in the Green family
+#   - Wavefunction Overlap: [0, 1] sequential gradient in the Blue family
+#   - Hamiltonian Density : [0, 1] sequential gradient in the Purple family
+#   - Temporal Modal (V)  : [-1, 1] diverging gradient (Amethyst -> Slate -> Green)
+#   - Cross Overlap (M)   : [-1, 1] diverging gradient (Magenta -> Slate -> Cyan/Blue)
+
+# 1. Spatial Overlap Colormap [0, 1] (Spatial / Magenta Family)
+# Zero overlap is quiet dark background; unit overlap glows in luminous rose.
 spatial_overlap_cmap = mcolors.LinearSegmentedColormap.from_list(
     "spatial_overlap_smooth",
     [
-        (0.00, "#0d1117"),  # Dark background (0 overlap = quiet)
-        (0.20, "#1c1445"),  # Deep navy-violet
-        (0.45, "#4361EE"),  # Royal Indigo
-        (0.70, "#7952F5"),  # Electric Purple
-        (0.88, "#FF66B3"),  # Vibrant Rose Pink
-        (1.00, "#00FFEE"),  # Glowing Electric Cyan (1.0 peak)
+        (0.00, "#0d1117"),  # 0.00: Dark background (orthogonal/quiet)
+        (0.25, "#2c0b24"),  # 0.25: Deep plum
+        (0.50, "#7C174F"),  # 0.50: Deep magenta
+        (0.75, "#F72585"),  # 0.75: Vibrant neon rose
+        (1.00, "#FFE5F9"),  # 1.00: Luminous rose-glow highlight
     ],
 )
 
-# 2. Symmetric Diverging Colormap for [-1, 1] Cross-Overlaps & Modal Matrices
-# -1.0 = Vibrant Pink/Rose, 0.0 = Dark Slate Neutral, +1.0 = Electric Cyan
+# 2. Temporal Overlap Colormap [0, 1] (Temporal / Green Family)
+# Zero overlap is quiet dark background; unit overlap glows in luminous mint.
+temporal_overlap_cmap = mcolors.LinearSegmentedColormap.from_list(
+    "temporal_overlap_smooth",
+    [
+        (0.00, "#0d1117"),  # 0.00: Dark background (orthogonal/quiet)
+        (0.25, "#072418"),  # 0.25: Deep forest shadow
+        (0.50, "#059669"),  # 0.50: Vibrant emerald green
+        (0.75, "#31FF48"),  # 0.75: Luminous electric green
+        (1.00, "#E2FFE9"),  # 1.00: Glowing mint highlight
+    ],
+)
+
+# 3. Wavefunction State Overlap Colormap [0, 1] (Wavefunction / Blue Family)
+# Zero overlap is quiet dark background; unit overlap glows in luminous ice-blue.
+wavefunction_overlap_cmap = mcolors.LinearSegmentedColormap.from_list(
+    "wavefunction_overlap_smooth",
+    [
+        (0.00, "#0d1117"),  # 0.00: Dark background (orthogonal/quiet)
+        (0.25, "#0A2342"),  # 0.25: Deep navy
+        (0.50, "#0070EB"),  # 0.50: Royal blue
+        (0.75, "#00B8FF"),  # 0.75: Vivid sky blue
+        (1.00, "#E0F8FF"),  # 1.00: Luminous ice-blue highlight
+    ],
+)
+
+# 4. Hamiltonian Operator / Potential Density Colormap [0, 1] (Purple Family)
+hamiltonian_density_cmap = mcolors.LinearSegmentedColormap.from_list(
+    "hamiltonian_density_smooth",
+    [
+        (0.00, "#0d1117"),  # 0.00: Dark background (quiet)
+        (0.25, "#1E0C3E"),  # 0.25: Deep indigo
+        (0.50, "#7C3AED"),  # 0.50: Vibrant purple
+        (0.75, "#A855F7"),  # 0.75: Luminous lilac
+        (1.00, "#F5E8FF"),  # 1.00: Glowing lavender highlight
+    ],
+)
+
+# 5. Symmetric Diverging Colormap for [-1, 1] Cross-Overlaps & Modal Matrices
+# Connects Spatial POD (Magenta, -1.0) with Wavefunction/Learned (Cyan/Blue, +1.0)
 cross_overlap_cmap = mcolors.LinearSegmentedColormap.from_list(
     "cross_overlap_diverging",
     [
-        (0.00, "#F72585"),  # -1.0 : Neon Rose Pink
-        (0.25, "#7952F5"),  # -0.5 : Electric Purple
+        (0.00, "#F72585"),  # -1.0 : Neon Rose Pink (Spatial dominant)
+        (0.25, "#7C174F"),  # -0.5 : Deep Magenta
         (0.50, "#161b22"),  #  0.0 : Neutral Dark Slate
-        (0.75, "#0A95EB"),  # +0.5 : Vivid Sky Blue
-        (1.00, "#00FFEE"),  # +1.0 : Bright Electric Cyan
+        (0.75, "#0070EB"),  # +0.5 : Vivid Royal Blue
+        (1.00, "#00B8FF"),  # +1.0 : Bright Electric Cyan/Blue (Wavefunction dominant)
     ],
 )
 
-BLUE_TO_PINK = cross_overlap_cmap
+# Backwards compatibility aliases
+BLUE_TO_PINK: Final[mcolors.LinearSegmentedColormap] = cross_overlap_cmap
+CROSS_OVERLAP_CMAP: Final[mcolors.LinearSegmentedColormap] = cross_overlap_cmap
+SPATIAL_OVERLAP_CMAP: Final[mcolors.LinearSegmentedColormap] = spatial_overlap_cmap
+TEMPORAL_OVERLAP_CMAP: Final[mcolors.LinearSegmentedColormap] = temporal_overlap_cmap
+WAVEFUNCTION_OVERLAP_CMAP: Final[mcolors.LinearSegmentedColormap] = wavefunction_overlap_cmap
+HAMILTONIAN_DENSITY_CMAP: Final[mcolors.LinearSegmentedColormap] = hamiltonian_density_cmap
 
-# 3. Temporal Modal Composition Colormap
-temporal_cmap = cross_overlap_cmap
-
-# 4. Temporal Unitary Overlap Colormap [0, 1]
-temporal_overlap_cmap = spatial_overlap_cmap
+# 6. Temporal Modal Composition Colormap [-1, 1] (Amethyst -> Slate -> Emerald)
+temporal_cmap = mcolors.LinearSegmentedColormap.from_list(
+    "temporal_modal_diverging",
+    [
+        (0.00, "#7C3AED"),  # -1.0 : Amethyst Violet
+        (0.25, "#31144F"),  # -0.5 : Deep Plum
+        (0.50, "#161b22"),  #  0.0 : Neutral Dark Slate
+        (0.75, "#059669"),  # +0.5 : Forest Emerald
+        (1.00, "#31FF48"),  # +1.0 : Luminous Electric Green
+    ],
+)
+TEMPORAL_CMAP: Final[mcolors.LinearSegmentedColormap] = temporal_cmap
 
 
 # ======================================================================
@@ -1720,7 +1844,7 @@ def plot_pod_singular_values(
         indices,
         sv,
         c=indices,
-        cmap=spatial_overlap_cmap,
+        cmap=SPATIAL_POD_CMAP,
         edgecolor=TEXT_PRIMARY,
         linewidth=1.2,
         s=80,
@@ -2030,7 +2154,7 @@ def plot_pod_eigen_alignment(
     psi_true_matrix: Sequence[torch.Tensor] | torch.Tensor,
     dx: float,
     *,
-    cmap: mcolors.Colormap | str = cross_overlap_cmap,
+    cmap: mcolors.Colormap | str = SPATIAL_POD_CMAP,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
     cbar_location: str = "right",
@@ -2105,7 +2229,7 @@ def plot_pod_eigen_alignment(
 def plot_pod_temporal_modes(
     Vh: torch.Tensor | np.ndarray,
     *,
-    cmap: mcolors.Colormap | str = cross_overlap_cmap,
+    cmap: mcolors.Colormap | str = temporal_cmap,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
     cbar_location: str = "right",
@@ -2179,7 +2303,7 @@ def plot_pod_temporal_modes(
 def plot_pod_temporal_overlap_heatmap(
     Vh: torch.Tensor | np.ndarray,
     *,
-    cmap: mcolors.Colormap | str = spatial_overlap_cmap,
+    cmap: mcolors.Colormap | str = temporal_overlap_cmap,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
     cbar_location: str = "right",
@@ -2252,7 +2376,7 @@ def plot_pod_temporal_overlap_heatmap(
 def plot_pod_temporal_cross_overlap_heatmap(
     Vh: torch.Tensor | np.ndarray,
     *,
-    cmap: mcolors.Colormap | str = spatial_overlap_cmap,
+    cmap: mcolors.Colormap | str = temporal_overlap_cmap,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
     cbar_location: str = "right",
@@ -2587,6 +2711,83 @@ def plot_partition_function_spectrum(
 
 
 # ======================================================================
+# 🎨 1️⃣7️⃣ Semantic Color Gradients Demonstration
+# ======================================================================
+def plot_semantic_colormaps(
+    *,
+    out_path: pathlib.Path | None = None,
+) -> plt.Figure:
+    """Render a visual demonstration of the project semantic color gradients and diagnostic colormaps.
+
+    Visual vocabulary convention:
+      - 🟢 Temporal POD     : Green gradient   (dynamical structure)
+      - 🩷 Spatial POD      : Magenta gradient (spatial structure)
+      - 🔵 Wavefunctions    : Blue gradient    (quantum states)
+      - 🟣 Hamiltonian      : Purple gradient  (potential & operators)
+
+    Diagnostic modalities:
+      - Spatial Overlap     : [0, 1] sequential (Magenta family)
+      - Temporal Overlap    : [0, 1] sequential (Green family)
+      - Wavefunction Overlap: [0, 1] sequential (Blue family)
+      - Hamiltonian Density : [0, 1] sequential (Purple family)
+      - Temporal Modal (V)  : [-1, 1] diverging (Amethyst -> Slate -> Emerald)
+      - Cross Overlap (M)   : [-1, 1] diverging (Magenta -> Slate -> Cyan/Blue)
+    """
+    _apply_style()
+
+    palettes = [
+        ("Temporal POD (Green Gradient)", TEMPORAL_POD_CMAP),
+        ("Spatial POD (Magenta Gradient)", SPATIAL_POD_CMAP),
+        ("Wavefunctions (Blue Gradient)", WAVEFUNCTION_CMAP),
+        ("Hamiltonian (Purple Gradient)", HAMILTONIAN_CMAP),
+        ("Spatial Overlap [0, 1]", SPATIAL_OVERLAP_CMAP),
+        ("Temporal Overlap [0, 1]", TEMPORAL_OVERLAP_CMAP),
+        ("Wavefunction Overlap [0, 1]", WAVEFUNCTION_OVERLAP_CMAP),
+        ("Hamiltonian Density [0, 1]", HAMILTONIAN_DENSITY_CMAP),
+        ("Temporal Modal V [-1, 1]", TEMPORAL_CMAP),
+        ("Cross Overlap M [-1, 1]", CROSS_OVERLAP_CMAP),
+    ]
+
+    fig, axes = plt.subplots(
+        len(palettes),
+        1,
+        figsize=(10, 7.5),
+        facecolor=THEME_BG,
+        constrained_layout=True,
+    )
+
+    gradient = np.linspace(0, 1, 256).reshape(1, -1)
+
+    for ax, (label, cmap) in zip(axes, palettes):
+        ax.imshow(gradient, aspect="auto", cmap=cmap)
+        ax.set_axis_off()
+        ax.text(
+            -0.02,
+            0.5,
+            label,
+            transform=ax.transAxes,
+            va="center",
+            ha="right",
+            fontsize=9.5,
+            fontweight="bold",
+            color=TEXT_PRIMARY,
+        )
+
+    fig.suptitle(
+        "Semantic & Diagnostic Color Gradients (Visual-Memory Convention)",
+        fontsize=13,
+        fontweight="bold",
+        color=TEXT_PRIMARY,
+    )
+
+    if out_path:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor=THEME_BG)
+
+    return fig
+
+
+# ======================================================================
 # 🧪 Smoke Test & Main Entry Point
 # ======================================================================
 def _smoke_test() -> None:
@@ -2594,6 +2795,27 @@ def _smoke_test() -> None:
     plt.close("all")
     plt.rcParams["figure.max_open_warning"] = 100
     torch.manual_seed(27)
+
+    # 1. Verify all semantic & diagnostic colormaps exist, are Colormap instances, and are callable
+    all_colormaps = {
+        "temporal_pod_cmap": (temporal_pod_cmap, TEMPORAL_POD_CMAP),
+        "spatial_pod_cmap": (spatial_pod_cmap, SPATIAL_POD_CMAP),
+        "wavefunction_cmap": (wavefunction_cmap, WAVEFUNCTION_CMAP),
+        "hamiltonian_cmap": (hamiltonian_cmap, HAMILTONIAN_CMAP),
+        "spatial_overlap_cmap": (spatial_overlap_cmap, SPATIAL_OVERLAP_CMAP),
+        "temporal_overlap_cmap": (temporal_overlap_cmap, TEMPORAL_OVERLAP_CMAP),
+        "wavefunction_overlap_cmap": (wavefunction_overlap_cmap, WAVEFUNCTION_OVERLAP_CMAP),
+        "hamiltonian_density_cmap": (hamiltonian_density_cmap, HAMILTONIAN_DENSITY_CMAP),
+        "temporal_cmap": (temporal_cmap, TEMPORAL_CMAP),
+        "cross_overlap_cmap": (cross_overlap_cmap, CROSS_OVERLAP_CMAP),
+    }
+    for name, (cmap_obj, alias_obj) in all_colormaps.items():
+        assert isinstance(cmap_obj, mpl.colors.Colormap), f"{name} must be an instance of mpl.colors.Colormap"
+        assert cmap_obj is alias_obj, f"{name} must match its alias constant"
+        for val in (0.0, 0.5, 1.0):
+            rgba = cmap_obj(val)
+            assert isinstance(rgba, tuple) and len(rgba) == 4, f"{name}({val}) must return a 4-channel RGBA tuple"
+            assert all(0.0 <= c <= 1.0 for c in rgba), f"{name}({val}) channel values must be in [0.0, 1.0]"
 
     N = 128
     x = torch.linspace(-5.0, 5.0, N)
@@ -2617,6 +2839,8 @@ def _smoke_test() -> None:
 
     out_dir = pathlib.Path("./_smoke_outputs")
     out_dir.mkdir(exist_ok=True)
+
+    plot_semantic_colormaps(out_path=out_dir / "semantic_colormaps_palette.png")
 
     plot_loss_history(
         epochs,
