@@ -7,10 +7,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bb16bf9d-5f4f-4082-9b17-e366580f8b10" name="Changes" comment="updated figures.md">
-      <change afterPath="$PROJECT_DIR$/conclusion-update-poa.md" afterDir="false" />
+    <list default="true" id="bb16bf9d-5f4f-4082-9b17-e366580f8b10" name="Changes" comment="Refined `figures_reevaluation.md` with additional training curve visualizations and updated analysis notes for spectral energy cascade and optimization trajectory.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebooks/demo.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/demo.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conclusion-update-poa.md" beforeDir="false" afterPath="$PROJECT_DIR$/conclusion-update-poa.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/references.bib" beforeDir="false" afterPath="$PROJECT_DIR$/references.bib" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,7 +18,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="298" />
+    <option name="cachedIndexableFilesCount" value="223" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="FileTemplateManagerImpl">
@@ -32,70 +32,67 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GithubDefaultAccount">
-    <option name="defaultAccountId" value="abb6097a-26a9-408d-bb7b-0596bc2b4362" />
-  </component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0099936411076698" />
-      <entry key="MS500" value="1.6153648236681581" />
-      <entry key="S2" value="3.2993946562795227" />
-      <entry key="S5" value="4.1821939484980355" />
-      <entry key="S10" value="4.56748122774393" />
-      <entry key="S30" value="5.307784285543926" />
-      <entry key="S60" value="6.953835722763187" />
-      <entry key="M2" value="11.092513060309617" />
-      <entry key="M5" value="29.542243758749137" />
-      <entry key="M10" value="76.62723264948102" />
-      <entry key="M15" value="131.98258542339178" />
-      <entry key="M30" value="285.59826776875263" />
-      <entry key="H1" value="482.6034616733723" />
-      <entry key="H2" value="698.4104713959445" />
-      <entry key="H4" value="1099.863961232302" />
-      <entry key="D1" value="5485.696630436574" />
-      <entry key="W1" value="8783.789076652716" />
+      <entry key="MS100" value="2.5320862744275964E-16" />
+      <entry key="MS500" value="0.0013378989252138815" />
+      <entry key="S2" value="0.9071595549645203" />
+      <entry key="S5" value="6.620181559536787" />
+      <entry key="S10" value="15.150269899308848" />
+      <entry key="S30" value="41.96375099215223" />
+      <entry key="S60" value="91.09008457454517" />
+      <entry key="M2" value="169.788473413811" />
+      <entry key="M5" value="279.4919807233303" />
+      <entry key="M10" value="363.463257287782" />
+      <entry key="M15" value="427.9872527882006" />
+      <entry key="M30" value="593.3830086202512" />
+      <entry key="H1" value="813.746021884524" />
+      <entry key="H2" value="1057.1628638784377" />
+      <entry key="H4" value="1474.4874730261718" />
+      <entry key="D1" value="5871.329630629252" />
+      <entry key="W1" value="9200.593371425868" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="0.0" />
-      <entry key="S2" value="0.0" />
-      <entry key="S5" value="4.981618969862208E-239" />
-      <entry key="S10" value="7.058058493567628E-120" />
-      <entry key="S30" value="1.9182052903000903E-40" />
-      <entry key="S60" value="1.384992884566636E-20" />
-      <entry key="M2" value="1.1768575043912677E-10" />
-      <entry key="M5" value="1.0710238200969945E-4" />
-      <entry key="M10" value="0.011193168474879776" />
-      <entry key="M15" value="0.0588474590842196" />
-      <entry key="M30" value="0.369738046671493" />
-      <entry key="H1" value="1.076353163770068" />
-      <entry key="H2" value="2.2649966086072193" />
-      <entry key="H4" value="4.546723738068853" />
-      <entry key="D1" value="32.51126374377703" />
-      <entry key="W1" value="56.340990266457034" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0000000000000597" />
+      <entry key="S10" value="1.000000244222592" />
+      <entry key="S30" value="1.0062507024347787" />
+      <entry key="S60" value="1.0791166925065374" />
+      <entry key="M2" value="1.288616800582653" />
+      <entry key="M5" value="1.742803785048142" />
+      <entry key="M10" value="2.155054570644197" />
+      <entry key="M15" value="2.3939545047570636" />
+      <entry key="M30" value="2.90131233045034" />
+      <entry key="H1" value="3.7124541749642246" />
+      <entry key="H2" value="4.977059733961546" />
+      <entry key="H4" value="7.3028028177078514" />
+      <entry key="D1" value="35.26806090613487" />
+      <entry key="W1" value="59.28149246847602" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.011651641011555493" />
-      <entry key="MS500" value="0.8709599220796713" />
-      <entry key="S2" value="3.00760017005546" />
-      <entry key="S5" value="4.052848557697735" />
-      <entry key="S10" value="4.500465654701106" />
-      <entry key="S30" value="5.284282005075132" />
-      <entry key="S60" value="6.941073124072108" />
-      <entry key="M2" value="11.08492577821293" />
-      <entry key="M5" value="29.536725191623642" />
-      <entry key="M10" value="76.63198333546363" />
-      <entry key="M15" value="132.03417563624697" />
-      <entry key="M30" value="285.9603554038289" />
-      <entry key="H1" value="483.67355074427667" />
-      <entry key="H2" value="700.6711620480504" />
-      <entry key="H4" value="1104.4077412769961" />
-      <entry key="D1" value="5518.20605278502" />
-      <entry key="W1" value="8840.129649320843" />
+      <entry key="MS100" value="4.0792147027863555E-15" />
+      <entry key="MS500" value="0.0026371220560130917" />
+      <entry key="S2" value="1.095451241254888" />
+      <entry key="S5" value="7.1288066664761045" />
+      <entry key="S10" value="15.860593203578972" />
+      <entry key="S30" value="42.85849711413322" />
+      <entry key="S60" value="92.10566552314499" />
+      <entry key="M2" value="171.03776539277297" />
+      <entry key="M5" value="281.2123701829512" />
+      <entry key="M10" value="365.6024320530411" />
+      <entry key="M15" value="430.36753650866234" />
+      <entry key="M30" value="596.2732542427998" />
+      <entry key="H1" value="817.4501841624746" />
+      <entry key="H2" value="1062.134408024133" />
+      <entry key="H4" value="1481.786658937739" />
+      <entry key="D1" value="5906.595728301495" />
+      <entry key="W1" value="9259.874427372419" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -107,40 +104,41 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Python.cli_train (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.cli_train.executor&quot;: &quot;Run&quot;,
-    &quot;Python.inverse.executor&quot;: &quot;Run&quot;,
-    &quot;Python.model.executor&quot;: &quot;Run&quot;,
-    &quot;Python.physics.executor&quot;: &quot;Run&quot;,
-    &quot;Python.pod.executor&quot;: &quot;Run&quot;,
-    &quot;Python.train.executor&quot;: &quot;Run&quot;,
-    &quot;Python.utils.executor&quot;: &quot;Run&quot;,
-    &quot;Python.visualizations.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;junie.plugin.stays.banner.dismissed&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;python.packages.toolwindow.project.migrated.to.right.top.v2&quot;: &quot;true&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.cli_train (1).executor": "Run",
+    "Python.cli_train.executor": "Run",
+    "Python.extract_metrics.executor": "Run",
+    "Python.inverse.executor": "Run",
+    "Python.model.executor": "Run",
+    "Python.physics.executor": "Run",
+    "Python.pod.executor": "Run",
+    "Python.train.executor": "Run",
+    "Python.utils.executor": "Run",
+    "Python.visualizations.executor": "Run",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "junie.plugin.stays.banner.dismissed": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "python.packages.toolwindow.project.migrated.to.right.top.v2": "true",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "to.speed.mode.migration.done": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\sofia\PycharmProjects\lf-pinn-inverse-schrodinger\cli" />
@@ -150,7 +148,7 @@
       <recent name="C:\Users\sofia\PycharmProjects\lf-pinn-inverse-schrodinger\notebooks" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.cli_train">
+  <component name="RunManager" selected="Python.extract_metrics">
     <configuration default="true" type="LATEX_RUN_CONFIGURATION" factoryName="LaTeX configuration factory">
       <steps>
         <latexmkCompile id="5a0c93a2-7540-460c-a4ef-bb73c6952071" />
@@ -182,7 +180,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="pod" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="extract_metrics" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="inverse_schrodinger" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -191,13 +189,13 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/cli" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="DEBUG_JUST_MY_CODE" value="false" />
       <option name="RUN_TOOL" value="" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/pod.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/cli/extract_metrics.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -295,11 +293,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.extract_metrics" />
         <item itemvalue="Python.cli_train" />
         <item itemvalue="Python.visualizations" />
         <item itemvalue="Python.utils" />
         <item itemvalue="Python.train" />
-        <item itemvalue="Python.pod" />
       </list>
     </recent_temporary>
   </component>
