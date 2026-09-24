@@ -7,30 +7,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bb16bf9d-5f4f-4082-9b17-e366580f8b10" name="Changes" comment="Added reevaluation analysis outputs to `figures_reevaluation.md` and updated `figures.md` with new training curve visualizations.">
+    <list default="true" id="bb16bf9d-5f4f-4082-9b17-e366580f8b10" name="Changes" comment="updated figures.md">
+      <change afterPath="$PROJECT_DIR$/conclusion-update-poa.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_smoke_outputs/cross_overlap_heatmap.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/cross_overlap_heatmap.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_smoke_outputs/density_vs_observed.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/density_vs_observed.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_smoke_outputs/energy.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/energy.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_smoke_outputs/hilbert_portrait.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/hilbert_portrait.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_smoke_outputs/loss_history.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/loss_history.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_smoke_outputs/loss_history_spike_matrix.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/loss_history_spike_matrix.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_smoke_outputs/loss_history_spike_matrix_out_of_bounds.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/loss_history_spike_matrix_out_of_bounds.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_smoke_outputs/loss_history_zoomed.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/loss_history_zoomed.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_smoke_outputs/overlap_heatmap.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/overlap_heatmap.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_smoke_outputs/partition_spectrum.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/partition_spectrum.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_smoke_outputs/pod_eigen_alignment.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/pod_eigen_alignment.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_smoke_outputs/pod_modes.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/pod_modes.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_smoke_outputs/pod_singular_values.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/pod_singular_values.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_smoke_outputs/pod_temporal_cross_overlap.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/pod_temporal_cross_overlap.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_smoke_outputs/pod_temporal_modes.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/pod_temporal_modes.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_smoke_outputs/pod_temporal_overlap.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/pod_temporal_overlap.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_smoke_outputs/potential.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/potential.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_smoke_outputs/spectral_cascade.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/spectral_cascade.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_smoke_outputs/wavefunctions.png" beforeDir="false" afterPath="$PROJECT_DIR$/_smoke_outputs/wavefunctions.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/artifacts/demo_visuals/learned_potential.png" beforeDir="false" afterPath="$PROJECT_DIR$/artifacts/demo_visuals/learned_potential.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notebooks/demo.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/demo.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/visualizations.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/visualizations.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,67 +32,70 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GithubDefaultAccount">
+    <option name="defaultAccountId" value="abb6097a-26a9-408d-bb7b-0596bc2b4362" />
+  </component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0000000000000213" />
-      <entry key="MS500" value="1.001931839896725" />
-      <entry key="S2" value="1.4107187449438208" />
-      <entry key="S5" value="2.6572669341300497" />
-      <entry key="S10" value="4.052933836104945" />
-      <entry key="S30" value="9.35058826174368" />
-      <entry key="S60" value="17.462611798798388" />
-      <entry key="M2" value="38.0542787201937" />
-      <entry key="M5" value="106.94668511646488" />
-      <entry key="M10" value="182.48155887599466" />
-      <entry key="M15" value="231.52612241532051" />
-      <entry key="M30" value="318.2991373044136" />
-      <entry key="H1" value="402.31044241055935" />
-      <entry key="H2" value="519.8961724191064" />
-      <entry key="H4" value="880.0976672411832" />
-      <entry key="D1" value="5248.04555486954" />
-      <entry key="W1" value="8430.980301457594" />
+      <entry key="MS100" value="1.0099936411076698" />
+      <entry key="MS500" value="1.6153648236681581" />
+      <entry key="S2" value="3.2993946562795227" />
+      <entry key="S5" value="4.1821939484980355" />
+      <entry key="S10" value="4.56748122774393" />
+      <entry key="S30" value="5.307784285543926" />
+      <entry key="S60" value="6.953835722763187" />
+      <entry key="M2" value="11.092513060309617" />
+      <entry key="M5" value="29.542243758749137" />
+      <entry key="M10" value="76.62723264948102" />
+      <entry key="M15" value="131.98258542339178" />
+      <entry key="M30" value="285.59826776875263" />
+      <entry key="H1" value="482.6034616733723" />
+      <entry key="H2" value="698.4104713959445" />
+      <entry key="H4" value="1099.863961232302" />
+      <entry key="D1" value="5485.696630436574" />
+      <entry key="W1" value="8783.789076652716" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="2.4326021218271613E-299" />
-      <entry key="S2" value="2.2208425532237076E-75" />
-      <entry key="S5" value="1.3759641163598503E-30" />
-      <entry key="S10" value="1.1730149685148319E-15" />
-      <entry key="S30" value="1.054632582767356E-5" />
-      <entry key="S60" value="0.0032475107124802925" />
-      <entry key="M2" value="0.056986949000200605" />
-      <entry key="M5" value="0.31902134367336654" />
-      <entry key="M10" value="0.6108904637096" />
-      <entry key="M15" value="0.846709798453843" />
-      <entry key="M30" value="1.4024829089146449" />
-      <entry key="H1" value="2.096314842137054" />
-      <entry key="H2" value="3.1609557398461736" />
-      <entry key="H4" value="5.371233052131092" />
-      <entry key="D1" value="33.4269246835789" />
-      <entry key="W1" value="56.56498815505982" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="4.981618969862208E-239" />
+      <entry key="S10" value="7.058058493567628E-120" />
+      <entry key="S30" value="1.9182052903000903E-40" />
+      <entry key="S60" value="1.384992884566636E-20" />
+      <entry key="M2" value="1.1768575043912677E-10" />
+      <entry key="M5" value="1.0710238200969945E-4" />
+      <entry key="M10" value="0.011193168474879776" />
+      <entry key="M15" value="0.0588474590842196" />
+      <entry key="M30" value="0.369738046671493" />
+      <entry key="H1" value="1.076353163770068" />
+      <entry key="H2" value="2.2649966086072193" />
+      <entry key="H4" value="4.546723738068853" />
+      <entry key="D1" value="32.51126374377703" />
+      <entry key="W1" value="56.340990266457034" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9265880618903907" />
-      <entry key="MS500" value="0.9867693201589244" />
-      <entry key="S2" value="1.4054663804636818" />
-      <entry key="S5" value="2.653422440265254" />
-      <entry key="S10" value="4.049952220778799" />
-      <entry key="S30" value="9.346979519786002" />
-      <entry key="S60" value="17.461086682365824" />
-      <entry key="M2" value="38.103987201232385" />
-      <entry key="M5" value="107.25595174524796" />
-      <entry key="M10" value="183.08419236522988" />
-      <entry key="M15" value="232.36584232040337" />
-      <entry key="M30" value="319.6966622404258" />
-      <entry key="H1" value="404.40351889333283" />
-      <entry key="H2" value="523.0550409371485" />
-      <entry key="H4" value="885.4672636708686" />
-      <entry key="D1" value="5281.470877853806" />
-      <entry key="W1" value="8487.54491164881" />
+      <entry key="MS100" value="0.011651641011555493" />
+      <entry key="MS500" value="0.8709599220796713" />
+      <entry key="S2" value="3.00760017005546" />
+      <entry key="S5" value="4.052848557697735" />
+      <entry key="S10" value="4.500465654701106" />
+      <entry key="S30" value="5.284282005075132" />
+      <entry key="S60" value="6.941073124072108" />
+      <entry key="M2" value="11.08492577821293" />
+      <entry key="M5" value="29.536725191623642" />
+      <entry key="M10" value="76.63198333546363" />
+      <entry key="M15" value="132.03417563624697" />
+      <entry key="M30" value="285.9603554038289" />
+      <entry key="H1" value="483.67355074427667" />
+      <entry key="H2" value="700.6711620480504" />
+      <entry key="H4" value="1104.4077412769961" />
+      <entry key="D1" value="5518.20605278502" />
+      <entry key="W1" value="8840.129649320843" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -323,7 +306,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-eff1e8def5f5-5bd6d13a2a75-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-262.10315.174" />
+        <option value="bundled-python-sdk-73a66231627c-5bd6d13a2a75-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-262.10968.92" />
       </set>
     </attachedChunks>
   </component>
@@ -703,7 +686,23 @@
       <option name="project" value="LOCAL" />
       <updated>1789107513194</updated>
     </task>
-    <option name="localTasksCounter" value="47" />
+    <task id="LOCAL-00047" summary="minor update to @figures.md">
+      <option name="closed" value="true" />
+      <created>1789840104820</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1789840104820</updated>
+    </task>
+    <task id="LOCAL-00048" summary="updated figures.md">
+      <option name="closed" value="true" />
+      <created>1789843548459</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1789843548459</updated>
+    </task>
+    <option name="localTasksCounter" value="49" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -713,9 +712,6 @@
     <option featureType="com.intellij.fileTypeFactory" implementationName="pyproject.toml" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="updated src/pod.py, src/visualizations.py, and notebooks/demo.ipynb to include suggested POD diagnostic workflow" />
-    <MESSAGE value="figure 1 and 2 analysis done" />
-    <MESSAGE value="nuanced normalization cleaning" />
     <MESSAGE value="figure 1, 2, and 3 analysis drafts typed up. some polishing needs to be done (mainly removing redundant information and deciding where to highlihgt the important points)." />
     <MESSAGE value="figure 1, 2, 3, and 4 analysis drafts have been typed up. some polishing needs to be done (mainly removing redundant information and deciding where to highlihgt the important points)." />
     <MESSAGE value="normalization best practices documentation" />
@@ -738,6 +734,9 @@
     <MESSAGE value="Updated training outputs in demo.ipynb to reflect new results and improve final loss metrics." />
     <MESSAGE value="Updated training outputs in demo.ipynb to reflect improved loss metrics and updated execution timings." />
     <MESSAGE value="Added reevaluation analysis outputs to `figures_reevaluation.md` and updated `figures.md` with new training curve visualizations." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added reevaluation analysis outputs to `figures_reevaluation.md` and updated `figures.md` with new training curve visualizations." />
+    <MESSAGE value="updated execution timestamps, outputs, and interpreter path in workspace configuration and demo notebook" />
+    <MESSAGE value="minor update to @figures.md" />
+    <MESSAGE value="updated figures.md" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated figures.md" />
   </component>
 </project>
