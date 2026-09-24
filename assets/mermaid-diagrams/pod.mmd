@@ -1,116 +1,157 @@
 %%{ init: {
-        "theme": "base",
-        "themeVariables": {
-            "background": "#0D1117",
-            "primaryColor": "#14B5FF",
-            "primaryTextColor": "#F0F6FC",
-            "primaryBorderColor": "#14B5FF",
-            "lineColor": "#4CC9F0",
-            "secondaryColor": "#0070EB",
-            "tertiaryColor": "#0D1117",
-            "fontFamily": "'Aclonica', sans-serif",
-            "fontSize": "16px",
-            "clusterBkg": "rgba(20, 181, 255, 0.02)",
-            "clusterBorder": "#14B5FF",
-            "edgeLabelBackground":"#0D1117",
-            "nodeSpacing": 81,
-            "rankSpacing": 131,
-            "borderRadius": "16"
-        },
-        "themeCSS": ".node rect, .node circle, .node ellipse, .node polygon, .node path { stroke-width: 2.618px !important; filter: drop-shadow(0px 4px 6px rgba(0,0,0, 0.5)); } .node { filter: saturate(1.2) contrast(1.1); } .cluster rect { rx: 25.8; ry: 25.8; stroke-width: 1px; stroke-dasharray: 10,5; } .nodeLabel, .edgeLabel, .cluster-label, .label text, text, .katex, .katex *, .MathJax, .MathJax *, mjx-container, mjx-container * { color: #F0F6FC !important; fill: #F0F6FC !important; font-weight: 300; } #pod .cluster-label { fill: #00D4FF !important; font-size: 20px; } #pod rect { stroke: #00D4FF; fill: rgba(0, 212, 255, 0.04); } .marker, .arrowMarkerPath, .marker path, .marker polygon { fill: #4CC9F0 !important; stroke: #4CC9F0 !important; } .flowchart-link, .edgePaths .path { stroke: #4CC9F0; stroke-width: 1.618px; }",
-        "flowchart": {
-            "curve": "basis",
-            "useMaxWidth": false,
-            "htmlLabels": true,
-            "rankSpacing": 131,
-            "nodeSpacing": 81
-        }
-    } }%%
+    "theme": "base",
+    "themeVariables": {
+        "background": "#0D1117",
+        "primaryColor": "#14B5FF",
+        "primaryTextColor": "#F0F6FC",
+        "primaryBorderColor": "#14B5FF",
+        "lineColor": "#4CC9F0",
+        "secondaryColor": "#0070EB",
+        "tertiaryColor": "#0D1117",
+        "fontFamily": "'Aclonica', sans-serif",
+        "fontSize": "15px",
+        "clusterBkg": "rgba(20, 181, 255, 0.02)",
+        "clusterBorder": "#14B5FF",
+        "edgeLabelBackground":"#0D1117",
+        "nodeSpacing": 65,
+        "rankSpacing": 85,
+        "borderRadius": "16"
+    },
+    "themeCSS": ".node rect, .node circle, .node ellipse, .node polygon, .node path { stroke-width: 2.618px !important; filter: drop-shadow(0px 4px 6px rgba(0,0,0, 0.5)); } .node { filter: saturate(1.2) contrast(1.1); } .cluster rect { rx: 25.8; ry: 25.8; stroke-width: 1px; stroke-dasharray: 10,5; } .nodeLabel, .edgeLabel, .cluster-label, .label text, text { font-family: 'Aclonica', sans-serif !important; color: #F0F6FC !important; fill: #F0F6FC !important; } #pod .cluster-label { fill: #00D4FF !important; font-size: 20px; } #pod rect { stroke: #00D4FF; fill: rgba(0, 212, 255, 0.04); } .marker, .arrowMarkerPath, .marker path, .marker polygon { fill: #4CC9F0 !important; stroke: #4CC9F0 !important; } .flowchart-link, .edgePaths .path { stroke: #4CC9F0; stroke-width: 2px; }",
+    "flowchart": {
+        "curve": "basis",
+        "useMaxWidth": true,
+        "htmlLabels": true,
+        "rankSpacing": 85,
+        "nodeSpacing": 65
+    }
+} }%%
 
 flowchart TB
 
 %% ==============================
-%% COLOR CLASSES (your palette)
+%% COLOR STYLES & CLASSES
 %% ==============================
 style synthetic_data fill:#010209,stroke:#5D3FD3,stroke-width:2px,stroke-dasharray:6 6,color:#ffffff,rx:16,ry:16;
-style domain_norm fill:#0c0010,stroke:#ff00ff,stroke-width:2px,color:#ffffff,rx:16,ry:16,stroke-dasharray:6 6;
-style pod fill:#0d1b2a,stroke:#00d4ff,color:#ffffff,stroke-width:2px,stroke-dasharray:6 6,rx:16,ry:16;
-style trap fill:#002b11,stroke:#00ff88,color:#ffffff,stroke-width:2.5px,rx:16,ry:16;
-style normalized_wavefunctions fill:#112230,color:#ffffff,stroke:#14B5FF,stroke-width:2px,stroke-dasharray:6 1,rx:16,ry:16;
-style PsiMat fill:#112230,stroke:#14B5FF,color:#ffffff,stroke-width:2px,rx:16,ry:16;
+style learned_piml_inputs fill:#0b1020,stroke:#14B5FF,stroke-width:2px,stroke-dasharray:6 6,color:#ffffff,rx:16,ry:16;
+style pod fill:#0d1b2a,stroke:#00d4ff,color:#ffffff,stroke-width:2.5px,stroke-dasharray:6 6,rx:16,ry:16;
+
+style spatial_branch fill:#120d2a,stroke:#9a66ff,stroke-width:2px,stroke-dasharray:6 6,color:#ffffff,rx:16,ry:16;
+style temporal_branch fill:#001f24,stroke:#00ffcc,stroke-width:2px,stroke-dasharray:6 6,color:#ffffff,rx:16,ry:16;
+style hamiltonian_branch fill:#1b1026,stroke:#FE28A2,stroke-width:2px,stroke-dasharray:6 6,color:#ffffff,rx:16,ry:16;
+style verification_branch fill:#05241b,stroke:#03E8BD,stroke-width:2px,stroke-dasharray:6 6,color:#ffffff,rx:16,ry:16;
+
+style PsiMat fill:#112230,stroke:#14B5FF,color:#ffffff,stroke-width:2.5px,rx:16,ry:16;
 style trap_pod fill:#1a1a1a,stroke:#ffcc00,stroke-width:3px,color:#ffffff,rx:16,ry:16,stroke-dasharray:8 2;
-classDef spatial_modes fill:#2a185c,stroke:#9a66ff,stroke-width:4px,color:#ffffff,rx:16,ry:16;
-classDef temporal_modes fill:#003333,stroke:#00ffcc,stroke-width:4px,color:#ffffff,rx:16,ry:16;
+style SVD fill:#1a2b3c,stroke:#00e8ff,stroke-width:3px,color:#ffffff,rx:16,ry:16;
+style spec fill:#1a2b3c,stroke:#00e8ff,stroke-width:2.5px,color:#ffffff,rx:16,ry:16;
+
+classDef spatial_modes fill:#2a185c,stroke:#9a66ff,stroke-width:3px,color:#ffffff,rx:16,ry:16;
+classDef temporal_modes fill:#003333,stroke:#00ffcc,stroke-width:3px,color:#ffffff,rx:16,ry:16;
 classDef spatial_stencil fill:#2a0037,stroke:#ff00ff,stroke-width:2px,color:#ffffff,rx:16,ry:16;
-classDef psinorm fill:#002244,stroke:#14B5FF,stroke-width:2px,color:#ffffff,rx:16,ry:16;
-classDef diag fill:#1a2b3c,stroke:#00e8ff,stroke-width:2.5px,rx:16,ry:16;
+classDef psinorm fill:#224261,stroke:#14B5FF,stroke-width:2.8px,color:#ffffff,rx:16,ry:16;
+classDef trap_style fill:#002b11,stroke:#00ff88,stroke-width:2.5px,color:#ffffff,rx:16,ry:16;
+classDef potential_node fill:#11163a,stroke:#14B5FF,stroke-width:2.8px,color:#ffffff,rx:16,ry:16;
+classDef ham_node fill:#2e0824,stroke:#FE28A2,stroke-width:3px,color:#ffffff,rx:16,ry:16;
+classDef verif_node fill:#083325,stroke:#03E8BD,stroke-width:3px,color:#ffffff,rx:16,ry:16;
 
 %% ==============================
-%% INPUT BLOCKS
+%% INPUT SECTION
 %% ==============================
-    subgraph synthetic_data["1️⃣ Synthetic Data"]
+subgraph synthetic_data["1️⃣ Grid & Quadrature Weights"]
     direction LR
-        subgraph domain_norm["Uniform Grid"]
-            spatial_grid["$$x\in[-5, 5]$$"]:::spatial_stencil
-            deltax["$$\Delta x$$"]:::spatial_stencil
-        end
-        trap["Trapezoidal weights"]
-    end
+    spatial_grid["$$x \in [-5, 5]$$"]:::spatial_stencil
+    deltax["$$\Delta x$$"]:::spatial_stencil
+    trap["$$w \text{ (Weights)}$$"]:::trap_style
+end
 
-subgraph normalized_wavefunctions["Normalized Wavefunctions"]
-    direction TB
+subgraph learned_piml_inputs["PIML Learned Models"]
+    direction LR
     psi0(["$$\hat{\psi}_0^\theta$$"]):::psinorm
     psi1(["$$\hat{\psi}_1^\theta$$"]):::psinorm
     psi2(["$$\hat{\psi}_2^\theta$$"]):::psinorm
+    v_learned(["$$V_\text{PIML}(x)$$"]):::potential_node
 end
 
-
 %% ==============================
-%% POD DIAGRAM
+%% POD ANALYSIS & HAMILTONIAN PIPELINE
 %% ==============================
-subgraph pod["7️⃣ POD analysis"]
-    PsiMat("Snapshot matrix construction<br/>$$\mathbf{\Psi}^\theta = [\hat{\psi}_0, \hat{\psi}_1, \hat{\psi}_2]$$")
-    trap_pod("L² spatial weighting<br/>$$\mathbf{\Psi}_w = \sqrt{w \Delta x} \odot \mathbf{\Psi}$$")
-    SVD("Euclidean SVD<br/>$$\mathbf{\Psi}_w = U \Sigma V^T$$"):::diag
-    podscale("Physical mode recovery<br/>$$u_k^\text{phys} = u_k / \sqrt{w \Delta x}$$"):::spatial_modes
-    align("Phase/Sign Alignment<br/>(Relative to Ground Truth)"):::spatial_modes
-    spec("Singular values spectrum $$\sigma_k$$"):::diag
-    modes("Physical Basis Functions $$u_k^\text{phys}$$"):::spatial_modes
-    overlaps("Overlap matrix $$C_{kn}$$<br/>$$\langle u_k^\text{phys}, \hat{\psi}_n \rangle$$"):::spatial_modes
-    temporal_scaling("Temporal mode projection from $$V^T$$"):::temporal_modes
-    temporal_alignment("Global U(1) Phase Alignment"):::temporal_modes
-    temporal_mode_heatmap("Composition Heatmap (Matrix $$V_{nk}$$)"):::temporal_modes
-    temporal_overlap("Orthogonality Check $$\langle v_m, v_n \rangle = \delta_{mn}$$"):::temporal_modes
-    cross_temporal("Cross-State Projections $$|\langle \mathbf{e}_n, v_k \rangle|$$"):::temporal_modes
+subgraph pod["7️⃣ POD Analysis & Hamiltonian Galerkin Projection"]
+    direction TB
 
-    %% POD Companion Panels
+    PsiMat["Snapshot Matrix Construction<br/>$$\mathbf{\Psi}^\theta = [\hat{\psi}_0^\theta, \hat{\psi}_1^\theta, \hat{\psi}_2^\theta]$$"]
+    trap_pod["L² Spatial Weighting<br/>$$\mathbf{\Psi}_w = \sqrt{w \Delta x} \odot \mathbf{\Psi}^\theta$$"]
+    SVD["Euclidean Thin SVD<br/>$$\mathbf{\Psi}_w = U \Sigma V^T$$"]
+    spec["Singular Value Spectrum<br/>$$\sigma_k \Rightarrow \lambda_k = \sigma_k^2$$"]
+
+    subgraph spatial_branch["Spatial POD Modes (U)"]
+        direction TB
+        podscale["Physical Mode Recovery<br/>$$u_k^\text{phys} = u_k / \sqrt{w \Delta x}$$"]:::spatial_modes
+        align["Phase / Sign Alignment<br/>(Relative to Ground Truth)"]:::spatial_modes
+        modes["Physical Basis Functions<br/>$$\phi_k(x) \equiv u_k^\text{phys}$$"]:::spatial_modes
+        overlaps["Spatial Overlap Matrix<br/>$$C_{kn} = \langle u_k^\text{phys}, \hat{\psi}_n^\theta \rangle$$"]:::spatial_modes
+    end
+
+    subgraph temporal_branch["Composition Modes (V)"]
+        direction TB
+        temporal_scaling["State Composition Matrix<br/>$$V^T$$"]:::temporal_modes
+        temporal_alignment["Global U(1) Phase Alignment"]:::temporal_modes
+        temporal_mode_heatmap["Composition Heatmap<br/>(Matrix $$V_{nk}$$)"]:::temporal_modes
+        temporal_overlap["Orthogonality Verification<br/>$$\langle v_m, v_n \rangle = \delta_{mn}$$"]:::temporal_modes
+        cross_temporal["Cross-State Projections<br/>$$|\langle \mathbf{e}_n, v_k \rangle|$$"]:::temporal_modes
+    end
+
+    subgraph hamiltonian_branch["Physical Hamiltonian Construction"]
+        direction TB
+        diff_op["Finite-Difference Laplacian<br/>$$\mathbf{D}_2 \approx \frac{d^2}{dx^2}$$"]:::ham_node
+        pot_mat["Discrete Potential Operator<br/>$$\mathbf{V} = \text{diag}(V_\text{PIML})$$"]:::ham_node
+        ham_matrix["Discrete Physical Hamiltonian<br/>$$\mathbf{H} = -\frac{\hbar^2}{2m}\mathbf{D}_2 + \mathbf{V}$$"]:::ham_node
+    end
+
+    subgraph verification_branch["Modal Galerkin Projection & Validation"]
+        direction TB
+        galerkin["Galerkin Projection onto POD Basis<br/>$$\mathbf{H}_\text{pod} = \mathbf{U}^* \mathbf{H} \mathbf{U}$$"]:::verif_node
+        plot_a["Plot A: Diagonalization Heatmap<br/>$$|\mathbf{H}_\text{pod}| \rightarrow \text{Decoupling Check}$$"]:::verif_node
+        plot_b["Plot B: Mode Energy Spectrum<br/>$$E_k = (\mathbf{H}_\text{pod})_{kk} \text{ vs. TISE } E_k^\text{phys}$$"]:::verif_node
+        ext_acc["External Accuracy Assessment<br/>$$\mathbf{\Psi}_\text{true} \text{ projected on } \mathbf{U}$$"]:::verif_node
+    end
+
+    %% Pipeline Flow
     PsiMat --> trap_pod
     trap_pod --> SVD
-    SVD --> spec
+
     SVD --> podscale
+    SVD --> spec
     SVD --> temporal_scaling
+
     podscale --> align
     align --> modes
-    PsiMat --> overlaps
+    modes --> overlaps
 
     temporal_scaling --> temporal_alignment
     temporal_alignment --> temporal_mode_heatmap
-    temporal_alignment --> temporal_overlap
-    temporal_alignment --> cross_temporal
-    PsiMat --> cross_temporal
+    temporal_mode_heatmap --> temporal_overlap
+    temporal_overlap --> cross_temporal
+
+    diff_op & pot_mat --> ham_matrix
+    ham_matrix --> galerkin
+    modes --> galerkin
+
+    galerkin --> plot_a
+    galerkin --> plot_b
+    plot_b --> ext_acc
 end
 
 %% ==============================
-%% CONNECTIONS
+%% CONNECTIONS FROM INPUTS
 %% ==============================
-psi0 --> PsiMat
-psi1 --> PsiMat
-psi2 --> PsiMat
+psi0 & psi1 & psi2 --> PsiMat
+deltax & trap --> trap_pod
+deltax --> diff_op
+v_learned --> pot_mat
 
-deltax --> trap_pod
-trap --> trap_pod
+PsiMat -.-> overlaps
+PsiMat -.-> cross_temporal
 
-%% ==============================
-%% LINKS (subtle)
-%% ==============================
-linkStyle default stroke:#4CC9F0,stroke-width:1.618px,opacity:0.6
+linkStyle default stroke:#4CC9F0,stroke-width:2px;
+linkStyle 18,19,20,21,22,23,24 stroke:#FE28A2,stroke-width:2.5px;
