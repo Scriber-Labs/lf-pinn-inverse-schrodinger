@@ -7,10 +7,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bb16bf9d-5f4f-4082-9b17-e366580f8b10" name="Changes" comment="Refined `figures_reevaluation.md` with additional training curve visualizations and updated analysis notes for spectral energy cascade and optimization trajectory.">
+    <list default="true" id="bb16bf9d-5f4f-4082-9b17-e366580f8b10" name="Changes" comment="Added `salmanogli2026QNN` to `references.bib` and updated `conclusion-update-poa.md` with new quantum neural network (QNN) framework citations, architecture extensions, and diagnostic mappings.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conclusion-update-poa.md" beforeDir="false" afterPath="$PROJECT_DIR$/conclusion-update-poa.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/references.bib" beforeDir="false" afterPath="$PROJECT_DIR$/references.bib" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/artifacts/figures.md" beforeDir="false" afterPath="$PROJECT_DIR$/artifacts/figures.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/mermaid-diagrams/architecture_final.mmd" beforeDir="false" afterPath="$PROJECT_DIR$/assets/mermaid-diagrams/architecture_final.mmd" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/mermaid-diagrams/pod.mmd" beforeDir="false" afterPath="$PROJECT_DIR$/assets/mermaid-diagrams/pod.mmd" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,61 +39,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="2.5320862744275964E-16" />
-      <entry key="MS500" value="0.0013378989252138815" />
-      <entry key="S2" value="0.9071595549645203" />
-      <entry key="S5" value="6.620181559536787" />
-      <entry key="S10" value="15.150269899308848" />
-      <entry key="S30" value="41.96375099215223" />
-      <entry key="S60" value="91.09008457454517" />
-      <entry key="M2" value="169.788473413811" />
-      <entry key="M5" value="279.4919807233303" />
-      <entry key="M10" value="363.463257287782" />
-      <entry key="M15" value="427.9872527882006" />
-      <entry key="M30" value="593.3830086202512" />
-      <entry key="H1" value="813.746021884524" />
-      <entry key="H2" value="1057.1628638784377" />
-      <entry key="H4" value="1474.4874730261718" />
-      <entry key="D1" value="5871.329630629252" />
-      <entry key="W1" value="9200.593371425868" />
-    </decayedCancelled>
-    <decayedSelected>
       <entry key="MS100" value="1.0" />
       <entry key="MS500" value="1.0" />
       <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0000000000000597" />
-      <entry key="S10" value="1.000000244222592" />
-      <entry key="S30" value="1.0062507024347787" />
-      <entry key="S60" value="1.0791166925065374" />
-      <entry key="M2" value="1.288616800582653" />
-      <entry key="M5" value="1.742803785048142" />
-      <entry key="M10" value="2.155054570644197" />
-      <entry key="M15" value="2.3939545047570636" />
-      <entry key="M30" value="2.90131233045034" />
-      <entry key="H1" value="3.7124541749642246" />
-      <entry key="H2" value="4.977059733961546" />
-      <entry key="H4" value="7.3028028177078514" />
-      <entry key="D1" value="35.26806090613487" />
-      <entry key="W1" value="59.28149246847602" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0" />
+      <entry key="S60" value="1.0" />
+      <entry key="M2" value="1.000000000000054" />
+      <entry key="M5" value="1.0001767040931537" />
+      <entry key="M10" value="1.2890008654960368" />
+      <entry key="M15" value="4.673301590325267" />
+      <entry key="M30" value="55.97281576972837" />
+      <entry key="H1" value="248.68249660017977" />
+      <entry key="H2" value="584.2370677694017" />
+      <entry key="H4" value="1096.1981379998751" />
+      <entry key="D1" value="5588.425321844264" />
+      <entry key="W1" value="9136.679926170367" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="1.0624728689343257E-186" />
+      <entry key="S30" value="1.0267832549347476E-62" />
+      <entry key="S60" value="1.0900707868621596E-31" />
+      <entry key="M2" value="4.0955943431008843E-16" />
+      <entry key="M5" value="1.1018583130173587E-6" />
+      <entry key="M10" value="0.001713550472074909" />
+      <entry key="M15" value="0.020546679444778313" />
+      <entry key="M30" value="0.26878644301451365" />
+      <entry key="H1" value="1.1299716297714626" />
+      <entry key="H2" value="2.745845341841938" />
+      <entry key="H4" value="5.424268564126294" />
+      <entry key="D1" value="33.56269686022795" />
+      <entry key="W1" value="58.86324054051147" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="4.0792147027863555E-15" />
-      <entry key="MS500" value="0.0026371220560130917" />
-      <entry key="S2" value="1.095451241254888" />
-      <entry key="S5" value="7.1288066664761045" />
-      <entry key="S10" value="15.860593203578972" />
-      <entry key="S30" value="42.85849711413322" />
-      <entry key="S60" value="92.10566552314499" />
-      <entry key="M2" value="171.03776539277297" />
-      <entry key="M5" value="281.2123701829512" />
-      <entry key="M10" value="365.6024320530411" />
-      <entry key="M15" value="430.36753650866234" />
-      <entry key="M30" value="596.2732542427998" />
-      <entry key="H1" value="817.4501841624746" />
-      <entry key="H2" value="1062.134408024133" />
-      <entry key="H4" value="1481.786658937739" />
-      <entry key="D1" value="5906.595728301495" />
-      <entry key="W1" value="9259.874427372419" />
+      <entry key="MS100" value="0.7737824967711949" />
+      <entry key="MS500" value="0.950000382874886" />
+      <entry key="S2" value="0.9872586443741826" />
+      <entry key="S5" value="0.9948838432045924" />
+      <entry key="S10" value="0.9974386413231605" />
+      <entry key="S30" value="0.9991454837844128" />
+      <entry key="S60" value="0.9995726505784424" />
+      <entry key="M2" value="0.9997863024559553" />
+      <entry key="M5" value="1.0000923072821262" />
+      <entry key="M10" value="1.2906590462816052" />
+      <entry key="M15" value="4.693702441393153" />
+      <entry key="M30" value="56.24056271117031" />
+      <entry key="H1" value="249.80993727457346" />
+      <entry key="H2" value="586.9798665975497" />
+      <entry key="H4" value="1101.6197182706062" />
+      <entry key="D1" value="5621.986150104658" />
+      <entry key="W1" value="9195.542733226366" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -700,7 +701,15 @@
       <option name="project" value="LOCAL" />
       <updated>1789843548459</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="Added `salmanogli2026QNN` to `references.bib` and updated `conclusion-update-poa.md` with new quantum neural network (QNN) framework citations, architecture extensions, and diagnostic mappings.">
+      <option name="closed" value="true" />
+      <created>1790259380549</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1790259380549</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -710,8 +719,6 @@
     <option featureType="com.intellij.fileTypeFactory" implementationName="pyproject.toml" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="figure 1, 2, and 3 analysis drafts typed up. some polishing needs to be done (mainly removing redundant information and deciding where to highlihgt the important points)." />
-    <MESSAGE value="figure 1, 2, 3, and 4 analysis drafts have been typed up. some polishing needs to be done (mainly removing redundant information and deciding where to highlihgt the important points)." />
     <MESSAGE value="normalization best practices documentation" />
     <MESSAGE value=" updated cli/extract_metrics.py and ran on windows. there is an interesting failure mode that results in the swapping of the spatial modes that manifests on the windows computer." />
     <MESSAGE value="Includes critical stability fixes (UTF-8 encoding for Windows), 100% adherence to normalization best practices, and physically consistent $L^2$ loss functions." />
@@ -735,6 +742,8 @@
     <MESSAGE value="updated execution timestamps, outputs, and interpreter path in workspace configuration and demo notebook" />
     <MESSAGE value="minor update to @figures.md" />
     <MESSAGE value="updated figures.md" />
-    <option name="LAST_COMMIT_MESSAGE" value="updated figures.md" />
+    <MESSAGE value="Refined `figures_reevaluation.md` with additional training curve visualizations and updated analysis notes for spectral energy cascade and optimization trajectory." />
+    <MESSAGE value="Added `salmanogli2026QNN` to `references.bib` and updated `conclusion-update-poa.md` with new quantum neural network (QNN) framework citations, architecture extensions, and diagnostic mappings." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added `salmanogli2026QNN` to `references.bib` and updated `conclusion-update-poa.md` with new quantum neural network (QNN) framework citations, architecture extensions, and diagnostic mappings." />
   </component>
 </project>

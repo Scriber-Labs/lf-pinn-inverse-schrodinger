@@ -144,7 +144,7 @@
 
 > 🔑 **Key Insights**
 > 1. **Rotated Basis:** Primary projections ($\langle u_0 | \hat{\psi}_0^\theta \rangle=0.88$, $\langle u_1 | \hat{\psi}_1^\theta \rangle=0.87$, $\langle u_2 | \hat{\psi}_2^\theta \rangle=0.98$).
-> 2. **Off-Diagonal Cross-Talk:** Significant off-diagonal components ($\langle u_0 | \hat{\psi}_1^\theta \rangle =0.46$, $\langle u_1 | \hat{\psi}_0^\theta \rangle=-0.47$, $\langle u_2 | \hat{\psi}_1^\theta \rangle=-0.20$).
+> 2. **Off-Diagonal Cross-Talk:** Significant off-diagonal components ($\langle u_0 | \hat{\psi}_1^\theta \rangle =0.46$, $\langle u_1 | \hat{\psi}_0^\theta \rangle=-0.47$, and $\langle u_2 | \hat{\psi}_1^\theta \rangle = -0.20$ ).
 
 > ❌ **Failure Modes**
 > 

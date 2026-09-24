@@ -1,22 +1,30 @@
 %%{ init: {
-        "theme": "dark",
+        "theme": "base",
         "themeVariables": {
             "background": "#0D1117",
-            "lineColor": "#14B5FF",
-            "textColor": "whitesmoke",
-            "primaryTextColor": "whitesmoke",
-            "secondaryTextColor": "whitesmoke",
-            "tertiaryTextColor": "whitesmoke",
+            "primaryColor": "#14B5FF",
+            "primaryTextColor": "#F0F6FC",
+            "primaryBorderColor": "#14B5FF",
+            "lineColor": "#4CC9F0",
+            "secondaryColor": "#0070EB",
+            "tertiaryColor": "#0D1117",
             "fontFamily": "'Aclonica', sans-serif",
-            "borderRadius": "14"
+            "fontSize": "16px",
+            "clusterBkg": "rgba(20, 181, 255, 0.02)",
+            "clusterBorder": "#14B5FF",
+            "edgeLabelBackground":"#0D1117",
+            "nodeSpacing": 81,
+            "rankSpacing": 131,
+            "borderRadius": "16"
         },
-        "themeCSS": ".nodeLabel, .edgeLabel, .cluster-label, .cluster-label text, .label, .label text, text, .katex, .katex *, .MathJax, .MathJax *, mjx-container, mjx-container * { color: whitesmoke !important; fill: whitesmoke !important; -webkit-text-fill-color: whitesmoke !important; }",
+        "themeCSS": ".node rect, .node circle, .node ellipse, .node polygon, .node path { stroke-width: 2.618px !important; filter: drop-shadow(0px 4px 6px rgba(0,0,0, 0.5)); } .node { filter: saturate(1.2) contrast(1.1); } .cluster rect { rx: 25.8; ry: 25.8; stroke-width: 1px; stroke-dasharray: 10,5; } .nodeLabel, .edgeLabel, .cluster-label, .label text, text, .katex, .katex *, .MathJax, .MathJax *, mjx-container, mjx-container * { color: #F0F6FC !important; fill: #F0F6FC !important; font-weight: 300; } #pod .cluster-label { fill: #00D4FF !important; font-size: 20px; } #pod rect { stroke: #00D4FF; fill: rgba(0, 212, 255, 0.04); } .marker, .arrowMarkerPath, .marker path, .marker polygon { fill: #4CC9F0 !important; stroke: #4CC9F0 !important; } .flowchart-link, .edgePaths .path { stroke: #4CC9F0; stroke-width: 1.618px; }",
         "flowchart": {
             "curve": "basis",
-            "nodeSpacing": 30,
-            "rankSpacing": 50
-        },
-        "handDrawn": true
+            "useMaxWidth": false,
+            "htmlLabels": true,
+            "rankSpacing": 131,
+            "nodeSpacing": 81
+        }
     } }%%
 
 flowchart TB
@@ -24,44 +32,43 @@ flowchart TB
 %% ==============================
 %% COLOR CLASSES (your palette)
 %% ==============================
-style synthetic_data fill:#010209,stroke:#5D3FD3,stroke-width:2px,stroke-dasharray:6 6,color:#ffffff,rx:12,ry:12;
-style domain_norm fill:#0c0010,stroke:#750071,stroke-width:2px,color:#ffffff,rx:12,ry:12,stroke-dasharray:6 6,rx:12,ry:12;
-style pod fill:#0d1b2a,stroke:#00d4ff,color:#ffffff,stroke-width:2px,stroke-dasharray:6 6,rx:12px,ry:12px;
-style trap fill:#023e00,stroke:#57ffbc,color:#ffffff,stroke-width:2px,rx:12,ry:12;
-style normalized_wavefunctions fill:#112230,color:#ffffff,stroke:#4b54ff,stroke-width:2px,stroke-dasharray:6 6,rx:12,ry:12;
-style PsiMat fill:#112230,stroke:#4b54ff,color:#ffffff,stroke-width:2px,rx:12,ry:12;
-style trap_pod fill:#1f4e5f,stroke:#f78166,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-
-classDef spatial_modes fill:#5c2c6d,stroke:#ff66b3,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-classDef temporal_modes fill:#1a6b63,stroke:#00f5db,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-classDef spatial_stencil fill:#2a0037,stroke:#750071,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-classDef psinorm fill:#224261,stroke:#4b54ff,stroke-width:2px,color:#ffffff,rx:12,ry:12;
-classDef diag fill:#1b263b,stroke:#00d4ff,color:#ffffff,stroke-width:2px,rx:12,ry:12;
+style synthetic_data fill:#010209,stroke:#5D3FD3,stroke-width:2px,stroke-dasharray:6 6,color:#ffffff,rx:16,ry:16;
+style domain_norm fill:#0c0010,stroke:#ff00ff,stroke-width:2px,color:#ffffff,rx:16,ry:16,stroke-dasharray:6 6;
+style pod fill:#0d1b2a,stroke:#00d4ff,color:#ffffff,stroke-width:2px,stroke-dasharray:6 6,rx:16,ry:16;
+style trap fill:#002b11,stroke:#00ff88,color:#ffffff,stroke-width:2.5px,rx:16,ry:16;
+style normalized_wavefunctions fill:#112230,color:#ffffff,stroke:#14B5FF,stroke-width:2px,stroke-dasharray:6 1,rx:16,ry:16;
+style PsiMat fill:#112230,stroke:#14B5FF,color:#ffffff,stroke-width:2px,rx:16,ry:16;
+style trap_pod fill:#1a1a1a,stroke:#ffcc00,stroke-width:3px,color:#ffffff,rx:16,ry:16,stroke-dasharray:8 2;
+classDef spatial_modes fill:#2a185c,stroke:#9a66ff,stroke-width:4px,color:#ffffff,rx:16,ry:16;
+classDef temporal_modes fill:#003333,stroke:#00ffcc,stroke-width:4px,color:#ffffff,rx:16,ry:16;
+classDef spatial_stencil fill:#2a0037,stroke:#ff00ff,stroke-width:2px,color:#ffffff,rx:16,ry:16;
+classDef psinorm fill:#002244,stroke:#14B5FF,stroke-width:2px,color:#ffffff,rx:16,ry:16;
+classDef diag fill:#1a2b3c,stroke:#00e8ff,stroke-width:2.5px,rx:16,ry:16;
 
 %% ==============================
 %% INPUT BLOCKS
 %% ==============================
-subgraph synthetic_data["1️⃣ Synthetic Data"]
-    direction TB
-    subgraph domain_norm["Uniform Grid / Trapezoidal Rule"]
-        spatial_grid["$$x\in[-5, 5]$$"]:::spatial_stencil
-        deltax["$$\Delta x$$"]:::spatial_stencil
+    subgraph synthetic_data["1️⃣ Synthetic Data"]
+    direction LR
+        subgraph domain_norm["Uniform Grid"]
+            spatial_grid["$$x\in[-5, 5]$$"]:::spatial_stencil
+            deltax["$$\Delta x$$"]:::spatial_stencil
+        end
+        trap["Trapezoidal weights"]
     end
-    trap["Trapezoidal weights"]
-end
 
 subgraph normalized_wavefunctions["Normalized Wavefunctions"]
     direction TB
-    psi0(("$$\hat{\psi}_0^\theta$$")):::psinorm
-    psi1(("$$\hat{\psi}_1^\theta$$")):::psinorm
-    psi2(("$$\hat{\psi}_2^\theta$$")):::psinorm
+    psi0(["$$\hat{\psi}_0^\theta$$"]):::psinorm
+    psi1(["$$\hat{\psi}_1^\theta$$"]):::psinorm
+    psi2(["$$\hat{\psi}_2^\theta$$"]):::psinorm
 end
 
 
 %% ==============================
 %% POD DIAGRAM
 %% ==============================
-subgraph pod["7️⃣ POD Diagnostics"]
+subgraph pod["7️⃣ POD analysis"]
     PsiMat("Snapshot matrix construction<br/>$$\mathbf{\Psi}^\theta = [\hat{\psi}_0, \hat{\psi}_1, \hat{\psi}_2]$$")
     trap_pod("L² spatial weighting<br/>$$\mathbf{\Psi}_w = \sqrt{w \Delta x} \odot \mathbf{\Psi}$$")
     SVD("Euclidean SVD<br/>$$\mathbf{\Psi}_w = U \Sigma V^T$$"):::diag
@@ -106,4 +113,4 @@ trap --> trap_pod
 %% ==============================
 %% LINKS (subtle)
 %% ==============================
-linkStyle default stroke:#8b949e,stroke-width:1.5px,opacity:0.8
+linkStyle default stroke:#4CC9F0,stroke-width:1.618px,opacity:0.6
