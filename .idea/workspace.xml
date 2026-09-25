@@ -7,7 +7,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bb16bf9d-5f4f-4082-9b17-e366580f8b10" name="Changes" comment="updated figures.md">
+    <list default="true" id="bb16bf9d-5f4f-4082-9b17-e366580f8b10" name="Changes" comment="updated workspace configuration and pod diagram styles">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -138,7 +138,7 @@
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;python.packages.toolwindow.project.migrated.to.right.top.v2&quot;: &quot;true&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.Mappings&quot;,
     &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
   }
 }</component>
@@ -318,14 +318,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1775001375268</updated>
-    </task>
-    <task id="LOCAL-00001" summary="Started repo entropy control 'treatment'.">
-      <option name="closed" value="true" />
-      <created>1775036113930</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1775036113930</updated>
     </task>
     <task id="LOCAL-00002" summary="Updated loss table images.">
       <option name="closed" value="true" />
@@ -711,7 +703,15 @@
       <option name="project" value="LOCAL" />
       <updated>1790259380549</updated>
     </task>
-    <option name="localTasksCounter" value="50" />
+    <task id="LOCAL-00050" summary="updated workspace configuration and pod diagram styles">
+      <option name="closed" value="true" />
+      <created>1790269724934</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1790269724935</updated>
+    </task>
+    <option name="localTasksCounter" value="51" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -721,7 +721,6 @@
     <option featureType="com.intellij.fileTypeFactory" implementationName="pyproject.toml" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="normalization best practices documentation" />
     <MESSAGE value=" updated cli/extract_metrics.py and ran on windows. there is an interesting failure mode that results in the swapping of the spatial modes that manifests on the windows computer." />
     <MESSAGE value="Includes critical stability fixes (UTF-8 encoding for Windows), 100% adherence to normalization best practices, and physically consistent $L^2$ loss functions." />
     <MESSAGE value="added a temporal mode heatmap plot and updated documentation" />
@@ -743,9 +742,10 @@
     <MESSAGE value="Added reevaluation analysis outputs to `figures_reevaluation.md` and updated `figures.md` with new training curve visualizations." />
     <MESSAGE value="updated execution timestamps, outputs, and interpreter path in workspace configuration and demo notebook" />
     <MESSAGE value="minor update to @figures.md" />
-    <MESSAGE value="updated figures.md" />
     <MESSAGE value="Refined `figures_reevaluation.md` with additional training curve visualizations and updated analysis notes for spectral energy cascade and optimization trajectory." />
     <MESSAGE value="Added `salmanogli2026QNN` to `references.bib` and updated `conclusion-update-poa.md` with new quantum neural network (QNN) framework citations, architecture extensions, and diagnostic mappings." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added `salmanogli2026QNN` to `references.bib` and updated `conclusion-update-poa.md` with new quantum neural network (QNN) framework citations, architecture extensions, and diagnostic mappings." />
+    <MESSAGE value="updated figures.md" />
+    <MESSAGE value="updated workspace configuration and pod diagram styles" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated workspace configuration and pod diagram styles" />
   </component>
 </project>
