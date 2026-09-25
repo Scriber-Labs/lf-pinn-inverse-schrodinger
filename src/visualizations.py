@@ -35,6 +35,7 @@ import matplotlib as mpl
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
+from matplotlib.text import Text
 import numpy as np
 import seaborn as sns
 import torch
@@ -194,60 +195,67 @@ def get_comparison_colors(quantity: str) -> Tuple[str, str]:
 
 
 # ======================================================================
+# 📐 Golden Ratio Constants & Harmonization Scaling
+# ======================================================================
+GOLDEN_RATIO: Final[float] = (1.0 + 5.0**0.5) / 2.0  # φ ≈ 1.6180339887
+PHI: Final[float] = GOLDEN_RATIO
+INV_PHI: Final[float] = 1.0 / GOLDEN_RATIO            # φ⁻¹ ≈ 0.6180339887
+INV_PHI2: Final[float] = INV_PHI**2                   # φ⁻² ≈ 0.3819660113
+INV_PHI3: Final[float] = INV_PHI**3                   # φ⁻³ ≈ 0.2360679775
+INV_PHI4: Final[float] = INV_PHI**4                   # φ⁻⁴ ≈ 0.1458980338
+
+
+# ======================================================================
 # 🧠 Semantic Visual-Memory Gradients
 # ======================================================================
-# These colormaps serve as a cognitive and visual-memory convention across the project:
-#   - 🟢 Green   : Temporal / dynamical structure (temporal POD modes, time-evolution)
-#   - 🩷 Magenta : Spatial structure (spatial POD modes, domain coordinates)
-#   - 🔵 Blue    : Wavefunctions / quantum states (learned & ground truth eigenstates)
-#   - 🟣 Purple  : Hamiltonian / potential / operator structure (V(x), energy landscape)
-#
-# NOTE: These gradients represent conceptual associations and visual-memory aids,
-# NOT direct numerical encodings. Colors do not encode mathematical value by themselves.
-# Continuous numerical diagnostics (e.g. signed overlaps, unitary overlap matrices)
-# retain separate diagnostic colormaps.
+# Vibrant brand gradients for physical and modal representations:
+#   - 🟢 Temporal POD     : Green / Emerald / Mint gradient
+#   - 🩷 Spatial POD      : Magenta / Rose / Pink gradient
+#   - 🔵 Wavefunctions    : Blue / Azure / Cyan gradient
+#   - 🟣 Hamiltonian      : Purple / Violet / Lilac gradient
 
 temporal_pod_cmap = mcolors.LinearSegmentedColormap.from_list(
     "temporal_pod_gradient",
     [
-        (0.00, "#071A12"),
-        (0.25, "#064E3B"),
-        (0.50, "#059669"),
+        (0.00, "#032B14"),
+        (0.25, "#059669"),
+        (0.50, "#00FF7F"),
         (0.75, "#31FF48"),
-        (1.00, "#B7FFCF"),
+        (1.00, "#CCFFBD"),
     ],
 )
 
 spatial_pod_cmap = mcolors.LinearSegmentedColormap.from_list(
     "spatial_pod_gradient",
     [
-        (0.00, "#210817"),
-        (0.25, "#7C174F"),
+        (0.00, "#3B022D"),
+        (0.25, "#7952F5"),
         (0.50, "#AD1457"),
         (0.75, "#F72585"),
-        (1.00, "#FFB4F6"),
+        (0.90, "#FF66B3"),
+        (1.00, "#FFD4F0"),
     ],
 )
 
 wavefunction_cmap = mcolors.LinearSegmentedColormap.from_list(
     "wavefunction_gradient",
     [
-        (0.00, "#06152B"),
-        (0.25, "#003B73"),
+        (0.00, "#031B4E"),
+        (0.25, "#0050C8"),
         (0.50, "#0070EB"),
-        (0.75, "#00B8FF"),
-        (1.00, "#B8F6FF"),
+        (0.75, "#14B5FF"),
+        (1.00, "#A6FAFF"),
     ],
 )
 
 hamiltonian_cmap = mcolors.LinearSegmentedColormap.from_list(
     "hamiltonian_gradient",
     [
-        (0.00, "#120A24"),
-        (0.25, "#3B176E"),
+        (0.00, "#1E0438"),
+        (0.25, "#4361EE"),
         (0.50, "#7C3AED"),
         (0.75, "#A855F7"),
-        (1.00, "#D8B4FE"),
+        (1.00, "#F3E8FF"),
     ],
 )
 
@@ -259,100 +267,59 @@ HAMILTONIAN_CMAP: Final[mcolors.LinearSegmentedColormap] = hamiltonian_cmap
 
 
 # ======================================================================
-# 🌈 Perceptually Smooth, Intuitive Diagnostic Colormaps
+# 🌈 Perceptually Smooth, Intuitive Diagnostic Colormaps (The Scriber Experience)
 # ======================================================================
-# These diagnostic colormaps are uniquely crafted for specific mathematical &
-# modal visualizations, harmonized with the four semantic color families:
-#   - Spatial Overlap     : [0, 1] sequential gradient in the Magenta family
-#   - Temporal Overlap    : [0, 1] sequential gradient in the Green family
-#   - Wavefunction Overlap: [0, 1] sequential gradient in the Blue family
-#   - Hamiltonian Density : [0, 1] sequential gradient in the Purple family
-#   - Temporal Modal (V)  : [-1, 1] diverging gradient (Amethyst -> Slate -> Green)
-#   - Cross Overlap (M)   : [-1, 1] diverging gradient (Magenta -> Slate -> Cyan/Blue)
+# Signature multi-hue high-contrast Scriber Experience colormaps for heatmaps:
+#   - Spatial / Unitary Overlap [0, 1] : Dark Slate -> Deep Navy -> Royal Indigo -> Electric Purple -> Rose Pink -> Electric Cyan
+#   - Cross Overlap [-1, 1]            : Neon Rose Pink -> Electric Purple -> Dark Slate -> Sky Blue -> Electric Cyan
+#   - Temporal Modal Diverging [-1, 1] : Amethyst Purple -> Deep Violet -> Dark Slate -> Spring Jade -> Electric Green / Cyan
 
-# 1. Spatial Overlap Colormap [0, 1] (Spatial / Magenta Family)
-# Zero overlap is quiet dark background; unit overlap glows in luminous rose.
+# 1. Sequential Colormap for [0, 1] Overlaps (The Scriber Experience Signature Overlap Colormap)
+# 0 = Quiet Dark Slate -> Mid = Electric Indigo/Purple -> High = Vibrant Rose Pink -> 1.0 = Glowing Electric Cyan
 spatial_overlap_cmap = mcolors.LinearSegmentedColormap.from_list(
     "spatial_overlap_smooth",
     [
-        (0.00, "#0d1117"),  # 0.00: Dark background (orthogonal/quiet)
-        (0.25, "#2c0b24"),  # 0.25: Deep plum
-        (0.50, "#7C174F"),  # 0.50: Deep magenta
-        (0.75, "#F72585"),  # 0.75: Vibrant neon rose
-        (1.00, "#FFE5F9"),  # 1.00: Luminous rose-glow highlight
+        (0.00, "#0d1117"),  # Dark background (0 overlap = quiet)
+        (0.20, "#1c1445"),  # Deep navy-violet
+        (0.45, "#4361EE"),  # Royal Indigo
+        (0.70, "#7952F5"),  # Electric Purple
+        (0.88, "#FF66B3"),  # Vibrant Rose Pink
+        (1.00, "#00FFEE"),  # Glowing Electric Cyan (1.0 peak)
     ],
 )
 
-# 2. Temporal Overlap Colormap [0, 1] (Temporal / Green Family)
-# Zero overlap is quiet dark background; unit overlap glows in luminous mint.
-temporal_overlap_cmap = mcolors.LinearSegmentedColormap.from_list(
-    "temporal_overlap_smooth",
-    [
-        (0.00, "#0d1117"),  # 0.00: Dark background (orthogonal/quiet)
-        (0.25, "#072418"),  # 0.25: Deep forest shadow
-        (0.50, "#059669"),  # 0.50: Vibrant emerald green
-        (0.75, "#31FF48"),  # 0.75: Luminous electric green
-        (1.00, "#E2FFE9"),  # 1.00: Glowing mint highlight
-    ],
-)
+# 2. Sequential Colormap for [0, 1] Temporal Overlaps
+temporal_overlap_cmap = spatial_overlap_cmap
 
-# 3. Wavefunction State Overlap Colormap [0, 1] (Wavefunction / Blue Family)
-# Zero overlap is quiet dark background; unit overlap glows in luminous ice-blue.
-wavefunction_overlap_cmap = mcolors.LinearSegmentedColormap.from_list(
-    "wavefunction_overlap_smooth",
-    [
-        (0.00, "#0d1117"),  # 0.00: Dark background (orthogonal/quiet)
-        (0.25, "#0A2342"),  # 0.25: Deep navy
-        (0.50, "#0070EB"),  # 0.50: Royal blue
-        (0.75, "#00B8FF"),  # 0.75: Vivid sky blue
-        (1.00, "#E0F8FF"),  # 1.00: Luminous ice-blue highlight
-    ],
-)
+# 3. Sequential Colormap for [0, 1] Wavefunction State Overlaps
+wavefunction_overlap_cmap = spatial_overlap_cmap
 
-# 4. Hamiltonian Operator / Potential Density Colormap [0, 1] (Purple Family)
-hamiltonian_density_cmap = mcolors.LinearSegmentedColormap.from_list(
-    "hamiltonian_density_smooth",
-    [
-        (0.00, "#0d1117"),  # 0.00: Dark background (quiet)
-        (0.25, "#1E0C3E"),  # 0.25: Deep indigo
-        (0.50, "#7C3AED"),  # 0.50: Vibrant purple
-        (0.75, "#A855F7"),  # 0.75: Luminous lilac
-        (1.00, "#F5E8FF"),  # 1.00: Glowing lavender highlight
-    ],
-)
+# 4. Sequential Colormap for [0, 1] Hamiltonian Density
+hamiltonian_density_cmap = spatial_overlap_cmap
 
-# 5. Symmetric Diverging Colormap for [-1, 1] Cross-Overlaps & Modal Matrices
-# Connects Spatial POD (Magenta, -1.0) with Wavefunction/Learned (Cyan/Blue, +1.0)
+# 5. Symmetric Diverging Colormap for [-1, 1] Cross-Overlaps & Modal Matrices (The Scriber Experience Diverging)
+# -1.0 = Vibrant Neon Rose Pink, 0.0 = Dark Slate Neutral, +1.0 = Electric Cyan
 cross_overlap_cmap = mcolors.LinearSegmentedColormap.from_list(
     "cross_overlap_diverging",
     [
-        (0.00, "#F72585"),  # -1.0 : Neon Rose Pink (Spatial dominant)
-        (0.25, "#7C174F"),  # -0.5 : Deep Magenta
+        (0.00, "#F72585"),  # -1.0 : Vibrant Neon Rose Pink
+        (0.25, "#7952F5"),  # -0.5 : Electric Purple
         (0.50, "#161b22"),  #  0.0 : Neutral Dark Slate
-        (0.75, "#0070EB"),  # +0.5 : Vivid Royal Blue
-        (1.00, "#00B8FF"),  # +1.0 : Bright Electric Cyan/Blue (Wavefunction dominant)
+        (0.75, "#0A95EB"),  # +0.5 : Vivid Sky Blue
+        (1.00, "#00FFEE"),  # +1.0 : Bright Electric Cyan
     ],
 )
 
-# Backwards compatibility aliases
+# 6. Temporal Modal Composition Colormap [-1, 1]
+temporal_cmap = cross_overlap_cmap
+
+# Colormap Aliases (Uppercase & Backwards Compatibility)
 BLUE_TO_PINK: Final[mcolors.LinearSegmentedColormap] = cross_overlap_cmap
 CROSS_OVERLAP_CMAP: Final[mcolors.LinearSegmentedColormap] = cross_overlap_cmap
 SPATIAL_OVERLAP_CMAP: Final[mcolors.LinearSegmentedColormap] = spatial_overlap_cmap
 TEMPORAL_OVERLAP_CMAP: Final[mcolors.LinearSegmentedColormap] = temporal_overlap_cmap
 WAVEFUNCTION_OVERLAP_CMAP: Final[mcolors.LinearSegmentedColormap] = wavefunction_overlap_cmap
 HAMILTONIAN_DENSITY_CMAP: Final[mcolors.LinearSegmentedColormap] = hamiltonian_density_cmap
-
-# 6. Temporal Modal Composition Colormap [-1, 1] (Amethyst -> Slate -> Emerald)
-temporal_cmap = mcolors.LinearSegmentedColormap.from_list(
-    "temporal_modal_diverging",
-    [
-        (0.00, "#7C3AED"),  # -1.0 : Amethyst Violet
-        (0.25, "#31144F"),  # -0.5 : Deep Plum
-        (0.50, "#161b22"),  #  0.0 : Neutral Dark Slate
-        (0.75, "#059669"),  # +0.5 : Forest Emerald
-        (1.00, "#31FF48"),  # +1.0 : Luminous Electric Green
-    ],
-)
 TEMPORAL_CMAP: Final[mcolors.LinearSegmentedColormap] = temporal_cmap
 
 
@@ -422,21 +389,50 @@ def _plot_gradient_bar(
     width: float,
     cmap: mcolors.Colormap,
     label: str | None = None,
+    *,
+    n_segments: int = 48,
+    zorder: int = 3,
+    edgecolor: str | None = BORDER_COLOR,
+    linewidth: float = 0.8,
+    alpha_bottom: float = 0.70,
+    alpha_top: float = 0.95,
 ) -> None:
-    """Draw a bar with a smooth gradient fill (lighter at bottom, darker at top)."""
-    n_segments = 40
+    """Draw a bar with a smooth, golden-ratio scaled gradient fill."""
+    if height == 0:
+        return
+
     segment_height = height / n_segments
     for i in range(n_segments):
-        color = cmap(1.0 - i / (n_segments - 1)) if n_segments > 1 else cmap(1.0)
+        t = i / (n_segments - 1) if n_segments > 1 else 1.0
+        # Golden-ratio perceptual color and alpha scaling
+        t_scaled = t ** (1.0 / GOLDEN_RATIO)
+        color = cmap(t_scaled)
+        r, g, b, _ = mcolors.to_rgba(color)
+        alpha = alpha_bottom + (alpha_top - alpha_bottom) * t_scaled
+
         ax.bar(
             x,
             segment_height,
             width=width,
             bottom=i * segment_height,
-            color=color,
+            color=(r, g, b, alpha),
             edgecolor="none",
+            zorder=zorder,
         )
-    if label:
+
+    if edgecolor is not None:
+        rect = ax.bar(
+            x,
+            height,
+            width=width,
+            facecolor="none",
+            edgecolor=edgecolor,
+            linewidth=linewidth,
+            zorder=zorder + 1,
+        )
+        if label:
+            rect.set_label(label)
+    elif label:
         ax.patches[-1].set_label(label)
 
 
@@ -448,7 +444,7 @@ def _add_lambda_row(
     y: float | None = None,
     x: float | None = None,
     fontsize: float | None = None,
-) -> mpl.text.Text | None:
+) -> Text | None:
     """
     Render loss-weight dictionary as a sleek glassmorphic pill badge.
     Placed consistently below the figure suptitle or axes title.
@@ -1501,7 +1497,7 @@ def plot_loss_history_spike_matrix(
     suptitle_text = title if title is not None else f"Zoomed Loss Spike Matrix ([-{pre_window}, +{post_window}] Epoch Windows)"
     fig.suptitle(suptitle_text, fontsize=13, fontweight="bold", color=TEXT_PRIMARY, y=0.98)
 
-    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    plt.tight_layout(rect=(0.0, 0.0, 1.0, 0.95))
 
     if lambdas:
         for i in range(n_panels):
@@ -1674,28 +1670,50 @@ def plot_energy_spectrum(
     )
 
     bar_width = 0.32
-    ax.bar(
-        indices - bar_width / 2,
-        E_true_np,
-        width=bar_width,
-        color=COLOR_ENERGY_TRUE,
-        edgecolor=BORDER_COLOR,
-        linewidth=1.0,
-        label="True $E_n$",
-        zorder=3,
-        alpha=0.90,
+
+    # Dedicated energy spectrum gradients adhering to the Blue / Cyan color heuristic
+    true_energy_cmap = mcolors.LinearSegmentedColormap.from_list(
+        "energy_true_gradient",
+        [
+            (0.0000, "#031B4E"),
+            (INV_PHI3, "#0050C8"),
+            (INV_PHI2, "#0070EB"),
+            (INV_PHI, "#0A95EB"),
+            (1.0 - INV_PHI3, "#14B5FF"),
+            (1.0000, "#82E2FF"),
+        ],
     )
-    ax.bar(
-        indices + bar_width / 2,
-        E_learn_np,
-        width=bar_width,
-        color=COLOR_ENERGY_LEARNED,
-        edgecolor=BORDER_COLOR,
-        linewidth=1.0,
-        label=r"Learned $E_n^\theta$",
-        zorder=3,
-        alpha=0.90,
+    learned_energy_cmap = mcolors.LinearSegmentedColormap.from_list(
+        "energy_learned_gradient",
+        [
+            (0.0000, "#002B36"),
+            (INV_PHI3, "#0070EB"),
+            (INV_PHI2, "#00B8FF"),
+            (INV_PHI, "#00E8FF"),
+            (1.0 - INV_PHI3, "#00FFEE"),
+            (1.0000, "#A6FAFF"),
+        ],
     )
+
+    for i, idx in enumerate(indices):
+        _plot_gradient_bar(
+            ax,
+            idx - bar_width / 2,
+            E_true_np[i],
+            bar_width,
+            true_energy_cmap,
+            label="True $E_n$" if i == 0 else None,
+            edgecolor=BORDER_COLOR,
+        )
+        _plot_gradient_bar(
+            ax,
+            idx + bar_width / 2,
+            E_learn_np[i],
+            bar_width,
+            learned_energy_cmap,
+            label=r"Learned $E_n^\theta$" if i == 0 else None,
+            edgecolor=BORDER_COLOR,
+        )
 
     # Numerical value annotations on top of bars
     for i, (yt, yl) in enumerate(zip(E_true_np, E_learn_np)):
@@ -1722,7 +1740,12 @@ def plot_energy_spectrum(
     ax.set_xticklabels([rf"$n={i}$" for i in indices], fontsize=10)
     ax.set_ylabel(r"Energy ($\hbar\omega$ units)", fontsize=11)
     ax.set_title("Exact vs. Learned Energy Eigenvalues", fontsize=13, pad=12)
-    ax.legend(loc="upper left", framealpha=0.85)
+    # Legend with vibrant handles matching the exact comparison colors
+    handles = [
+        Patch(facecolor=COLOR_ENERGY_TRUE, edgecolor=BORDER_COLOR, linewidth=1.0, label="True $E_n$"),
+        Patch(facecolor=COLOR_ENERGY_LEARNED, edgecolor=BORDER_COLOR, linewidth=1.0, label=r"Learned $E_n^\theta$"),
+    ]
+    ax.legend(handles=handles, loc="upper left", framealpha=0.85)
 
     if out_path:
         out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1844,7 +1867,7 @@ def plot_pod_singular_values(
         indices,
         sv,
         c=indices,
-        cmap=SPATIAL_POD_CMAP,
+        cmap=spatial_overlap_cmap,
         edgecolor=TEXT_PRIMARY,
         linewidth=1.2,
         s=80,
@@ -2154,7 +2177,7 @@ def plot_pod_eigen_alignment(
     psi_true_matrix: Sequence[torch.Tensor] | torch.Tensor,
     dx: float,
     *,
-    cmap: mcolors.Colormap | str = SPATIAL_POD_CMAP,
+    cmap: mcolors.Colormap | str = cross_overlap_cmap,
     fmt: str = ".2f",
     lambdas: Dict[str, float] | None = None,
     cbar_location: str = "right",
@@ -2412,7 +2435,7 @@ def plot_pod_temporal_cross_overlap_heatmap(
 
     for i in range(n_states):
         for j in range(n_modes):
-            val = np.abs(V[i, j])
+            val = float(np.abs(V[i, j]))
             text_color = THEME_BG if val > 0.65 else TEXT_PRIMARY
             ax.text(
                 j,
